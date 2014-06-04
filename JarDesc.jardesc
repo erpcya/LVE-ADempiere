@@ -11,6 +11,7 @@
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
-        <javaElement handleIdentifier="=LVE-ADempiere"/>
+        <javaElement handleIdentifier="=LVE-ADempiere/patches"/>
+        <javaElement handleIdentifier="=LVE-ADempiere/base"/>
     </selectedElements>
 </jardesc>
