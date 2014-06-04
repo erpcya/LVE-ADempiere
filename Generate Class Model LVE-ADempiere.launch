@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/adempiere_370/base/src/org/adempiere/util/GenerateModel.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+<listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
+<listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
+</listAttribute>
+<booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.adempiere.util.GenerateModel"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="&quot;Ruta de la ubicacion del Paquete Modelo&quot;&#10;&quot;Nombre del Paquete Modelo donde se van a guardar las clases por ejemplo org.compiere.model&quot;&#10;&quot;'Codigo de la Entidad','Codigo Entidad 2','.........'&quot;&#10;&quot;'Nombre Tabla 1',''Nombre Tabla 2','Nombre Tabla 3'  ó   '%CUST%'&quot;"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="LVE-ADempiere"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-DPropertyFile=/opt/Development/ADempiere_Properties/LVE-ADempiere.properties&#13;&#10;-DADEMPIERE_HOME=/Applications/Adempiere&#13;&#10;-Xms128M&#13;&#10;-Xmx256M&#13;&#10;-Dorg.adempiere.server.embedded=true"/>
+</launchConfiguration>
