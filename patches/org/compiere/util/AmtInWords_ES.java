@@ -260,10 +260,13 @@ public class AmtInWords_ES implements AmtInWords
 				sb.append (' ')
 				//	Dixon Martinez 
 				//	Add Msg 
-					.append("@With@")
+				//	Yamel Senih 2014-07-01, 18:56:20
+				//	Fixed Error with Msg, Missing translation
+					.append(Msg.getMsg(lang, "With"))
 					.append(' ')
 					.append (cents)
 					.append ("/100");
+				//	End Yamel Senih
 				//	.append ("/100 PESOS");
 				break;
 			}
