@@ -18,9 +18,6 @@ package org.spin.model;
 
 import org.compiere.model.MClient;
 import org.compiere.model.MInvoice;
-import org.compiere.model.MOrder;
-import org.compiere.model.MPaySelectionCheck;
-import org.compiere.model.MPayment;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -93,22 +90,15 @@ public class LVEADempiereModelValidator implements ModelValidator {
 	 */
 	@Override
 	public String docValidate(PO po, int timing) {
-		if(timing == TIMING_AFTER_REVERSECORRECT){
+		if(timing == TIMING_BEFORE_REVERSECORRECT){
 			if(po.get_TableName().equals(X_C_Invoice.Table_Name)){
-				//MInvoice inv = (MInvoice) po;
-				
 				return validCashLineReference(po.get_TrxName(), po.get_ID());
-						
 			}
 		}
-			
-		
+		//
 		return null;
 	}
 
-	
-
-	
 	/**
 	 * Valid Reference in other record
 	 * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a> 01/07/2014, 10:45:30
