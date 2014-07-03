@@ -199,7 +199,7 @@ public class VSortTab extends CPanel implements APanelTab
 		StringBuffer identifierSql = new StringBuffer();
 		int AD_Reference = 0;
 		String sql = "SELECT t.TableName, c.AD_Column_ID, c.ColumnName, e.Name,"	//	1..4
-			+ "c.IsParent, c.IsKey, c.IsIdentifier, c.IsTranslated "				//	4..8
+			+ "c.IsParent, c.IsKey, c.IsIdentifier, c.IsTranslated, "				//	4..8
 			+ " c.AD_Reference_ID "
 			+ "FROM AD_Table t, AD_Column c, AD_Element e "
 			+ "WHERE t.AD_Table_ID=?"						//	#1
