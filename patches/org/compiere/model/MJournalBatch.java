@@ -706,12 +706,10 @@ public class MJournalBatch extends X_GL_JournalBatch implements DocAction
 		//	Set doc Status and Doc Action
 		
 		//	Process reverse Document
-		reverse.setDocAction(X_GL_JournalBatch.DOCACTION_Complete);
-		reverse.processIt(X_GL_JournalBatch.DOCACTION_Complete);
-		reverse.saveEx();
-
+		reverse.setDocAction(X_GL_JournalBatch.DOCACTION_None);
 		reverse.setDocStatus(DOCSTATUS_Reversed);
-		reverse.processIt(DOCACTION_None);
+		reverse.setProcessed(true);
+		
 		//	End Dixon Martinez
 		
 		reverse.saveEx();
@@ -733,7 +731,7 @@ public class MJournalBatch extends X_GL_JournalBatch implements DocAction
 		
 		//[ 1948157  ]
 		setReversal_ID(reverse.getGL_JournalBatch_ID());
-		save();
+		saveEx();
 		// After reverseCorrect
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSECORRECT);
 		if (m_processMsg != null)
@@ -798,6 +796,20 @@ public class MJournalBatch extends X_GL_JournalBatch implements DocAction
 			}
 			journal.save();
 		}
+		
+		//	Dixon Martinez 28/03/2014 16:03:00
+		//	Set doc Status and Doc Action
+		
+		//	Process reverse Document
+		reverse.setDocAction(X_GL_JournalBatch.DOCACTION_None);
+		reverse.setDocStatus(DOCSTATUS_Reversed);
+		reverse.setProcessed(true);
+		
+		//	End Dixon Martinez
+		
+		reverse.saveEx();
+		//
+		
 		// After reverseAccrual
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSEACCRUAL);
 		if (m_processMsg != null)
