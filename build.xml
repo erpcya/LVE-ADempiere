@@ -8,6 +8,7 @@
   <import file="${adempiere.trunk}/utils_dev/properties.xml"/>
   <property name="dist" value="${basedir}/dist"/>
   <property name="patches" value="${basedir}/patches"/>
+  <property name="base" value="${basedir}/base"/>
   <property name="zksrc" value="${basedir}/zkwebui/WEB-INF/src"/>
   <property name="zkclasses" value="${dist}/zkclass/WEB-INF/classes"/>
   <property name="class" value="${dist}/class"/>
@@ -87,6 +88,7 @@
     <!-- compile the java code from ${src} into ${build.dir} -->
     <javac target="1.6" encoding="UTF-8" fork="true" destdir="${build.dir}" deprecation="on" debug="on" memoryinitialsize="512m" memorymaximumsize="512m">
       	<src path="${patches}"/>
+      	<src path="${base}"/>
 		<classpath refid="project.class.path"/>
 		</javac>
   	</target>
