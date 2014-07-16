@@ -299,12 +299,14 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 		//	Std Period open?
 		MPeriod.testPeriodOpen(getCtx(), getStatementDate(), MDocType.DOCBASETYPE_BankStatement, getAD_Org_ID());
 		MBankStatementLine[] lines = getLines(true);
-		if (lines.length == 0)
+		//2014-07-16 Carlos Parada Allow Complete When No Lines 
+		/*if (lines.length == 0)
 		{
 			m_processMsg = "@NoLines@";
 			return DocAction.STATUS_Invalid;
-		}
+		}*/
 		//	Lines
+		// End Carlos Parada
 		BigDecimal total = Env.ZERO;
 		Timestamp minDate = getStatementDate();
 		Timestamp maxDate = minDate;
