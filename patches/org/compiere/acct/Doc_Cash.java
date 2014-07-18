@@ -44,6 +44,7 @@ import org.compiere.util.Env;
  */
 public class Doc_Cash extends Doc
 {
+	
 	/**
 	 * Constructor
 	 * 
