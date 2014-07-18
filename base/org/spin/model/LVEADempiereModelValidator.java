@@ -16,14 +16,19 @@
  *****************************************************************************/
 package org.spin.model;
 
+import org.compiere.model.I_C_Cash;
+import org.compiere.model.MCash;
 import org.compiere.model.MClient;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.X_C_Invoice;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 /**
  * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a>
@@ -58,6 +63,7 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		}
 		//	Add Timing change in C_Order and C_Invoice
 		engine.addDocValidate(MInvoice.Table_Name, this);
+		engine.addDocValidate(I_C_Cash.Table_Name, this);
 	}
 
 	/* (non-Javadoc)
@@ -93,6 +99,19 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		if(timing == TIMING_BEFORE_REVERSECORRECT){
 			if(po.get_TableName().equals(X_C_Invoice.Table_Name)){
 				return validCashLineReference(po.get_TrxName(), po.get_ID());
+			}
+		}else if (timing==TIMING_BEFORE_PREPARE)
+		{	//	Dixon Martinez Add Tax in Cash
+				  
+			if(po.get_TableName().equals(MCash.Table_Name))
+			{
+				log.fine(MCash.Table_Name + " -- TIMING_BEFORE_PREPARE");
+				if (MSysConfig.getBooleanValue("TAX_ACCT_CASH", false))
+				{
+					MCash cash = (MCash) po;
+					if (!MLVECashTax.calculateTaxTotal(cash)) // setTotals
+						return Msg.translate(Env.getLanguage(Env.getCtx()), "TaxCalculatingError");
+				}
 			}
 		}
 		//
