@@ -22,4 +22,3 @@ ALTER TABLE M_InventoryLine ADD C_UOM_ID NUMBER(10) DEFAULT NULL
 -- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
 ALTER TABLE M_Requisition ADD IsService CHAR(1) DEFAULT 'N' CHECK (IsService IN ('Y','N'))
 ;
-

@@ -33,16 +33,6 @@ INSERT INTO AD_Window_Access (AD_Client_ID,AD_Org_ID,AD_Role_ID,AD_Window_ID,Cre
 INSERT INTO AD_Window_Access (AD_Client_ID,AD_Org_ID,AD_Role_ID,AD_Window_ID,Created,CreatedBy,IsActive,Updated,UpdatedBy) VALUES (0,0,50002,1000000,TO_DATE('2014-07-03 08:23:46','YYYY-MM-DD HH24:MI:SS'),100,'Y',TO_DATE('2014-07-03 08:23:46','YYYY-MM-DD HH24:MI:SS'),100)
 ;
 
--- Jul 3, 2014 8:23:46 AM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-INSERT INTO AD_Window_Access (AD_Client_ID,AD_Org_ID,AD_Role_ID,AD_Window_ID,Created,CreatedBy,IsActive,Updated,UpdatedBy) VALUES (1000000,0,1000000,1000000,TO_DATE('2014-07-03 08:23:46','YYYY-MM-DD HH24:MI:SS'),100,'Y',TO_DATE('2014-07-03 08:23:46','YYYY-MM-DD HH24:MI:SS'),100)
-;
-
--- Jul 3, 2014 8:23:47 AM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-INSERT INTO AD_Window_Access (AD_Client_ID,AD_Org_ID,AD_Role_ID,AD_Window_ID,Created,CreatedBy,IsActive,Updated,UpdatedBy) VALUES (1000000,0,1000001,1000000,TO_DATE('2014-07-03 08:23:46','YYYY-MM-DD HH24:MI:SS'),100,'Y',TO_DATE('2014-07-03 08:23:46','YYYY-MM-DD HH24:MI:SS'),100)
-;
-
 -- Jul 3, 2014 8:23:56 AM VET
 -- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
 UPDATE AD_Window_Trl SET Name='Requisición Interna (Por Usuario)',Updated=TO_DATE('2014-07-03 08:23:56','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Window_ID=1000000 AND AD_Language='es_MX'
@@ -631,7 +621,7 @@ INSERT INTO AD_Menu_Trl (AD_Language,AD_Menu_ID, Description,Name, IsTranslated,
 
 -- Jul 3, 2014 8:30:59 AM VET
 -- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-INSERT INTO AD_TreeNodeMM (AD_Client_ID,AD_Org_ID, IsActive,Created,CreatedBy,Updated,UpdatedBy, AD_Tree_ID, Node_ID, Parent_ID, SeqNo) SELECT t.AD_Client_ID,0, 'Y', SysDate, 0, SysDate, 0,t.AD_Tree_ID, 3000210, 0, 999 FROM AD_Tree t WHERE t.AD_Client_ID=0 AND t.IsActive='Y' AND t.IsAllNodes='Y' AND t.AD_Table_ID=116 AND NOT EXISTS (SELECT * FROM AD_TreeNodeMM e WHERE e.AD_Tree_ID=t.AD_Tree_ID AND Node_ID=3000210)
+INSERT INTO AD_TreeNodeMM (AD_Client_ID,AD_Org_ID, IsActive,Created,CreatedBy,Updated,UpdatedBy, AD_Tree_ID, Node_ID, Parent_ID, SeqNo) SELECT t.AD_Client_ID,0, 'Y', SysDate, 0, SysDate, 0,t.AD_Tree_ID, 3000210, 0, 999 FROM AD_Tree t WHERE t.AD_Client_ID=0 AND t.IsActive='Y' AND t.IsAllNodes='Y' /*AND t.AD_Table_ID=116*/ AND NOT EXISTS (SELECT * FROM AD_TreeNodeMM e WHERE e.AD_Tree_ID=t.AD_Tree_ID AND Node_ID=3000210)
 ;
 
 -- Jul 3, 2014 8:31:03 AM VET
