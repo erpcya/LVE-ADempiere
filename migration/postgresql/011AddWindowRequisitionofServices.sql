@@ -33,16 +33,6 @@ INSERT INTO AD_Window_Access (AD_Client_ID,AD_Org_ID,AD_Role_ID,AD_Window_ID,Cre
 INSERT INTO AD_Window_Access (AD_Client_ID,AD_Org_ID,AD_Role_ID,AD_Window_ID,Created,CreatedBy,IsActive,Updated,UpdatedBy) VALUES (0,0,50002,1000001,TO_TIMESTAMP('2014-07-03 08:40:45','YYYY-MM-DD HH24:MI:SS'),100,'Y',TO_TIMESTAMP('2014-07-03 08:40:45','YYYY-MM-DD HH24:MI:SS'),100)
 ;
 
--- Jul 3, 2014 8:40:45 AM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-INSERT INTO AD_Window_Access (AD_Client_ID,AD_Org_ID,AD_Role_ID,AD_Window_ID,Created,CreatedBy,IsActive,Updated,UpdatedBy) VALUES (1000000,0,1000000,1000001,TO_TIMESTAMP('2014-07-03 08:40:45','YYYY-MM-DD HH24:MI:SS'),100,'Y',TO_TIMESTAMP('2014-07-03 08:40:45','YYYY-MM-DD HH24:MI:SS'),100)
-;
-
--- Jul 3, 2014 8:40:46 AM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-INSERT INTO AD_Window_Access (AD_Client_ID,AD_Org_ID,AD_Role_ID,AD_Window_ID,Created,CreatedBy,IsActive,Updated,UpdatedBy) VALUES (1000000,0,1000001,1000001,TO_TIMESTAMP('2014-07-03 08:40:45','YYYY-MM-DD HH24:MI:SS'),100,'Y',TO_TIMESTAMP('2014-07-03 08:40:45','YYYY-MM-DD HH24:MI:SS'),100)
-;
-
 -- Jul 3, 2014 8:42:33 AM VET
 -- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
 UPDATE AD_Window_Trl SET Name='Requisición de Servicio ',Description='Requisición de Servicio ',Help='Ingrese y guarde contenidos para requisiciones. Solicitudes de Material se pueden crear de forma automática a través de Reposición. Opcionalmente puedes crear o generar órdenes de compra consolidadas.',Updated=TO_TIMESTAMP('2014-07-03 08:42:33','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Window_ID=1000001 AND AD_Language='es_MX'
@@ -996,7 +986,7 @@ INSERT INTO AD_Menu_Trl (AD_Language,AD_Menu_ID, Description,Name, IsTranslated,
 
 -- Jul 3, 2014 8:51:11 AM VET
 -- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-INSERT INTO AD_TreeNodeMM (AD_Client_ID,AD_Org_ID, IsActive,Created,CreatedBy,Updated,UpdatedBy, AD_Tree_ID, Node_ID, Parent_ID, SeqNo) SELECT t.AD_Client_ID,0, 'Y', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0,t.AD_Tree_ID, 3000211, 0, 999 FROM AD_Tree t WHERE t.AD_Client_ID=0 AND t.IsActive='Y' AND t.IsAllNodes='Y' AND t.AD_Table_ID=116 AND NOT EXISTS (SELECT * FROM AD_TreeNodeMM e WHERE e.AD_Tree_ID=t.AD_Tree_ID AND Node_ID=3000211)
+INSERT INTO AD_TreeNodeMM (AD_Client_ID,AD_Org_ID, IsActive,Created,CreatedBy,Updated,UpdatedBy, AD_Tree_ID, Node_ID, Parent_ID, SeqNo) SELECT t.AD_Client_ID,0, 'Y', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0,t.AD_Tree_ID, 3000211, 0, 999 FROM AD_Tree t WHERE t.AD_Client_ID=0 AND t.IsActive='Y' AND t.IsAllNodes='Y' /*AND t.AD_Table_ID=116 */AND NOT EXISTS (SELECT * FROM AD_TreeNodeMM e WHERE e.AD_Tree_ID=t.AD_Tree_ID AND Node_ID=3000211)
 ;
 
 -- Jul 3, 2014 8:51:21 AM VET

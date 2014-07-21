@@ -35,6 +35,5 @@ UPDATE AD_PrintFormatItem pi SET PrintName='Allows Copy', Name='Allows Copy' WHE
 
 -- Jun 16, 2014 3:19:27 PM VET
 -- LVE ADempiere
-ALTER TABLE AD_Field ADD IsAllowsCopy CHAR(1) DEFAULT NULL  CHECK (IsAllowsCopy IN ('Y','N'))
+ALTER TABLE AD_Field ADD IsAllowsCopy CHAR(1) DEFAULT 'Y'  CHECK (IsAllowsCopy IN ('Y','N'))
 ;
-
