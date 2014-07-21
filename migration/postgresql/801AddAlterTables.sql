@@ -27,3 +27,4 @@ ALTER TABLE M_Requisition ADD COLUMN IsService CHAR(1) DEFAULT 'N' CHECK (IsServ
 -- Request for Quotation Create From Requisition
 ALTER TABLE C_RfQ ADD COLUMN CreateFromRequisition CHAR(1) DEFAULT 'N' 
 ;
+

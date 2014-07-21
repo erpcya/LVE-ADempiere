@@ -58,16 +58,6 @@ INSERT INTO AD_Field (AD_Client_ID,AD_Column_ID,AD_Field_ID,AD_Org_ID,AD_Tab_ID,
 INSERT INTO AD_Field_Trl (AD_Language,AD_Field_ID, Description,Help,Name, IsTranslated,AD_Client_ID,AD_Org_ID,Created,Createdby,Updated,UpdatedBy) SELECT l.AD_Language,t.AD_Field_ID, t.Description,t.Help,t.Name, 'N',t.AD_Client_ID,t.AD_Org_ID,t.Created,t.Createdby,t.Updated,t.UpdatedBy FROM AD_Language l, AD_Field t WHERE l.IsActive='Y' AND l.IsSystemLanguage='Y' AND l.IsBaseLanguage='N' AND t.AD_Field_ID=3000448 AND NOT EXISTS (SELECT * FROM AD_Field_Trl tt WHERE tt.AD_Language=l.AD_Language AND tt.AD_Field_ID=t.AD_Field_ID)
 ;
 
--- Jun 26, 2014 4:15:18 PM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-INSERT INTO AD_Field (AD_Client_ID,AD_Column_ID,AD_Field_ID,AD_Org_ID,AD_Tab_ID,Created,CreatedBy,Description,DisplayLength,EntityType,Help,IsActive,IsCentrallyMaintained,IsDisplayed,IsEncrypted,IsFieldOnly,IsHeading,IsReadOnly,IsSameLine,Name,Updated,UpdatedBy) VALUES (0,3000255,3000449,0,186,TO_DATE('2014-06-26 16:15:16','YYYY-MM-DD HH24:MI:SS'),100,'Is the Payment Schedule is valid',1,'ECA02','Payment Schedules allow to have multiple due dates.','Y','Y','Y','N','N','N','N','N','Pay Schedule valid',TO_DATE('2014-06-26 16:15:16','YYYY-MM-DD HH24:MI:SS'),100)
-;
-
--- Jun 26, 2014 4:15:18 PM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-INSERT INTO AD_Field_Trl (AD_Language,AD_Field_ID, Description,Help,Name, IsTranslated,AD_Client_ID,AD_Org_ID,Created,Createdby,Updated,UpdatedBy) SELECT l.AD_Language,t.AD_Field_ID, t.Description,t.Help,t.Name, 'N',t.AD_Client_ID,t.AD_Org_ID,t.Created,t.Createdby,t.Updated,t.UpdatedBy FROM AD_Language l, AD_Field t WHERE l.IsActive='Y' AND l.IsSystemLanguage='Y' AND l.IsBaseLanguage='N' AND t.AD_Field_ID=3000449 AND NOT EXISTS (SELECT * FROM AD_Field_Trl tt WHERE tt.AD_Language=l.AD_Language AND tt.AD_Field_ID=t.AD_Field_ID)
-;
-
 -- Jun 26, 2014 4:15:19 PM VET
 -- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
 INSERT INTO AD_Field (AD_Client_ID,AD_Column_ID,AD_Field_ID,AD_Org_ID,AD_Tab_ID,Created,CreatedBy,Description,DisplayLength,EntityType,Help,IsActive,IsCentrallyMaintained,IsDisplayed,IsEncrypted,IsFieldOnly,IsHeading,IsReadOnly,IsSameLine,Name,Updated,UpdatedBy) VALUES (0,59038,3000450,0,186,TO_DATE('2014-06-26 16:15:18','YYYY-MM-DD HH24:MI:SS'),100,'The date+time (expressed in decimal format) when the document has been processed',20,'D','The ProcessedOn Date+Time save the exact moment (nanoseconds precision if allowed by the DB) when a document has been processed.','Y','Y','Y','N','N','N','N','N','Processed On',TO_DATE('2014-06-26 16:15:18','YYYY-MM-DD HH24:MI:SS'),100)
@@ -96,56 +86,6 @@ INSERT INTO AD_Field (AD_Client_ID,AD_Column_ID,AD_Field_ID,AD_Org_ID,AD_Tab_ID,
 -- Jun 26, 2014 4:15:23 PM VET
 -- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
 INSERT INTO AD_Field_Trl (AD_Language,AD_Field_ID, Description,Help,Name, IsTranslated,AD_Client_ID,AD_Org_ID,Created,Createdby,Updated,UpdatedBy) SELECT l.AD_Language,t.AD_Field_ID, t.Description,t.Help,t.Name, 'N',t.AD_Client_ID,t.AD_Org_ID,t.Created,t.Createdby,t.Updated,t.UpdatedBy FROM AD_Language l, AD_Field t WHERE l.IsActive='Y' AND l.IsSystemLanguage='Y' AND l.IsBaseLanguage='N' AND t.AD_Field_ID=3000452 AND NOT EXISTS (SELECT * FROM AD_Field_Trl tt WHERE tt.AD_Language=l.AD_Language AND tt.AD_Field_ID=t.AD_Field_ID)
-;
-
--- Jun 26, 2014 4:15:55 PM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-DELETE  FROM  AD_Field_Trl WHERE AD_Field_ID=3000451
-;
-
--- Jun 26, 2014 4:15:55 PM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-DELETE FROM AD_Field WHERE AD_Field_ID=3000451
-;
-
--- Jun 26, 2014 4:15:56 PM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-DELETE  FROM  AD_Field_Trl WHERE AD_Field_ID=3000452
-;
-
--- Jun 26, 2014 4:15:56 PM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-DELETE FROM AD_Field WHERE AD_Field_ID=3000452
-;
-
--- Jun 26, 2014 4:15:59 PM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-DELETE  FROM  AD_Field_Trl WHERE AD_Field_ID=3000448
-;
-
--- Jun 26, 2014 4:15:59 PM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-DELETE FROM AD_Field WHERE AD_Field_ID=3000448
-;
-
--- Jun 26, 2014 4:16:01 PM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-DELETE  FROM  AD_Field_Trl WHERE AD_Field_ID=3000450
-;
-
--- Jun 26, 2014 4:16:01 PM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-DELETE FROM AD_Field WHERE AD_Field_ID=3000450
-;
-
--- Jun 26, 2014 4:16:03 PM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-DELETE  FROM  AD_Field_Trl WHERE AD_Field_ID=3000449
-;
-
--- Jun 26, 2014 4:16:03 PM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-DELETE FROM AD_Field WHERE AD_Field_ID=3000449
 ;
 
 -- Jun 26, 2014 4:18:52 PM VET
@@ -336,10 +276,5 @@ UPDATE AD_Process_Para SET ColumnName='IsAllowsCopy', Name='Allow Copy', Descrip
 -- Jun 26, 2014 4:26:00 PM VET
 -- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
 UPDATE AD_Process_Para SET ColumnName='IsAllowsCopy', Name='Allow Copy', Description=NULL, Help=NULL WHERE AD_Element_ID=3000255 AND IsCentrallyMaintained='Y'
-;
-
--- Jun 26, 2014 4:26:10 PM VET
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
-ALTER TABLE AD_Field ADD IsAllowsCopy CHAR(1) DEFAULT NULL  CHECK (IsAllowsCopy IN ('Y','N'))
 ;
 
