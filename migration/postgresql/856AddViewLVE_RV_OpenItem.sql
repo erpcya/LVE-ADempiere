@@ -1,4 +1,4 @@
-﻿DROP VIEW LVE_RV_OpenItem;
+--﻿DROP VIEW LVE_RV_OpenItem;
 CREATE OR REPLACE VIEW LVE_RV_OpenItem AS 
          SELECT i.ad_org_id, i.ad_client_id, i.documentno, i.c_invoice_id, 
             i.c_order_id, i.c_bpartner_id, i.issotrx, i.dateinvoiced, 
