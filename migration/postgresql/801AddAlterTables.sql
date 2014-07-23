@@ -23,3 +23,8 @@ ALTER TABLE M_InventoryLine ADD COLUMN C_UOM_ID NUMERIC(10) DEFAULT NULL
 ALTER TABLE M_Requisition ADD COLUMN IsService CHAR(1) DEFAULT 'N' CHECK (IsService IN ('Y','N'))
 ;
 
+-- 14/07/2014 05:39:38 PM VET
+-- Request for Quotation Create From Requisition
+ALTER TABLE C_RfQ ADD COLUMN CreateFromRequisition CHAR(1) DEFAULT 'N' 
+;
+

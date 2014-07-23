@@ -2114,11 +2114,22 @@ public final class MPayment extends X_C_Payment
 		alloc.setAD_Org_ID(getAD_Org_ID());
 		alloc.setDateAcct(getDateAcct()); // in case date acct is different from datetrx in payment
 		
+		/**2014-07-22 Carlos Parada Only Allocate When Invoice  
 		String sql = "SELECT psc.C_BPartner_ID, psl.C_Invoice_ID, psl.IsSOTrx, "	//	1..3
 			+ " psl.PayAmt, psl.DiscountAmt, psl.DifferenceAmt, psl.OpenAmt "
 			+ "FROM C_PaySelectionLine psl"
 			+ " INNER JOIN C_PaySelectionCheck psc ON (psl.C_PaySelectionCheck_ID=psc.C_PaySelectionCheck_ID) "
 			+ "WHERE psc.C_Payment_ID=?";
+		**/
+		
+		String sql = "SELECT psc.C_BPartner_ID, psl.C_Invoice_ID, psl.IsSOTrx, "	//	1..3
+				+ " psl.PayAmt, psl.DiscountAmt, psl.DifferenceAmt, psl.OpenAmt "
+				+ "FROM C_PaySelectionLine psl"
+				+ " INNER JOIN C_PaySelectionCheck psc ON (psl.C_PaySelectionCheck_ID=psc.C_PaySelectionCheck_ID) "
+				+ "WHERE psc.C_Payment_ID=? AND psl.C_Invoice_ID IS NOT NULL ";
+		/**
+		 * End Carlos Parada
+		 */
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
