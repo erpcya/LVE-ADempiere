@@ -25,14 +25,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for LVE_CashTax
  *  @author Adempiere (generated) 
- *  @version Release 3.6.0LTS - $Id$ */
+ *  @version Release 3.7.0LTS (1252452765) - $Id$ */
 public class X_LVE_CashTax extends PO implements I_LVE_CashTax, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20140306L;
+	private static final long serialVersionUID = 20140725L;
 
     /** Standard Constructor */
     public X_LVE_CashTax (Properties ctx, int LVE_CashTax_ID, String trxName)
@@ -77,9 +77,9 @@ public class X_LVE_CashTax extends PO implements I_LVE_CashTax, I_Persistent
       return sb.toString();
     }
 
-	public I_C_Cash getC_Cash() throws RuntimeException
+	public org.compiere.model.I_C_Cash getC_Cash() throws RuntimeException
     {
-		return (I_C_Cash)MTable.get(getCtx(), I_C_Cash.Table_Name)
+		return (org.compiere.model.I_C_Cash)MTable.get(getCtx(), org.compiere.model.I_C_Cash.Table_Name)
 			.getPO(getC_Cash_ID(), get_TrxName());	}
 
 	/** Set Cash Journal.
@@ -105,9 +105,9 @@ public class X_LVE_CashTax extends PO implements I_LVE_CashTax, I_Persistent
 		return ii.intValue();
 	}
 
-	public I_C_Tax getC_Tax() throws RuntimeException
+	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException
     {
-		return (I_C_Tax)MTable.get(getCtx(), I_C_Tax.Table_Name)
+		return (org.compiere.model.I_C_Tax)MTable.get(getCtx(), org.compiere.model.I_C_Tax.Table_Name)
 			.getPO(getC_Tax_ID(), get_TrxName());	}
 
 	/** Set Tax.

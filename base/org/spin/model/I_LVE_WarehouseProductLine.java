@@ -21,17 +21,17 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for LVE_CashTax
+/** Generated Interface for LVE_WarehouseProductLine
  *  @author Adempiere (generated) 
  *  @version Release 3.7.0LTS (1252452765)
  */
-public interface I_LVE_CashTax 
+public interface I_LVE_WarehouseProductLine 
 {
 
-    /** TableName=LVE_CashTax */
-    public static final String Table_Name = "LVE_CashTax";
+    /** TableName=LVE_WarehouseProductLine */
+    public static final String Table_Name = "LVE_WarehouseProductLine";
 
-    /** AD_Table_ID=53563 */
+    /** AD_Table_ID=53848 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -63,21 +63,6 @@ public interface I_LVE_CashTax
 	  */
 	public int getAD_Org_ID();
 
-    /** Column name C_Cash_ID */
-    public static final String COLUMNNAME_C_Cash_ID = "C_Cash_ID";
-
-	/** Set Cash Journal.
-	  * Cash Journal
-	  */
-	public void setC_Cash_ID (int C_Cash_ID);
-
-	/** Get Cash Journal.
-	  * Cash Journal
-	  */
-	public int getC_Cash_ID();
-
-	public org.compiere.model.I_C_Cash getC_Cash() throws RuntimeException;
-
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -94,20 +79,18 @@ public interface I_LVE_CashTax
 	  */
 	public int getCreatedBy();
 
-    /** Column name C_Tax_ID */
-    public static final String COLUMNNAME_C_Tax_ID = "C_Tax_ID";
+    /** Column name Description */
+    public static final String COLUMNNAME_Description = "Description";
 
-	/** Set Tax.
-	  * Tax identifier
+	/** Set Description.
+	  * Optional short description of the record
 	  */
-	public void setC_Tax_ID (int C_Tax_ID);
+	public void setDescription (String Description);
 
-	/** Get Tax.
-	  * Tax identifier
+	/** Get Description.
+	  * Optional short description of the record
 	  */
-	public int getC_Tax_ID();
-
-	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException;
+	public String getDescription();
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
@@ -122,57 +105,92 @@ public interface I_LVE_CashTax
 	  */
 	public boolean isActive();
 
-    /** Column name IsTaxIncluded */
-    public static final String COLUMNNAME_IsTaxIncluded = "IsTaxIncluded";
+    /** Column name IsAlwaysSetMandatory */
+    public static final String COLUMNNAME_IsAlwaysSetMandatory = "IsAlwaysSetMandatory";
 
-	/** Set Price includes Tax.
-	  * Tax is included in the price 
+	/** Set Is Always Set Mandatory	  */
+	public void setIsAlwaysSetMandatory (boolean IsAlwaysSetMandatory);
+
+	/** Get Is Always Set Mandatory	  */
+	public boolean isAlwaysSetMandatory();
+
+    /** Column name LVE_WarehouseProduct_ID */
+    public static final String COLUMNNAME_LVE_WarehouseProduct_ID = "LVE_WarehouseProduct_ID";
+
+	/** Set Warehouse of Product	  */
+	public void setLVE_WarehouseProduct_ID (int LVE_WarehouseProduct_ID);
+
+	/** Get Warehouse of Product	  */
+	public int getLVE_WarehouseProduct_ID();
+
+	public org.spin.model.I_LVE_WarehouseProduct getLVE_WarehouseProduct() throws RuntimeException;
+
+    /** Column name LVE_WarehouseProductLine_ID */
+    public static final String COLUMNNAME_LVE_WarehouseProductLine_ID = "LVE_WarehouseProductLine_ID";
+
+	/** Set Warehouse Product Line	  */
+	public void setLVE_WarehouseProductLine_ID (int LVE_WarehouseProductLine_ID);
+
+	/** Get Warehouse Product Line	  */
+	public int getLVE_WarehouseProductLine_ID();
+
+    /** Column name M_Product_ID */
+    public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";
+
+	/** Set Product.
+	  * Product, Service, Item
 	  */
-	public void setIsTaxIncluded (boolean IsTaxIncluded);
+	public void setM_Product_ID (int M_Product_ID);
 
-	/** Get Price includes Tax.
-	  * Tax is included in the price 
+	/** Get Product.
+	  * Product, Service, Item
 	  */
-	public boolean isTaxIncluded();
+	public int getM_Product_ID();
 
-    /** Column name Processed */
-    public static final String COLUMNNAME_Processed = "Processed";
+	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException;
 
-	/** Set Processed.
-	  * The document has been processed
+    /** Column name MustBeStocked */
+    public static final String COLUMNNAME_MustBeStocked = "MustBeStocked";
+
+	/** Set Product quantity must be in stock.
+	  * If not sufficient in stock in the warehouse, the BOM is not produced
 	  */
-	public void setProcessed (boolean Processed);
+	public void setMustBeStocked (boolean MustBeStocked);
 
-	/** Get Processed.
-	  * The document has been processed
+	/** Get Product quantity must be in stock.
+	  * If not sufficient in stock in the warehouse, the BOM is not produced
 	  */
-	public boolean isProcessed();
+	public boolean isMustBeStocked();
 
-    /** Column name TaxAmt */
-    public static final String COLUMNNAME_TaxAmt = "TaxAmt";
+    /** Column name M_Warehouse_ID */
+    public static final String COLUMNNAME_M_Warehouse_ID = "M_Warehouse_ID";
 
-	/** Set Tax Amount.
-	  * Tax Amount for a document
+	/** Set Warehouse.
+	  * Storage Warehouse and Service Point
 	  */
-	public void setTaxAmt (BigDecimal TaxAmt);
+	public void setM_Warehouse_ID (int M_Warehouse_ID);
 
-	/** Get Tax Amount.
-	  * Tax Amount for a document
+	/** Get Warehouse.
+	  * Storage Warehouse and Service Point
 	  */
-	public BigDecimal getTaxAmt();
+	public int getM_Warehouse_ID();
 
-    /** Column name TaxBaseAmt */
-    public static final String COLUMNNAME_TaxBaseAmt = "TaxBaseAmt";
+	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException;
 
-	/** Set Tax base Amount.
-	  * Base for calculating the tax amount
+    /** Column name SeqNo */
+    public static final String COLUMNNAME_SeqNo = "SeqNo";
+
+	/** Set Sequence.
+	  * Method of ordering records;
+ lowest number comes first
 	  */
-	public void setTaxBaseAmt (BigDecimal TaxBaseAmt);
+	public void setSeqNo (int SeqNo);
 
-	/** Get Tax base Amount.
-	  * Base for calculating the tax amount
+	/** Get Sequence.
+	  * Method of ordering records;
+ lowest number comes first
 	  */
-	public BigDecimal getTaxBaseAmt();
+	public int getSeqNo();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
