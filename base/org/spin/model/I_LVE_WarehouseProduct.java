@@ -21,17 +21,17 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for LVE_CashTax
+/** Generated Interface for LVE_WarehouseProduct
  *  @author Adempiere (generated) 
  *  @version Release 3.7.0LTS (1252452765)
  */
-public interface I_LVE_CashTax 
+public interface I_LVE_WarehouseProduct 
 {
 
-    /** TableName=LVE_CashTax */
-    public static final String Table_Name = "LVE_CashTax";
+    /** TableName=LVE_WarehouseProduct */
+    public static final String Table_Name = "LVE_WarehouseProduct";
 
-    /** AD_Table_ID=53563 */
+    /** AD_Table_ID=53847 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -63,20 +63,20 @@ public interface I_LVE_CashTax
 	  */
 	public int getAD_Org_ID();
 
-    /** Column name C_Cash_ID */
-    public static final String COLUMNNAME_C_Cash_ID = "C_Cash_ID";
+    /** Column name AD_Table_ID */
+    public static final String COLUMNNAME_AD_Table_ID = "AD_Table_ID";
 
-	/** Set Cash Journal.
-	  * Cash Journal
+	/** Set Table.
+	  * Database Table information
 	  */
-	public void setC_Cash_ID (int C_Cash_ID);
+	public void setAD_Table_ID (int AD_Table_ID);
 
-	/** Get Cash Journal.
-	  * Cash Journal
+	/** Get Table.
+	  * Database Table information
 	  */
-	public int getC_Cash_ID();
+	public int getAD_Table_ID();
 
-	public org.compiere.model.I_C_Cash getC_Cash() throws RuntimeException;
+	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -94,21 +94,6 @@ public interface I_LVE_CashTax
 	  */
 	public int getCreatedBy();
 
-    /** Column name C_Tax_ID */
-    public static final String COLUMNNAME_C_Tax_ID = "C_Tax_ID";
-
-	/** Set Tax.
-	  * Tax identifier
-	  */
-	public void setC_Tax_ID (int C_Tax_ID);
-
-	/** Get Tax.
-	  * Tax identifier
-	  */
-	public int getC_Tax_ID();
-
-	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException;
-
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -122,57 +107,36 @@ public interface I_LVE_CashTax
 	  */
 	public boolean isActive();
 
-    /** Column name IsTaxIncluded */
-    public static final String COLUMNNAME_IsTaxIncluded = "IsTaxIncluded";
+    /** Column name LVE_WarehouseProduct_ID */
+    public static final String COLUMNNAME_LVE_WarehouseProduct_ID = "LVE_WarehouseProduct_ID";
 
-	/** Set Price includes Tax.
-	  * Tax is included in the price 
+	/** Set Warehouse of Product	  */
+	public void setLVE_WarehouseProduct_ID (int LVE_WarehouseProduct_ID);
+
+	/** Get Warehouse of Product	  */
+	public int getLVE_WarehouseProduct_ID();
+
+    /** Column name Name */
+    public static final String COLUMNNAME_Name = "Name";
+
+	/** Set Name.
+	  * Alphanumeric identifier of the entity
 	  */
-	public void setIsTaxIncluded (boolean IsTaxIncluded);
+	public void setName (String Name);
 
-	/** Get Price includes Tax.
-	  * Tax is included in the price 
+	/** Get Name.
+	  * Alphanumeric identifier of the entity
 	  */
-	public boolean isTaxIncluded();
+	public String getName();
 
-    /** Column name Processed */
-    public static final String COLUMNNAME_Processed = "Processed";
+    /** Column name Processing */
+    public static final String COLUMNNAME_Processing = "Processing";
 
-	/** Set Processed.
-	  * The document has been processed
-	  */
-	public void setProcessed (boolean Processed);
+	/** Set Process Now	  */
+	public void setProcessing (boolean Processing);
 
-	/** Get Processed.
-	  * The document has been processed
-	  */
-	public boolean isProcessed();
-
-    /** Column name TaxAmt */
-    public static final String COLUMNNAME_TaxAmt = "TaxAmt";
-
-	/** Set Tax Amount.
-	  * Tax Amount for a document
-	  */
-	public void setTaxAmt (BigDecimal TaxAmt);
-
-	/** Get Tax Amount.
-	  * Tax Amount for a document
-	  */
-	public BigDecimal getTaxAmt();
-
-    /** Column name TaxBaseAmt */
-    public static final String COLUMNNAME_TaxBaseAmt = "TaxBaseAmt";
-
-	/** Set Tax base Amount.
-	  * Base for calculating the tax amount
-	  */
-	public void setTaxBaseAmt (BigDecimal TaxBaseAmt);
-
-	/** Get Tax base Amount.
-	  * Base for calculating the tax amount
-	  */
-	public BigDecimal getTaxBaseAmt();
+	/** Get Process Now	  */
+	public boolean isProcessing();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

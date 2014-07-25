@@ -45,12 +45,11 @@ import org.compiere.util.Env;
 public class StorageMaintaining extends SvrProcess {
 
 	/**	Organization		*/
-	private int 		p_AD_Org_ID = 0;
+	private int 		p_AD_Org_ID 		= 0;
 	/**	Warehouse			*/
-	private int 		p_M_Warehouse_ID = 0;
-	
+	private int 		p_M_Warehouse_ID 	= 0;
 	/** Product				*/
-	private int			p_M_Product_ID = 0;
+	private int			p_M_Product_ID 		= 0;
 	
 	@Override
 	protected void prepare() {
