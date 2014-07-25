@@ -19,6 +19,8 @@ package org.spin.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.util.DB;
+
 /**
  * @author <a href="mailto:yamelsenih@gmail.com">Yamel Senih</a>
  *
@@ -52,5 +54,29 @@ public class MLVEWarehouseProduct extends X_LVE_WarehouseProduct {
 	public MLVEWarehouseProduct(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
 	}
+	
+	/***************************************************************************
+	 * Helper Methods                                                          *
+	 ***************************************************************************/
 
+	/**
+	 * Get Default Warehouse from Product
+	 * @author <a href="mailto:yamelsenih@gmail.com">Yamel Senih</a> 25/07/2014, 19:25:27
+	 * @param cxt
+	 * @param p_AD_Org_ID
+	 * @param p_M_Product_ID
+	 * @param trxName
+	 * @return
+	 * @return int
+	 */
+	public static int getDefaultWarehouse(Properties cxt, int p_AD_Org_ID, int p_M_Product_ID, String trxName) {
+		//	Get Warehouse
+		int m_M_Warehouse_ID = DB.getSQLValue(trxName, "SELECT wpl.M_Warehouse_ID " +
+				"FROM LVE_WarehouseProductLine wpl " +
+				"WHERE wpl.AD_Org_ID = ? " +
+				"AND wpl.M_Product_ID = ? " +
+				"ORDER BY wpl.SeqNo", new Object[]{p_AD_Org_ID, p_M_Product_ID});
+		//	Return
+		return m_M_Warehouse_ID;
+	}
 }
