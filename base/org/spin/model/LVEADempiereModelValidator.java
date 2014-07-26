@@ -16,10 +16,14 @@
  *****************************************************************************/
 package org.spin.model;
 
+import java.math.BigDecimal;
+
 import org.compiere.model.I_C_Cash;
+import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.MCash;
 import org.compiere.model.MClient;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MStorage;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -49,9 +53,6 @@ public class LVEADempiereModelValidator implements ModelValidator {
 	/** Client */
 	private int m_AD_Client_ID = -1;
 	
-	/* (non-Javadoc)
-	 * @see org.compiere.model.ModelValidator#initialize(org.compiere.model.ModelValidationEngine, org.compiere.model.MClient)
-	 */
 	@Override
 	public void initialize(ModelValidationEngine engine, MClient client) {
 		// client = null for global validator
@@ -64,36 +65,26 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		//	Add Timing change in C_Order and C_Invoice
 		engine.addDocValidate(MInvoice.Table_Name, this);
 		engine.addDocValidate(I_C_Cash.Table_Name, this);
+		engine.addModelChange(I_C_OrderLine.Table_Name, this);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.compiere.model.ModelValidator#getAD_Client_ID()
-	 */
 	@Override
 	public int getAD_Client_ID() {
 		return m_AD_Client_ID;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.compiere.model.ModelValidator#login(int, int, int)
-	 */
 	@Override
 	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
 		log.info("AD_User_ID=" + AD_User_ID);
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.compiere.model.ModelValidator#modelChange(org.compiere.model.PO, int)
-	 */
 	@Override
 	public String modelChange(PO po, int type) throws Exception {
-		return null;
+		String msg = validWarehouseProduct(po, type);
+		return msg;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.compiere.model.ModelValidator#docValidate(org.compiere.model.PO, int)
-	 */
 	@Override
 	public String docValidate(PO po, int timing) {
 		if(timing == TIMING_BEFORE_REVERSECORRECT){
@@ -136,10 +127,69 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		
 		if(m_ReferenceNo != null)
 			return "@SQLErrorReferenced@ @C_Cash_ID@: " + m_ReferenceNo;
-		
-		return null;
-		
+		//	Return
+		return null;	
 	}
-
 	
+	/**
+	 * Valid Warehouse Product Configuration
+	 * @author <a href="mailto:yamelsenih@gmail.com">Yamel Senih</a> 26/07/2014, 13:17:14
+	 * @param po
+	 * @param type
+	 * @return
+	 * @return String
+	 */
+	private String validWarehouseProduct(PO po, int type) {
+		//	Valid Null
+		if(po == null)
+			return null;
+		//	
+		if(type != TYPE_BEFORE_NEW
+				&& type != TYPE_BEFORE_CHANGE)
+			return null;
+		//	
+		String msg = null;
+		//	do It
+		int m_AD_Org_ID = po.getAD_Org_ID();
+		int m_M_Product_ID = po.get_ValueAsInt("M_Product_ID");
+		int m_M_AttributeSetInstance_ID = po.get_ValueAsInt("M_AttributeSetInstance_ID");
+		int m_M_Warehouse_ID = po.get_ValueAsInt("M_Warehouse_ID");
+		int m_OldWarehouse_ID = po.get_ValueOldAsInt("M_Warehouse_ID");
+		BigDecimal m_Qty = (BigDecimal) po.get_Value("QtyEntered");
+		if(m_Qty == null)
+			m_Qty = Env.ZERO;
+		//	Valid Configuration
+		MLVEWarehouseProductLine configLine = MLVEWarehouseProduct
+				.getWarehouseProduct(po.getCtx(), po.get_Table_ID(), m_AD_Org_ID, m_M_Product_ID, 0,po.get_TrxName());
+		if(configLine == null)
+			return null;
+		//	Before New
+		if(type == TYPE_BEFORE_NEW) {
+			//	Set Warehouse
+			po.set_ValueOfColumn("M_Warehouse_ID", configLine.getM_Warehouse_ID());
+			//	Valid Stock
+		} else if(type == TYPE_BEFORE_CHANGE) {
+			configLine = MLVEWarehouseProduct.getWarehouseProduct(po.getCtx(), po.get_Table_ID(), 
+					m_AD_Org_ID, m_M_Product_ID, m_OldWarehouse_ID,po.get_TrxName());
+			if(configLine == null)
+				return null;
+			m_M_Warehouse_ID = configLine.getM_Warehouse_ID();
+			//	Valid Mandatory
+			if(configLine.isAlwaysSetMandatory())
+				po.set_ValueOfColumn("M_Warehouse_ID", m_OldWarehouse_ID);
+		}
+		//	Valid Stock
+		if(configLine.isMustBeStocked()) {
+			BigDecimal available = MStorage.getQtyAvailable
+					(m_M_Warehouse_ID, 0, m_M_Product_ID, m_M_AttributeSetInstance_ID, null);
+			if (available == null)
+				available = Env.ZERO;
+			if (available.signum() == 0)
+				msg = "@Error@ @NoQtyAvailable@";
+			else if (available.compareTo(m_Qty) < 0)
+				msg = "@Error@ @InsufficientQtyAvailable@ " + available.toString();
+		}
+		//	Return
+		return Msg.parseTranslation(po.getCtx(), msg);
+	}
 }

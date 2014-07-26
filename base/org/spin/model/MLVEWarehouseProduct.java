@@ -63,20 +63,30 @@ public class MLVEWarehouseProduct extends X_LVE_WarehouseProduct {
 	 * Get Default Warehouse from Product
 	 * @author <a href="mailto:yamelsenih@gmail.com">Yamel Senih</a> 25/07/2014, 19:25:27
 	 * @param cxt
+	 * @param p_AD_Table_ID
 	 * @param p_AD_Org_ID
 	 * @param p_M_Product_ID
+	 * @param p_M_Warehouse_ID
 	 * @param trxName
 	 * @return
-	 * @return int
+	 * @return MLVEWarehouseProductLine
 	 */
-	public static int getDefaultWarehouse(Properties cxt, int p_AD_Org_ID, int p_M_Product_ID, String trxName) {
-		//	Get Warehouse
-		int m_M_Warehouse_ID = DB.getSQLValue(trxName, "SELECT wpl.M_Warehouse_ID " +
-				"FROM LVE_WarehouseProductLine wpl " +
-				"WHERE wpl.AD_Org_ID = ? " +
+	public static MLVEWarehouseProductLine getWarehouseProduct(Properties ctx, int p_AD_Table_ID, 
+			int p_AD_Org_ID, int p_M_Product_ID, int p_M_Warehouse_ID, String trxName) {
+		//	Get Warehouse Configuration
+		int m_LVE_WarehouseProductLine_ID = DB.getSQLValue(trxName, "SELECT wpl.LVE_WarehouseProductLine_ID " +
+				"FROM LVE_WarehouseProduct wp " +
+				"INNER JOIN LVE_WarehouseProductLine wpl ON(wp.LVE_WarehouseProduct_ID = wpl.LVE_WarehouseProduct_ID) " +
+				"WHERE wp.AD_Table_ID = ? " +
+				"AND wpl.AD_Org_ID = ? " +
 				"AND wpl.M_Product_ID = ? " +
-				"ORDER BY wpl.SeqNo", new Object[]{p_AD_Org_ID, p_M_Product_ID});
+				(p_M_Warehouse_ID != 0? "AND wpl.M_Warehouse_ID = " + p_M_Warehouse_ID + " ": "") +
+				"AND wpl.IsActive = 'Y' " +
+				"ORDER BY wpl.SeqNo", new Object[]{p_AD_Table_ID, p_AD_Org_ID, p_M_Product_ID});
 		//	Return
-		return m_M_Warehouse_ID;
+		if(m_LVE_WarehouseProductLine_ID == 0)
+			return null;
+		//	
+		return MLVEWarehouseProductLine.get(ctx, m_LVE_WarehouseProductLine_ID);
 	}
 }
