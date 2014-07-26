@@ -31,7 +31,7 @@ public class X_LVE_WarehouseProduct extends PO implements I_LVE_WarehouseProduct
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20140725L;
+	private static final long serialVersionUID = 20140727L;
 
     /** Standard Constructor */
     public X_LVE_WarehouseProduct (Properties ctx, int LVE_WarehouseProduct_ID, String trxName)
@@ -40,8 +40,12 @@ public class X_LVE_WarehouseProduct extends PO implements I_LVE_WarehouseProduct
       /** if (LVE_WarehouseProduct_ID == 0)
         {
 			setAD_Table_ID (0);
+			setAttribute_Column_ID (0);
 			setLVE_WarehouseProduct_ID (0);
 			setName (null);
+			setProduct_Column_ID (0);
+			setQty_Column_ID (0);
+			setWarehouse_Column_ID (0);
         } */
     }
 
@@ -96,6 +100,31 @@ public class X_LVE_WarehouseProduct extends PO implements I_LVE_WarehouseProduct
 	public int getAD_Table_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Table_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_AD_Column getAttribute_Column() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_Column)MTable.get(getCtx(), org.compiere.model.I_AD_Column.Table_Name)
+			.getPO(getAttribute_Column_ID(), get_TrxName());	}
+
+	/** Set Attribute Column.
+		@param Attribute_Column_ID Attribute Column	  */
+	public void setAttribute_Column_ID (int Attribute_Column_ID)
+	{
+		if (Attribute_Column_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_Attribute_Column_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_Attribute_Column_ID, Integer.valueOf(Attribute_Column_ID));
+	}
+
+	/** Get Attribute Column.
+		@return Attribute Column	  */
+	public int getAttribute_Column_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Attribute_Column_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -165,5 +194,80 @@ public class X_LVE_WarehouseProduct extends PO implements I_LVE_WarehouseProduct
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	public org.compiere.model.I_AD_Column getProduct_Column() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_Column)MTable.get(getCtx(), org.compiere.model.I_AD_Column.Table_Name)
+			.getPO(getProduct_Column_ID(), get_TrxName());	}
+
+	/** Set Product Column.
+		@param Product_Column_ID Product Column	  */
+	public void setProduct_Column_ID (int Product_Column_ID)
+	{
+		if (Product_Column_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_Product_Column_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_Product_Column_ID, Integer.valueOf(Product_Column_ID));
+	}
+
+	/** Get Product Column.
+		@return Product Column	  */
+	public int getProduct_Column_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Product_Column_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_AD_Column getQty_Column() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_Column)MTable.get(getCtx(), org.compiere.model.I_AD_Column.Table_Name)
+			.getPO(getQty_Column_ID(), get_TrxName());	}
+
+	/** Set Qty Column.
+		@param Qty_Column_ID Qty Column	  */
+	public void setQty_Column_ID (int Qty_Column_ID)
+	{
+		if (Qty_Column_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_Qty_Column_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_Qty_Column_ID, Integer.valueOf(Qty_Column_ID));
+	}
+
+	/** Get Qty Column.
+		@return Qty Column	  */
+	public int getQty_Column_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Qty_Column_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_AD_Column getWarehouse_Column() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_Column)MTable.get(getCtx(), org.compiere.model.I_AD_Column.Table_Name)
+			.getPO(getWarehouse_Column_ID(), get_TrxName());	}
+
+	/** Set Warehouse Column.
+		@param Warehouse_Column_ID Warehouse Column	  */
+	public void setWarehouse_Column_ID (int Warehouse_Column_ID)
+	{
+		if (Warehouse_Column_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_Warehouse_Column_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_Warehouse_Column_ID, Integer.valueOf(Warehouse_Column_ID));
+	}
+
+	/** Get Warehouse Column.
+		@return Warehouse Column	  */
+	public int getWarehouse_Column_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Warehouse_Column_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 }

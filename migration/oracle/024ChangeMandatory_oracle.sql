@@ -1,0 +1,10 @@
+-- 27/07/2014 12:59:22 AM CEST
+-- LVE-ADempiere
+UPDATE AD_Column SET IsMandatory='N',Updated=TO_DATE('2014-07-27 00:59:22','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=73851
+;
+
+-- 27/07/2014 01:08:31 AM CEST
+-- LVE-ADempiere
+UPDATE AD_Column SET IsUpdateable='N',Updated=TO_DATE('2014-07-27 01:08:31','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=73832
+;
+

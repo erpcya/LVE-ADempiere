@@ -78,6 +78,17 @@ public interface I_LVE_WarehouseProduct
 
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException;
 
+    /** Column name Attribute_Column_ID */
+    public static final String COLUMNNAME_Attribute_Column_ID = "Attribute_Column_ID";
+
+	/** Set Attribute Column	  */
+	public void setAttribute_Column_ID (int Attribute_Column_ID);
+
+	/** Get Attribute Column	  */
+	public int getAttribute_Column_ID();
+
+	public org.compiere.model.I_AD_Column getAttribute_Column() throws RuntimeException;
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -138,6 +149,28 @@ public interface I_LVE_WarehouseProduct
 	/** Get Process Now	  */
 	public boolean isProcessing();
 
+    /** Column name Product_Column_ID */
+    public static final String COLUMNNAME_Product_Column_ID = "Product_Column_ID";
+
+	/** Set Product Column	  */
+	public void setProduct_Column_ID (int Product_Column_ID);
+
+	/** Get Product Column	  */
+	public int getProduct_Column_ID();
+
+	public org.compiere.model.I_AD_Column getProduct_Column() throws RuntimeException;
+
+    /** Column name Qty_Column_ID */
+    public static final String COLUMNNAME_Qty_Column_ID = "Qty_Column_ID";
+
+	/** Set Qty Column	  */
+	public void setQty_Column_ID (int Qty_Column_ID);
+
+	/** Get Qty Column	  */
+	public int getQty_Column_ID();
+
+	public org.compiere.model.I_AD_Column getQty_Column() throws RuntimeException;
+
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
 
@@ -153,4 +186,15 @@ public interface I_LVE_WarehouseProduct
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name Warehouse_Column_ID */
+    public static final String COLUMNNAME_Warehouse_Column_ID = "Warehouse_Column_ID";
+
+	/** Set Warehouse Column	  */
+	public void setWarehouse_Column_ID (int Warehouse_Column_ID);
+
+	/** Get Warehouse Column	  */
+	public int getWarehouse_Column_ID();
+
+	public org.compiere.model.I_AD_Column getWarehouse_Column() throws RuntimeException;
 }

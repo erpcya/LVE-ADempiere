@@ -19,6 +19,7 @@ package org.spin.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.util.CCache;
 import org.compiere.util.DB;
 
 /**
@@ -31,6 +32,9 @@ public class MLVEWarehouseProduct extends X_LVE_WarehouseProduct {
 	 * 
 	 */
 	private static final long serialVersionUID = 1994668061472867078L;
+	
+	/** Cache */
+	private static CCache<Integer, MLVEWarehouseProduct> s_cacheByTable = new CCache<Integer, MLVEWarehouseProduct>(Table_Name, 10);
 
 	/**
 	 * *** Constructor ***
@@ -84,9 +88,40 @@ public class MLVEWarehouseProduct extends X_LVE_WarehouseProduct {
 				"AND wpl.IsActive = 'Y' " +
 				"ORDER BY wpl.SeqNo", new Object[]{p_AD_Table_ID, p_AD_Org_ID, p_M_Product_ID});
 		//	Return
-		if(m_LVE_WarehouseProductLine_ID == 0)
+		if(m_LVE_WarehouseProductLine_ID <= 0)
 			return null;
 		//	
 		return MLVEWarehouseProductLine.get(ctx, m_LVE_WarehouseProductLine_ID);
+	}
+	
+	/**
+	 * Get from Table
+	 * @author <a href="mailto:yamelsenih@gmail.com">Yamel Senih</a> 27/07/2014, 00:16:54
+	 * @param ctx
+	 * @param p_AD_Table_ID
+	 * @return
+	 * @return MLVEWarehouseProduct
+	 */
+	public static MLVEWarehouseProduct getFromTable(Properties ctx, int p_AD_Table_ID) {
+		if (p_AD_Table_ID <= 0)
+			return null;
+		//
+		MLVEWarehouseProduct wProduct = s_cacheByTable.get(p_AD_Table_ID);
+		if (wProduct != null)
+			return wProduct;
+		//	Get From DB
+		int m_LVE_WarehouseProduct_ID = DB.getSQLValue(null, "SELECT wp.LVE_WarehouseProduct_ID " +
+				"FROM LVE_WarehouseProduct wp " + 
+				"WHERE wp.AD_Table_ID = ? " +
+				"AND wp.IsActive = 'Y' ", p_AD_Table_ID);
+		//	
+		wProduct = new MLVEWarehouseProduct(ctx, m_LVE_WarehouseProduct_ID, null);
+		if (wProduct.get_ID() == m_LVE_WarehouseProduct_ID) {
+			s_cacheByTable.put(p_AD_Table_ID, wProduct);
+		} else {
+			wProduct = null;
+		}
+		//	Return
+		return wProduct;
 	}
 }

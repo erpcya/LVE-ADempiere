@@ -22,6 +22,7 @@ import org.compiere.model.I_C_Cash;
 import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.MCash;
 import org.compiere.model.MClient;
+import org.compiere.model.MColumn;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MStorage;
 import org.compiere.model.MSysConfig;
@@ -150,12 +151,24 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		//	
 		String msg = null;
 		//	do It
+		//	Get From Table
+		MLVEWarehouseProduct wProductConfig = MLVEWarehouseProduct
+				.getFromTable(po.getCtx(), po.get_Table_ID());
+		//	Valid Null
+		if(wProductConfig == null)
+			return null;
+		//	Get Column Names
+		String m_Product_Column = MColumn.getColumnName(po.getCtx(), wProductConfig.getProduct_Column_ID());
+		String m_Attribute_Column = MColumn.getColumnName(po.getCtx(), wProductConfig.getAttribute_Column_ID());
+		String m_Warehouse_Column = MColumn.getColumnName(po.getCtx(), wProductConfig.getWarehouse_Column_ID());
+		String m_Qty_Column = MColumn.getColumnName(po.getCtx(), wProductConfig.getQty_Column_ID());
+		//	Get Values
 		int m_AD_Org_ID = po.getAD_Org_ID();
-		int m_M_Product_ID = po.get_ValueAsInt("M_Product_ID");
-		int m_M_AttributeSetInstance_ID = po.get_ValueAsInt("M_AttributeSetInstance_ID");
-		int m_M_Warehouse_ID = po.get_ValueAsInt("M_Warehouse_ID");
-		int m_OldWarehouse_ID = po.get_ValueOldAsInt("M_Warehouse_ID");
-		BigDecimal m_Qty = (BigDecimal) po.get_Value("QtyEntered");
+		int m_M_Product_ID = po.get_ValueAsInt(m_Product_Column);
+		int m_M_AttributeSetInstance_ID = po.get_ValueAsInt(m_Attribute_Column);
+		int m_M_Warehouse_ID = po.get_ValueAsInt(m_Warehouse_Column);
+		int m_OldWarehouse_ID = po.get_ValueOldAsInt(m_Warehouse_Column);
+		BigDecimal m_Qty = (BigDecimal) po.get_Value(m_Qty_Column);
 		if(m_Qty == null)
 			m_Qty = Env.ZERO;
 		//	Valid Configuration
@@ -166,7 +179,7 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		//	Before New
 		if(type == TYPE_BEFORE_NEW) {
 			//	Set Warehouse
-			po.set_ValueOfColumn("M_Warehouse_ID", configLine.getM_Warehouse_ID());
+			po.set_ValueOfColumn(m_Warehouse_Column, configLine.getM_Warehouse_ID());
 			//	Valid Stock
 		} else if(type == TYPE_BEFORE_CHANGE) {
 			configLine = MLVEWarehouseProduct.getWarehouseProduct(po.getCtx(), po.get_Table_ID(), 
@@ -176,7 +189,7 @@ public class LVEADempiereModelValidator implements ModelValidator {
 			m_M_Warehouse_ID = configLine.getM_Warehouse_ID();
 			//	Valid Mandatory
 			if(configLine.isAlwaysSetMandatory())
-				po.set_ValueOfColumn("M_Warehouse_ID", m_OldWarehouse_ID);
+				po.set_ValueOfColumn(m_Warehouse_Column, m_OldWarehouse_ID);
 		}
 		//	Valid Stock
 		if(configLine.isMustBeStocked()) {
@@ -185,9 +198,10 @@ public class LVEADempiereModelValidator implements ModelValidator {
 			if (available == null)
 				available = Env.ZERO;
 			if (available.signum() == 0)
-				msg = "@Error@ @NoQtyAvailable@";
+				msg = "@NoQtyAvailable@";
 			else if (available.compareTo(m_Qty) < 0)
-				msg = "@Error@ @InsufficientQtyAvailable@ " + available.toString();
+				msg = "@InsufficientQtyAvailable@ [@QtyAvailable@ = " + available.toString() 
+							+ " @Qty@ = " + m_Qty + "]";
 		}
 		//	Return
 		return Msg.parseTranslation(po.getCtx(), msg);

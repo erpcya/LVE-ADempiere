@@ -1,7 +1,33 @@
-﻿ALTER TABLE LVE_WarehouseProduct ADD CONSTRAINT FK_LVE_WarehouseProduct_AD_Table FOREIGN KEY (AD_Table_ID)
+-- Table Reference
+ALTER TABLE LVE_WarehouseProduct ADD CONSTRAINT FK_LVE_WarehouseProduct_AD_Table FOREIGN KEY (AD_Table_ID)
 	REFERENCES AD_Table(AD_Table_ID) 
 	ON UPDATE CASCADE 
 	ON DELETE RESTRICT;
+
+-- Product Column Reference	
+ALTER TABLE LVE_WarehouseProduct ADD CONSTRAINT FK_LVE_WarehouseProduct_Product_Column_ID FOREIGN KEY (Product_Column_ID)
+	REFERENCES AD_Column(AD_Column_ID) 
+	ON UPDATE CASCADE 
+	ON DELETE RESTRICT;
+
+-- Attribute Column Reference	
+ALTER TABLE LVE_WarehouseProduct ADD CONSTRAINT FK_LVE_WarehouseProduct_Attribute_Column_ID FOREIGN KEY (Attribute_Column_ID)
+	REFERENCES AD_Column(AD_Column_ID) 
+	ON UPDATE CASCADE 
+	ON DELETE RESTRICT;
+
+-- Warehouse Column Reference	
+ALTER TABLE LVE_WarehouseProduct ADD CONSTRAINT FK_LVE_WarehouseProduct_Warehouse_Column_ID FOREIGN KEY (Warehouse_Column_ID)
+	REFERENCES AD_Column(AD_Column_ID) 
+	ON UPDATE CASCADE 
+	ON DELETE RESTRICT;
+
+-- Quantity Column Reference	
+ALTER TABLE LVE_WarehouseProduct ADD CONSTRAINT FK_LVE_WarehouseProduct_Qty_Column_ID FOREIGN KEY (Qty_Column_ID)
+	REFERENCES AD_Column(AD_Column_ID) 
+	ON UPDATE CASCADE 
+	ON DELETE RESTRICT;
+
 	
 ALTER TABLE LVE_WarehouseProductLine ADD CONSTRAINT FK_LVE_WarehouseProductLine_LVE_WarehouseProduct_ID FOREIGN KEY (LVE_WarehouseProduct_ID)
 	REFERENCES LVE_WarehouseProduct(LVE_WarehouseProduct_ID) 
