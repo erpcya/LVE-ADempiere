@@ -31,7 +31,7 @@ public class X_LVE_WarehouseProductLine extends PO implements I_LVE_WarehousePro
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20140725L;
+	private static final long serialVersionUID = 20140727L;
 
     /** Standard Constructor */
     public X_LVE_WarehouseProductLine (Properties ctx, int LVE_WarehouseProductLine_ID, String trxName)

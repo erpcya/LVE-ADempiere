@@ -32,7 +32,7 @@ public class X_LVE_CashTax extends PO implements I_LVE_CashTax, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20140725L;
+	private static final long serialVersionUID = 20140727L;
 
     /** Standard Constructor */
     public X_LVE_CashTax (Properties ctx, int LVE_CashTax_ID, String trxName)

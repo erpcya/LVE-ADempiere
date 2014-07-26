@@ -31,6 +31,7 @@ public class MLVEWarehouseProductLine extends X_LVE_WarehouseProductLine {
 	 * 
 	 */
 	private static final long serialVersionUID = -1186809613100119541L;
+	
 	/** Cache */
 	private static CCache<Integer, MLVEWarehouseProductLine> s_cache = new CCache<Integer, MLVEWarehouseProductLine>(Table_Name, 10);
 

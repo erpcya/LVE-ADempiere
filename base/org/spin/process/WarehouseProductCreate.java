@@ -30,14 +30,18 @@ import org.spin.model.MLVEWarehouseProductLine;
  */
 public class WarehouseProductCreate extends SvrProcess {
 
-	/**	Organization		*/
+	/**	Organization			*/
 	private int 		p_AD_Org_ID 				= 0;
-	/**	Warehouse			*/
+	/**	Warehouse				*/
 	private int 		p_M_Warehouse_ID 			= 0;
-	/** Product Category	*/
+	/** Product Category		*/
 	private int			p_M_Product_Category_ID 	= 0;
-	/**	Record Identifier	*/
+	/**	Record Identifier		*/
 	private int 		p_Record_ID					= 0;
+	/**	Is Always Set Mandatory	*/
+	private boolean		p_IsAlwaysSetMandatory		= false;
+	/**	Must Be Stocked			*/
+	private boolean 	p_MustBeStocked				= false;
 	
 	@Override
 	protected void prepare() {
@@ -52,6 +56,10 @@ public class WarehouseProductCreate extends SvrProcess {
 				p_M_Warehouse_ID = para.getParameterAsInt();
 			else if(name.equals("p_M_Product_Category_ID"))
 				p_M_Product_Category_ID = para.getParameterAsInt();
+			else if(name.equals("IsAlwaysSetMandatory"))
+				p_IsAlwaysSetMandatory = para.getParameterAsBoolean();
+			else if(name.equals("MustBeStocked"))
+				p_MustBeStocked = para.getParameterAsBoolean();	
 		}
 		//	Get Record Identifier
 		p_Record_ID = getRecord_ID();
@@ -107,6 +115,8 @@ public class WarehouseProductCreate extends SvrProcess {
 			line.setAD_Org_ID(rs.getInt("AD_Org_ID"));
 			line.setM_Warehouse_ID(rs.getInt("M_Warehouse_ID"));
 			line.setM_Product_ID(rs.getInt("M_Product_ID"));
+			line.setIsAlwaysSetMandatory(p_IsAlwaysSetMandatory);
+			line.setMustBeStocked(p_MustBeStocked);
 			line.setSeqNo(m_SeqNo);
 			line.saveEx();
 			//	Add Sequence
