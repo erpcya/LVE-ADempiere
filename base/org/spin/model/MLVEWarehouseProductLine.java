@@ -19,6 +19,8 @@ package org.spin.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.util.CCache;
+
 /**
  * @author <a href="mailto:yamelsenih@gmail.com">Yamel Senih</a>
  *
@@ -29,6 +31,8 @@ public class MLVEWarehouseProductLine extends X_LVE_WarehouseProductLine {
 	 * 
 	 */
 	private static final long serialVersionUID = -1186809613100119541L;
+	/** Cache */
+	private static CCache<Integer, MLVEWarehouseProductLine> s_cache = new CCache<Integer, MLVEWarehouseProductLine>(Table_Name, 10);
 
 	/**
 	 * *** Constructor ***
@@ -52,5 +56,30 @@ public class MLVEWarehouseProductLine extends X_LVE_WarehouseProductLine {
 	public MLVEWarehouseProductLine(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
 	}
-
+	
+	/**
+	 * Get from ID
+	 * @author <a href="mailto:yamelsenih@gmail.com">Yamel Senih</a> 26/07/2014, 12:58:13
+	 * @param ctx
+	 * @param LVE_WarehouseProductLine_ID
+	 * @return
+	 * @return MLVEWarehouseProductLine
+	 */
+	public static MLVEWarehouseProductLine get(Properties ctx, int LVE_WarehouseProductLine_ID) {
+		if (LVE_WarehouseProductLine_ID <= 0)
+			return null;
+		//
+		MLVEWarehouseProductLine wpLine = s_cache.get(LVE_WarehouseProductLine_ID);
+		if (wpLine != null)
+			return wpLine;
+		//
+		wpLine = new MLVEWarehouseProductLine(ctx, LVE_WarehouseProductLine_ID, null);
+		if (wpLine.get_ID() == LVE_WarehouseProductLine_ID) {
+			s_cache.put(LVE_WarehouseProductLine_ID, wpLine);
+		} else {
+			wpLine = null;
+		}
+		//	Return
+		return wpLine;
+	}
 }
