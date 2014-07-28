@@ -19,7 +19,6 @@ package org.spin.model;
 import java.math.BigDecimal;
 
 import org.compiere.model.I_C_Cash;
-import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.MCash;
 import org.compiere.model.MClient;
 import org.compiere.model.MColumn;
@@ -33,6 +32,7 @@ import org.compiere.model.X_C_Invoice;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 
 /**
@@ -66,7 +66,8 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		//	Add Timing change in C_Order and C_Invoice
 		engine.addDocValidate(MInvoice.Table_Name, this);
 		engine.addDocValidate(I_C_Cash.Table_Name, this);
-		engine.addModelChange(I_C_OrderLine.Table_Name, this);
+		//	Add Warehouse Product Listener
+		addWPListener(engine, this);
 	}
 
 	@Override
@@ -201,9 +202,38 @@ public class LVEADempiereModelValidator implements ModelValidator {
 				msg = "@NoQtyAvailable@";
 			else if (available.compareTo(m_Qty) < 0)
 				msg = "@InsufficientQtyAvailable@ [@QtyAvailable@ = " + available.toString() 
-							+ " @Qty@ = " + m_Qty + "]";
+							+ " @Qty@ = " + m_Qty + " @Difference@ = " + m_Qty.subtract(available) + "]";
 		}
 		//	Return
 		return Msg.parseTranslation(po.getCtx(), msg);
+	}
+	
+	/**
+	 * Add Warehouse Product Listener
+	 * @author <a href="mailto:yamelsenih@gmail.com">Yamel Senih</a> 28/07/2014, 17:29:30
+	 * @param engine
+	 * @param listener
+	 * @return void
+	 */
+	private void addWPListener(ModelValidationEngine engine, ModelValidator listener) {
+		//	Valid Null
+		if(engine == null
+				|| listener == null)
+			return;
+		KeyNamePair [] tables = DB.getKeyNamePairs("SELECT t.AD_Table_ID, t.TableName " +
+				"FROM LVE_WarehouseProduct wp " +
+				"INNER JOIN AD_Table t ON(t.AD_Table_ID = wp.AD_Table_ID) " +
+				"WHERE wp.AD_Client_ID = ? " +
+				"GROUP BY t.AD_Table_ID, t.TableName " +
+				"ORDER BY t.TableName", false, getAD_Client_ID());
+		//	Valid Tables
+		if(tables == null)
+			return;
+		//	Iterate over tables
+		for (KeyNamePair table : tables) {
+			//	Add Listener
+			engine.addModelChange(table.getName(), listener);
+			log.fine("Table Added=" + table.toString());
+		}
 	}
 }
