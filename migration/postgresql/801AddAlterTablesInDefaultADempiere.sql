@@ -28,3 +28,8 @@ ALTER TABLE M_Requisition ADD COLUMN IsService CHAR(1) DEFAULT 'N' CHECK (IsServ
 ALTER TABLE C_RfQ ADD COLUMN CreateFromRequisition CHAR(1) DEFAULT 'N' 
 ;
 
+-- Jul 30, 2014 12:21:55 PM CEST
+-- Custom User File Path
+ALTER TABLE AD_User ADD COLUMN File_Directory VARCHAR(255) DEFAULT NULL 
+;
+
