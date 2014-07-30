@@ -311,11 +311,13 @@ public class VFile extends JComponent
 		//	
 		//	Yamel Senih 2014-07-30, 11:48:58
 		//	Add Cache last path
-		if(m_value == null) {
+		if(m_value == null
+				|| m_value.length() == 0) {
 			m_value = Env.getContext(Env.getCtx(), "#File_Directory");
 		}
 		//	Get from User if if null
-		if(m_value == null) {
+		if(m_value == null
+				|| m_value.length() == 0) {
 			//	Get Current User
 			MUser currentUser = MUser.get(Env.getCtx());
 			//	Get
