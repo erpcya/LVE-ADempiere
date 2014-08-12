@@ -32,24 +32,21 @@ public class AmtInWordsScriptlet extends JRDefaultScriptlet {
 	public String amtInWords(String amount, String lang) throws JRScriptletException, Exception{
 		AmtInWords amt = null;
 		//	Get Language
-		System.out.println(lang);
-		if(lang.equals("null"))
+		if(lang == null)
 			lang = Env.getAD_Language(Env.getCtx());
 		
 		Language language = Language.getLanguage(lang);
-		System.out.println(language);
 		//	Instanced AmtInWords
-		if(lang != null )
+		if(lang != null)
 			amt = (AmtInWords) Class.forName(RESOURCE +"_"+language.getLanguageCode().toUpperCase()).newInstance();
 		
 		//	Evaluate amount
-		if(amount.equals("null"))
+		if(amount == null)
 			amount = "0.0";
-		
-		//amount = amount.replace(".", ",");
-		
-		System.out.println(amt.getAmtInWords(amount));
-		return amt.getAmtInWords(amount);
+		//	Get Amount in Word
+		String amtInWords = amt.getAmtInWords(amount);
+		//	
+		return amtInWords;
 				
 	}
 	
