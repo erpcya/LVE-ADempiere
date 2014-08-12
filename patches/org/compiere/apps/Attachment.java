@@ -440,7 +440,6 @@ public final class Attachment extends CDialog
 		}
 		//	Set to Context
 		Env.setContext(Env.getCtx(), "#File_Directory", m_value);
-		//	End Yamel Senih
 		//
 		JFileChooser chooser = new JFileChooser(m_value);
 		chooser.setDialogType(JFileChooser.OPEN_DIALOG);
@@ -451,9 +450,16 @@ public final class Attachment extends CDialog
 			return;
 		//
 		File[] files = chooser.getSelectedFiles();
+		//	
+		boolean saveContext = false;
 		for (File file : files) {
 			int cnt = m_attachment.getEntryCount();
-			
+			//	Validate Save Context
+			if(!saveContext) {
+				//	Set to Context
+				Env.setContext(Env.getCtx(), "#File_Directory", file.getAbsolutePath());
+			}
+			//	End Yamel Senih
 			//update
 			boolean add = true;
 			for (int i = 0; i < cnt; i++) 
@@ -566,14 +572,14 @@ public final class Attachment extends CDialog
             if (Env.isWindows())
             {
             //	Runtime.getRuntime().exec ("rundll32 url.dll,FileProtocolHandler " + url);
-                Process p = Runtime.getRuntime().exec("rundll32 SHELL32.DLL,ShellExec_RunDLL \"" + tempFile + "\"");
+                Runtime.getRuntime().exec("rundll32 SHELL32.DLL,ShellExec_RunDLL \"" + tempFile + "\"");
             //	p.waitFor();
                 return true;
             }
             else if (Env.isMac())
             {
             	String [] cmdArray = new String [] {"open", tempFile.getAbsolutePath()};
-            	Process p = Runtime.getRuntime ().exec (cmdArray);
+            	Runtime.getRuntime ().exec (cmdArray);
             //	p.waitFor();
                 return true;
             }

@@ -345,7 +345,11 @@ public class VFile extends JComponent
 			return;
 		
 		File selectedFile = chooser.getSelectedFile();
-		m_text.setText(selectedFile.getAbsolutePath() );
+		m_text.setText(selectedFile.getAbsolutePath());
+		//	Set to Context
+		if(selectedFile != null)
+			Env.setContext(Env.getCtx(), "#File_Directory", selectedFile.getAbsolutePath());
+		//	End Yamel Senih
 		//  Data Binding
 		try
 		{
