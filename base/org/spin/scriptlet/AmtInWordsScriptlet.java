@@ -4,6 +4,8 @@
 package org.spin.scriptlet;
 
 
+import java.text.DecimalFormat;
+
 import org.compiere.util.AmtInWords;
 import org.compiere.util.Env;
 import org.compiere.util.Language;
@@ -16,9 +18,13 @@ import net.sf.jasperreports.engine.JRScriptletException;
  * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a>
  */
 public class AmtInWordsScriptlet extends JRDefaultScriptlet {
-
-	/**	Resource for Class AmtInWords				*/
-	protected static final String RESOURCE			 = "org.compiere.util.AmtInWords";
+	
+	public AmtInWordsScriptlet() {
+	}
+	/**	Resource for Class AmtInWords							*/
+	protected static final String RESOURCE			 			= "org.compiere.util.AmtInWords";
+	/**	Amount in words Scriptlet								*/
+	private static AmtInWordsScriptlet AMT_IN_WORDS_SCRIPTLET	= null	;
 	
 	/**
 	 * Amount In Words
@@ -39,15 +45,27 @@ public class AmtInWordsScriptlet extends JRDefaultScriptlet {
 		//	Instanced AmtInWords
 		if(lang != null)
 			amt = (AmtInWords) Class.forName(RESOURCE +"_"+language.getLanguageCode().toUpperCase()).newInstance();
-		
 		//	Evaluate amount
 		if(amount == null)
-			amount = "0.0";
+			amount = String.valueOf(Env.ZERO);
 		//	Get Amount in Word
-		String amtInWords = amt.getAmtInWords(amount);
+		DecimalFormat myFormatter = new DecimalFormat("###,###.###");
+		String output = String.valueOf(myFormatter.format(Double.valueOf(amount)));
+		
+		String amtInWords = amt.getAmtInWords(output);
 		//	
 		return amtInWords;
-				
 	}
-	
+
+	public static void main(String []arg) {
+		AMT_IN_WORDS_SCRIPTLET = new AmtInWordsScriptlet(); 
+		
+		try {
+			System.out.println(AMT_IN_WORDS_SCRIPTLET.amtInWords("12.4", "es_VE"));
+		} catch (JRScriptletException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
