@@ -59,6 +59,7 @@ public class CreateFromRequisition extends SvrProcess{
 			MRfQLineQty rfqlineqty = new MRfQLineQty(rfqline);
 			rfqlineqty.setQty(rl.getQty());
 			rfqlineqty.setC_UOM_ID(rl.getC_UOM_ID());
+			rfqlineqty.setIsPurchaseQty(true);
 			rfqlineqty.saveEx(get_TrxName());
 			lines++;
 		}
