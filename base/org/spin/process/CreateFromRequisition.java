@@ -47,13 +47,15 @@ public class CreateFromRequisition extends SvrProcess{
 		ps = DB.prepareStatement(sql.toString(), get_TrxName());
 		ps.setInt(1, getAD_PInstance_ID());
 		rs = ps.executeQuery();
-		
+		int line = 10;
 		while (rs.next()){
+			lines++;
 			rl = new MRequisitionLine(getCtx(), rs.getInt("T_Selection_ID"), get_TrxName());
 			MRfQ rfq = new MRfQ(getCtx(),getRecord_ID(),get_TrxName());
 			MRfQLine rfqline = new MRfQLine(rfq);
 			rfqline.setM_Product_ID(rl.getM_Product_ID());
 			rfqline.setDescription(rl.getDescription());
+			rfqline.setLine(line*lines);
 			rfqline.saveEx(get_TrxName());
 			
 			MRfQLineQty rfqlineqty = new MRfQLineQty(rfqline);
@@ -61,7 +63,7 @@ public class CreateFromRequisition extends SvrProcess{
 			rfqlineqty.setC_UOM_ID(rl.getC_UOM_ID());
 			rfqlineqty.setIsPurchaseQty(true);
 			rfqlineqty.saveEx(get_TrxName());
-			lines++;
+			
 		}
 		
 		DB.close(rs, ps);
