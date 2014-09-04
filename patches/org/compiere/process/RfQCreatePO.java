@@ -27,7 +27,7 @@ import org.compiere.model.MRfQResponse;
 import org.compiere.model.MRfQResponseLine;
 import org.compiere.model.MRfQResponseLineQty;
 import org.compiere.model.MUOMConversion;
-import org.compiere.util.Env;
+
 
 /**
  * 	Create RfQ PO.
@@ -77,8 +77,9 @@ public class RfQCreatePO extends SvrProcess
 	 */
 	protected String doIt () throws Exception
 	{
-		//Carlos Parada 2014-09-01 Set Variable for UOM Conversion
-		BigDecimal l_Qty = Env.ZERO;
+		//Carlos Parada 2014-09-01 Set Variable for UOM Conversion Qty And Prices
+		BigDecimal l_Qty = null;
+		BigDecimal l_Price = null;
 		
 		MRfQ rfq = new MRfQ (getCtx(), p_C_RfQ_ID, get_TrxName());
 		if (rfq.get_ID() == 0)
@@ -137,7 +138,7 @@ public class RfQCreatePO extends SvrProcess
 						ol.setQty(qty.getRfQLineQty().getQty());
 						/** 2014-09-01 Set Conversion for Qty Ordered*/
 						l_Qty = MUOMConversion.convertProductFrom (getCtx(), ol.getM_Product_ID(), 
-								qty.getRfQLineQty().getC_UOM_ID(), ol.getQtyEntered());
+								ol.getC_UOM_ID(), ol.getQtyEntered());
 						if (l_Qty!=null)
 							ol.setQtyOrdered(l_Qty);
 						/** End Carlos PArada*/ 
@@ -145,7 +146,11 @@ public class RfQCreatePO extends SvrProcess
 						//ol.setPrice();
 						ol.setPrice(price);
 						
-						System.out.println(ol);
+						l_Price =  MUOMConversion.convertProductTo (getCtx(), ol.getM_Product_ID(), 
+								ol.getC_UOM_ID(), price);
+						if (l_Price!=null)
+							ol.setPriceActual(l_Price);
+						
 						ol.saveEx();
 					}
 				}
@@ -211,6 +216,12 @@ public class RfQCreatePO extends SvrProcess
 						BigDecimal price = qty.getNetAmt();
 						//ol.setPrice();
 						ol.setPrice(price);
+						
+						l_Price =  MUOMConversion.convertProductTo (getCtx(), ol.getM_Product_ID(), 
+								ol.getC_UOM_ID(), price);
+						if (l_Price!=null)
+							ol.setPriceActual(l_Price);
+						
 						ol.saveEx();
 					}
 				}	//	for all Qtys
