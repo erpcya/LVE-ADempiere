@@ -13,6 +13,8 @@
   <property name="zkclasses" value="${dist}/zkclass/WEB-INF/classes"/>
   <property name="class" value="${dist}/class"/>
   <property name="zkjar" value="${dist}/zkclass"/>
+  <property name="build" value="${basedir}/build"/>
+  <property name="jar" value="${build}"/>
   
   <property name="build.dir" value="build"/>
   <property name="dist.dir" value="${project.trunk}/packages/${project-name}/lib"/>
@@ -58,6 +60,7 @@
   <target name="clean_zk" description="clean up class" >
 	<echo message="Remove Class ZK Directory"/>
   	<delete dir="${zkjar}"/>
+  	<delete dir="${jar}"/>
   </target>
 	
   <!-- @author Carlos Parada Create ZK Directory -->
@@ -96,6 +99,7 @@
 	<target name="makedir" depends="init" unless="dist.dir.exists">
     	<!-- create the distribution directory if not available -->
     	<mkdir dir="${dist.dir}"/>
+    	<mkdir dir="${jar}"/>
   	</target>
 	
 </project>
