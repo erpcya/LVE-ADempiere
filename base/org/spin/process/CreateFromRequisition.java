@@ -39,8 +39,6 @@ public class CreateFromRequisition extends SvrProcess{
 
 	@Override
 	protected String doIt() throws Exception {
-		// TODO Auto-generated method stub
-		
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		MRequisitionLine rl = null;
@@ -62,6 +60,7 @@ public class CreateFromRequisition extends SvrProcess{
 			rfqlineqty.setQty(rl.getQty());
 			rfqlineqty.setC_UOM_ID(rl.getC_UOM_ID());
 			rfqlineqty.setIsPurchaseQty(true);
+			rfqlineqty.set_ValueOfColumn("M_RequisitionLine_ID", rl.get_ID());
 			rfqlineqty.saveEx(get_TrxName());
 			
 		}
