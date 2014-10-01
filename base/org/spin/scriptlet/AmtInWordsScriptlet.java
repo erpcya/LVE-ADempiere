@@ -4,14 +4,12 @@
 package org.spin.scriptlet;
 
 
-import java.text.DecimalFormat;
+import net.sf.jasperreports.engine.JRDefaultScriptlet;
+import net.sf.jasperreports.engine.JRScriptletException;
 
 import org.compiere.util.AmtInWords;
 import org.compiere.util.Env;
 import org.compiere.util.Language;
-
-import net.sf.jasperreports.engine.JRDefaultScriptlet;
-import net.sf.jasperreports.engine.JRScriptletException;
 
 /**
  * Scriptlet Amt In Words
@@ -49,9 +47,9 @@ public class AmtInWordsScriptlet extends JRDefaultScriptlet {
 		if(amount == null)
 			amount = String.valueOf(Env.ZERO);
 		//	Get Amount in Word
-		DecimalFormat myFormatter = new DecimalFormat("###,###.###");
-		String output = String.valueOf(myFormatter.format(Double.valueOf(amount)));
-		
+		//DecimalFormat myFormatter = new DecimalFormat("###,###.###");
+		//String output = String.valueOf(myFormatter.format(Double.valueOf(amount)));
+		String output = String.valueOf(Double.valueOf(amount));
 		String amtInWords = amt.getAmtInWords(output);
 		//	
 		return amtInWords;
