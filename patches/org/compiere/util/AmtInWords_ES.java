@@ -249,7 +249,7 @@ public class AmtInWords_ES implements AmtInWords
 			newpos = amount.lastIndexOf ('.');  // Old
 		else
 			newpos = amount.lastIndexOf (',');
-
+		
 		long pesos = Long.parseLong(amount.substring (0, newpos));
 		sb.append (convert (pesos));
 		for (int i = 0; i < oldamt.length (); i++)
