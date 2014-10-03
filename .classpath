@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry combineaccessrules="false" kind="src" path="/FTA"/>
 	<classpathentry kind="src" path="base"/>
 	<classpathentry kind="src" path="patches"/>
 	<classpathentry kind="src" path="zkwebui/WEB-INF/src"/>
