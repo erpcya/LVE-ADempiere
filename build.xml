@@ -26,6 +26,9 @@
 		<fileset dir="${adempiere.trunk}/lib">
     	    <include name="*.jar"/>
     	</fileset>
+    	<fileset dir="${fta.trunk}/packages/FTA/lib">
+    	    <include name="*.jar"/>
+    	</fileset>
     </path>
   
   <!-- @author Carlos Parada Set Path --> 

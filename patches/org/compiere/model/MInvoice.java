@@ -865,7 +865,13 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			if (due != null)
 				total = total.add(due);
 		}
-		boolean valid = getGrandTotal().compareTo(total) == 0;
+		//	Dixon Martinez
+		//	Check Payment Term based in total line
+		MPaymentTerm pt = new MPaymentTerm(getCtx(), getC_PaymentTerm_ID(), get_TrxName());
+		boolean isLineAmtBased = pt.get_ValueAsBoolean("IsLineAmtBased");
+		BigDecimal amount = isLineAmtBased ? getTotalLines()  : getGrandTotal() ;
+		boolean valid = amount.compareTo(total) == 0;
+		//	End Dixon Martinez
 		setIsPayScheduleValid(valid);
 
 		//	Update Schedule Lines
