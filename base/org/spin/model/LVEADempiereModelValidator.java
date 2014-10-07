@@ -17,6 +17,7 @@
 package org.spin.model;
 
 import org.compiere.model.I_C_Cash;
+import org.compiere.model.MBPartner;
 import org.compiere.model.MCash;
 import org.compiere.model.MClient;
 import org.compiere.model.MInvoice;
@@ -25,6 +26,7 @@ import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.X_C_Invoice;
+import org.compiere.model.X_C_Order;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -80,9 +82,7 @@ public class LVEADempiereModelValidator implements ModelValidator {
 			if(po.get_TableName().equals(X_C_Invoice.Table_Name)){
 				return validCashLineReference(po.get_TrxName(), po.get_ID());
 			}
-		}else if (timing==TIMING_BEFORE_PREPARE)
-		{	//	Dixon Martinez Add Tax in Cash
-				  
+		}else if (timing==TIMING_BEFORE_PREPARE)	{	//	Dixon Martinez Add Tax in Cash
 			if(po.get_TableName().equals(MCash.Table_Name))
 			{
 				log.fine(MCash.Table_Name + " -- TIMING_BEFORE_PREPARE");
@@ -92,12 +92,62 @@ public class LVEADempiereModelValidator implements ModelValidator {
 					if (!MLVECashTax.calculateTaxTotal(cash)) // setTotals
 						return Msg.translate(Env.getLanguage(Env.getCtx()), "TaxCalculatingError");
 				}
+			} else if(po.get_TableName().equals(X_C_Order.Table_Name)) {
+				//	Dixon Martinez 2014-09-25
+				//	Add support for check credit
+				log.fine(X_C_Order.Table_Name + " -- TIMING_BEFORE_PREPARE");
+				X_C_Order order = (X_C_Order) po;
+				int countOverdueInvoices = overdueInvoices(order.getC_BPartner_ID()) ;
+				int countCheckReturn = checkReturn(order.getC_BPartner_ID());
+						
+				if(countOverdueInvoices > 0
+						|| countCheckReturn > 0) {
+					MBPartner bp = new MBPartner (order.getCtx(), order.getC_BPartner_ID(), order.get_TrxName());
+					bp.setSOCreditStatus(MBPartner.SOCREDITSTATUS_CreditStop);
+					bp.saveEx();
+				}
+				//	End Dixon Martinez
 			}
-		}
+		}	
 		//
 		return null;
 	}
-
+	/**
+	 * Verify Overdue Invoices
+	 * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a> 6/10/2014, 11:21:23
+	 * @param c_BPartner_ID
+	 * @return
+	 * @return int
+	 */
+	private int overdueInvoices(int c_BPartner_ID) {
+		String sql = "SELECT COUNT(*) "
+				+ " FROM LVE_RV_OpenItem "
+				+ " WHERE "
+				+ "		C_BPartner_ID = ?"
+				+ "		AND DaysDue > 0";
+		
+		int count = DB.getSQLValue(null, sql, c_BPartner_ID);
+		return count;
+	}
+	
+	/**
+	 * Verify Check Returns 
+	 * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a> 6/10/2014, 11:21:23
+	 * @param c_BPartner_ID
+	 * @return
+	 * @return int
+	 */
+	private int checkReturn(int c_BPartner_ID) {
+		String sql = "SELECT COUNT(*) "
+				+ "	FROM LVE_RV_OpenItem oi"
+				+ "	INNER JOIN C_DocType dt ON (oi.C_DocType_ID = oi.C_DocType_ID)"
+				+ "	WHERE"
+				+ "		C_BPartner_ID = ?"
+				+ "		AND dt.IsCheckReturn = 'Y'";
+		int count = DB.getSQLValue(null, sql, c_BPartner_ID);
+		return count;
+	}
+	
 	/**
 	 * Valid Reference in other record
 	 * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a> 01/07/2014, 10:45:30
