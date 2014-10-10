@@ -1,0 +1,5 @@
+-- Sep 19, 2013 5:15:15 AM VET
+-- LVE-Import
+ALTER TABLE I_BPartner ADD COLUMN OrgValue VARCHAR(60) DEFAULT NULL 
+;
+
