@@ -38,7 +38,7 @@ public class AmtInWordsScriptlet extends JRDefaultScriptlet {
 		//	Get Language
 		if(lang == null)
 			lang = Env.getAD_Language(Env.getCtx());
-		
+		//
 		Language language = Language.getLanguage(lang);
 		//	Instanced AmtInWords
 		if(lang != null)
@@ -47,10 +47,7 @@ public class AmtInWordsScriptlet extends JRDefaultScriptlet {
 		if(amount == null)
 			amount = String.valueOf(Env.ZERO);
 		//	Get Amount in Word
-		//DecimalFormat myFormatter = new DecimalFormat("###,###.###");
-		//String output = String.valueOf(myFormatter.format(Double.valueOf(amount)));
-		String output = String.valueOf(Double.valueOf(amount));
-		String amtInWords = amt.getAmtInWords(output);
+		String amtInWords = amt.getAmtInWords(amount);
 		//	
 		return amtInWords;
 	}
