@@ -17,18 +17,17 @@
 package org.compiere.process;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
 import org.compiere.model.I_C_Order;
-import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.Query;
-import org.compiere.model.X_C_DocType;
-import org.compiere.util.DB;
 import org.compiere.util.Env;
 
 /**
@@ -36,15 +35,20 @@ import org.compiere.util.Env;
  *	
  *  @author Jorg Janke
  *  @version $Id: OrderRePrice.java,v 1.2 2006/07/30 00:51:01 jjanke Exp $
+ *  @contributor <a href="mailto:yamelsenih@gmail.com">Yamel Senih</a> 10/10/2014, 20:36:57
  */
 public class OrderRePrice extends SvrProcess
 {
 	/**	Order to re-price		*/
-	private int 	p_C_Order_ID = 0;
+	private int 		p_C_Order_ID = 0;
 	/** Invoice to re-price		*/
-	private int 	p_C_Invoice_ID = 0;
+	private int 		p_C_Invoice_ID = 0;
 	/**	Document Type			*/
-	private int p_C_DocType_ID 	= 0;
+	private int 		p_C_DocType_ID 	= 0;
+	/**	Date Ordered			*/
+	private Timestamp 	p_DateOrdered = null;
+	/**	Document Date			*/
+	private Timestamp 	p_DateOrdered_To = null;
 	
 	String retValue = "";
 	
@@ -65,9 +69,13 @@ public class OrderRePrice extends SvrProcess
 				p_C_Invoice_ID = ((BigDecimal)para[i].getParameter()).intValue();
 			//	Dixon Martinez 06/05/2014 11:07:00
 			//	Adding support to recalculate price orders depending on the type of document
-			else if(name.equals(X_C_DocType.COLUMNNAME_C_DocType_ID))
+			else if(name.equals("C_DocType_ID"))
 				p_C_DocType_ID = para[i].getParameterAsInt();
 			//	End Dixon Martinez
+			else if(name.equals("DateOrdered")) {
+				p_DateOrdered = (Timestamp) para[i].getParameter();
+				p_DateOrdered_To = (Timestamp) para[i].getParameter_To();
+			}
 			else
 				log.log(Level.SEVERE, "prepare - Unknown Parameter: " + name);
 		}
@@ -87,10 +95,24 @@ public class OrderRePrice extends SvrProcess
 		//	Dixon Martinez 06/05/2014 11:07:00
 		//	Adding support to recalculate price orders depending on the type of document
 		if(p_C_DocType_ID != 0){
-			String sqlWhere = " C_DocType_ID = ?";
-		
-			List<MOrder> list = new Query(getCtx(), I_C_Order.Table_Name, sqlWhere, get_TrxName())
-							.setParameters(p_C_DocType_ID)
+			//
+			ArrayList<Object> params = new ArrayList<Object>();
+			//	Add Document Type
+			StringBuffer whereClause = new StringBuffer(" C_DocType_ID = ?");
+			params.add(p_C_DocType_ID);
+			//	Add Date Ordered
+			if(p_DateOrdered != null) {
+				whereClause.append(" AND DateOrdered >= ?");
+				params.add(p_DateOrdered);
+			}
+			//	Add Date Ordered
+			if(p_DateOrdered_To != null) {
+				whereClause.append(" AND DateOrdered <= ?");
+				params.add(p_DateOrdered_To);
+			}
+			//	Add Parameters
+			List<MOrder> list = new Query(getCtx(), I_C_Order.Table_Name, whereClause.toString(), get_TrxName())
+							.setParameters(params)
 							.list();
 			
 			for (MOrder mOrder : list) {		
