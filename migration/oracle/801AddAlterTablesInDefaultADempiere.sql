@@ -32,4 +32,3 @@ ALTER TABLE C_RfQ ADD CreateFromRequisition CHAR(1) DEFAULT 'N'
 -- Custom User File Path
 ALTER TABLE AD_User ADD File_Directory NVARCHAR2(255) DEFAULT NULL 
 ;
-
