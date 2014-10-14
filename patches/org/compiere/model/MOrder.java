@@ -52,7 +52,7 @@ import org.eevolution.model.MPPProductBOMLine;
  * 	Use DocAction and C_DocTypeTarget_ID instead.
  *
  *  @author Jorg Janke
- *
+ 
  *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
  * 			<li> FR [ 2520591 ] Support multiples calendar for Org 
  *			@see http://sourceforge.net/tracker2/?func=detail&atid=879335&aid=2520591&group_id=176962
@@ -1245,11 +1245,11 @@ public class MOrder extends X_C_Order implements DocAction
 		{
 			//	Dixon Martinez 2014-09-25
 			//	Add support for check credit
-			if(validAmount(getC_BPartner_ID()) > 0) {
+			/*if(validAmount(getC_BPartner_ID()) > 0) {
 				MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
 				bp.setSOCreditStatus(MBPartner.SOCREDITSTATUS_CreditStop);
 				bp.saveEx();
-			}
+			}*/
 			//	End Dixon Martinez
 			if (   MDocType.DOCSUBTYPESO_POSOrder.equals(dt.getDocSubTypeSO())
 					&& PAYMENTRULE_Cash.equals(getPaymentRule())
@@ -1309,7 +1309,7 @@ public class MOrder extends X_C_Order implements DocAction
 	}	//	prepareIt
 	
 	
-	
+	/*
 	private int validAmount(int c_BPartner_ID) {
 		String sql = "SELECT COUNT(*) "
 				+ " FROM RV_OpenItem "
@@ -1321,7 +1321,7 @@ public class MOrder extends X_C_Order implements DocAction
 		
 		return count;
 	}
-
+*/
 
 	/**
 	 * 	Explode non stocked BOM.
