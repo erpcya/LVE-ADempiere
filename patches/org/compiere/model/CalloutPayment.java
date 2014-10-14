@@ -369,6 +369,11 @@ public class CalloutPayment extends CalloutEngine
 		log.fine ("Pay=" + PayAmt + ", Discount=" + DiscountAmt + ", WriteOff="
 			+ WriteOffAmt + ", OverUnderAmt=" + OverUnderAmt);
 		// Get Currency Info
+		//	Dixon Martinez 2014-10-13 
+		//	Valid null
+		if(((Integer)mTab.getValue ("C_Currency_ID")) == null) 
+			return "";
+		
 		int C_Currency_ID = ((Integer)mTab.getValue ("C_Currency_ID"))
 			.intValue ();
 		MCurrency currency = MCurrency.get (ctx, C_Currency_ID);

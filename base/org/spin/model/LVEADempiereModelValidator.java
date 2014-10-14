@@ -92,7 +92,7 @@ public class LVEADempiereModelValidator implements ModelValidator {
 					if (!MLVECashTax.calculateTaxTotal(cash)) // setTotals
 						return Msg.translate(Env.getLanguage(Env.getCtx()), "TaxCalculatingError");
 				}
-			} else if(po.get_TableName().equals(X_C_Order.Table_Name)) {
+			} /*else if(po.get_TableName().equals(X_C_Order.Table_Name)) {
 				//	Dixon Martinez 2014-09-25
 				//	Add support for check credit
 				log.fine(X_C_Order.Table_Name + " -- TIMING_BEFORE_PREPARE");
@@ -107,7 +107,7 @@ public class LVEADempiereModelValidator implements ModelValidator {
 					bp.saveEx();
 				}
 				//	End Dixon Martinez
-			}
+			}*/
 		}	
 		//
 		return null;
