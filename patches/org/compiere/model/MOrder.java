@@ -1243,14 +1243,6 @@ public class MOrder extends X_C_Order implements DocAction
 		//	Credit Check
 		if (isSOTrx())
 		{
-			//	Dixon Martinez 2014-09-25
-			//	Add support for check credit
-			/*if(validAmount(getC_BPartner_ID()) > 0) {
-				MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
-				bp.setSOCreditStatus(MBPartner.SOCREDITSTATUS_CreditStop);
-				bp.saveEx();
-			}*/
-			//	End Dixon Martinez
 			if (   MDocType.DOCSUBTYPESO_POSOrder.equals(dt.getDocSubTypeSO())
 					&& PAYMENTRULE_Cash.equals(getPaymentRule())
 					&& !MSysConfig.getBooleanValue("CHECK_CREDIT_ON_CASH_POS_ORDER", true, getAD_Client_ID(), getAD_Org_ID())) {
@@ -1308,21 +1300,6 @@ public class MOrder extends X_C_Order implements DocAction
 		return DocAction.STATUS_InProgress;
 	}	//	prepareIt
 	
-	
-	/*
-	private int validAmount(int c_BPartner_ID) {
-		String sql = "SELECT COUNT(*) "
-				+ " FROM RV_OpenItem "
-				+ " WHERE C_BPartner_ID = ?"
-				+ " GROUP BY C_BPartner_ID, C_Invoice_ID, DaysDue, DocumentNo "
-				+ " HAVING DaysDue > 0";
-		
-		int count = DB.getSQLValue(get_TrxName(), sql, c_BPartner_ID);
-		
-		return count;
-	}
-*/
-
 	/**
 	 * 	Explode non stocked BOM.
 	 * 	@return true if bom exploded
