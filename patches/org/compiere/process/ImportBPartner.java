@@ -424,14 +424,14 @@ implements ImportProcess
 						setTypeOfBPartner(impBP,bp);
 						
 						/**Carlos Parada 2013-09-18 Set Employee Values*/
-						
+						/*
 						bp.set_ValueOfColumn("Birthday", impBP.get_Value("BP_Birthday"));
 						bp.set_ValueOfColumn("EmployeeStatus", impBP.get_Value("EmployeeStatus"));
 						bp.set_ValueOfColumn("IsCAPTA", impBP.get_Value("IsCAPTA"));
 						bp.set_ValueOfColumn("IsGrowthPlan", impBP.get_Value("IsGrowthPlan"));
 						bp.set_ValueOfColumn("IsJubilate", impBP.get_Value("IsJubilate"));
 						bp.set_ValueOfColumn("IsUnionized", impBP.get_Value("IsUnionized"));
-						bp.set_ValueOfColumn("Gender", impBP.get_Value("BP_Gender"));
+						bp.set_ValueOfColumn("Gender", impBP.get_Value("BP_Gender"));*/
 						/**End Carlos Parada*/
 						
 						//
