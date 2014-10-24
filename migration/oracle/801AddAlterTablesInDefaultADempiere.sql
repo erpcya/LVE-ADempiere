@@ -8,6 +8,17 @@ ALTER TABLE M_Inventory ADD IsInternal CHAR(1) DEFAULT 'N' CHECK (IsInternal IN 
 ALTER TABLE C_DocType ADD IsInternal CHAR(1) DEFAULT 'N' CHECK (IsInternal IN ('Y','N'))
 ;
 
+
+-- Aug 28, 2013 11:12:38 AM VET
+-- LVE Withholding
+ALTER TABLE C_Cash ADD C_DocTypeTarget_ID NUMBER(10) DEFAULT NULL 
+;
+
+-- Aug 28, 2013 11:14:49 AM VET
+-- LVE Withholding
+ALTER TABLE C_Cash ADD DocumentNo NVARCHAR2(30) DEFAULT NULL 
+;
+
 -- Jul 3, 2014 10:50:34 AM VET
 -- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
 ALTER TABLE C_DocType ADD IsService CHAR(1) DEFAULT 'N' CHECK (IsService IN ('Y','N'))
@@ -38,3 +49,63 @@ ALTER TABLE AD_User ADD File_Directory NVARCHAR2(255) DEFAULT NULL
 ALTER TABLE C_CashLine ADD TenderType CHAR(1) DEFAULT NULL 
 ;
 
+
+-- Aug 28, 2013 11:15:31 AM VET
+-- LVE Withholding
+ALTER TABLE C_CashLine ADD A_Base_Amount NUMBER DEFAULT NULL 
+;
+
+-- Aug 28, 2013 11:15:35 AM VET
+-- LVE Withholding
+ALTER TABLE C_CashLine ADD AccountNo NVARCHAR2(20) DEFAULT NULL 
+;
+
+-- Aug 28, 2013 11:15:39 AM VET
+-- LVE Withholding
+ALTER TABLE C_CashLine ADD AffectsBook CHAR(1) DEFAULT 'Y' CHECK (AffectsBook IN ('Y','N'))
+;
+
+-- Aug 28, 2013 11:15:41 AM VET
+-- LVE Withholding
+ALTER TABLE C_CashLine ADD C_Activity_ID NUMBER(10) DEFAULT NULL 
+;
+
+-- Aug 28, 2013 11:15:44 AM VET
+-- LVE Withholding
+ALTER TABLE C_CashLine ADD C_Bank_ID NUMBER(10) DEFAULT NULL 
+;
+
+-- Aug 28, 2013 11:15:46 AM VET
+-- LVE Withholding
+ALTER TABLE C_CashLine ADD C_BPartner_ID NUMBER(10) DEFAULT NULL 
+;
+
+-- Aug 28, 2013 11:15:48 AM VET
+-- LVE Withholding
+ALTER TABLE C_CashLine ADD CheckNo NVARCHAR2(20) DEFAULT NULL 
+;
+
+-- Aug 28, 2013 11:15:50 AM VET
+-- LVE Withholding
+ALTER TABLE C_CashLine ADD ControlNo NVARCHAR2(15) DEFAULT NULL 
+;
+
+-- Aug 28, 2013 11:15:52 AM VET
+-- LVE Withholding
+ALTER TABLE C_CashLine ADD C_Tax_ID NUMBER(10) DEFAULT NULL 
+;
+
+-- Aug 28, 2013 11:15:55 AM VET
+-- LVE Withholding
+ALTER TABLE C_CashLine ADD DateDoc DATE DEFAULT NULL 
+;
+
+-- Aug 28, 2013 11:15:57 AM VET
+-- LVE Withholding
+ALTER TABLE C_CashLine ADD IsOverUnderPayment CHAR(1) DEFAULT NULL  CHECK (IsOverUnderPayment IN ('Y','N'))
+;
+
+-- Aug 28, 2013 11:15:59 AM VET
+-- LVE Withholding
+ALTER TABLE C_CashLine ADD ReferenceNo NVARCHAR2(40) DEFAULT NULL 
+;
