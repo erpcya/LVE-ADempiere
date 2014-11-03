@@ -17,16 +17,18 @@
 package org.spin.model;
 
 import org.compiere.model.I_C_Cash;
-import org.compiere.model.MBPartner;
+import org.compiere.model.MBPBankAccount;
 import org.compiere.model.MCash;
+import org.compiere.model.MCashLine;
 import org.compiere.model.MClient;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MPaySelectionCheck;
+import org.compiere.model.MPayment;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.X_C_Invoice;
-import org.compiere.model.X_C_Order;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -63,6 +65,7 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		//	Add Timing change in C_Order and C_Invoice
 		engine.addDocValidate(MInvoice.Table_Name, this);
 		engine.addDocValidate(I_C_Cash.Table_Name, this);
+		engine.addModelChange(MCashLine.Table_Name, this);
 	}
 
 	@Override
@@ -122,6 +125,103 @@ public class LVEADempiereModelValidator implements ModelValidator {
 
 	@Override
 	public String modelChange(PO po, int type) throws Exception {
+		if(type == TYPE_BEFORE_NEW
+				|| type == TYPE_BEFORE_CHANGE) {
+			/*if(po.get_TableName().equals(MCashLine.Table_Name)) {
+				MCashLine m_CashLine = (MCashLine) po;
+				if(m_CashLine.getCashType().equals(MCashLine.CASHTYPE_Invoice)) {
+					Timestamp ts = Env.getContextAsDate(Env.getCtx(), "DateAcct");     //  from C_Cash
+					if (ts == null)
+						ts = new Timestamp(System.currentTimeMillis());
+					
+					String sql = " SELECT C_BPartner_ID, C_Currency_ID, "
+							+ " invoiceOpen(i.C_Invoice_ID, COALESCE(ips.C_InvoicePaySchedule_ID,0)), IsSOTrx,"
+							+ " invoiceDiscount(i.C_Invoice_ID,?,COALESCE(ips.C_InvoicePaySchedule_ID,0))"
+							+ " FROM C_Invoice i"
+							+ " LEFT JOIN C_InvoicePaySchedule ips ON (i.C_Invoice_ID = ips.C_Invoice_ID)"
+							+ " WHERE i.C_Invoice_ID = ?";
+					
+					int p_C_Invoice_ID = m_CashLine.getC_Invoice_ID();
+					
+					PreparedStatement pstmt = null;
+					ResultSet rs = null;
+					
+					try {
+						pstmt = DB.prepareStatement(sql,m_CashLine.get_TrxName());
+						pstmt.setTimestamp(1, ts);
+						pstmt.setInt(2, p_C_Invoice_ID);
+						
+						rs = pstmt.executeQuery();
+						
+						if(rs.next()) {
+							m_CashLine.setC_Currency_ID(new Integer(rs.getInt(2)));
+							BigDecimal PayAmt = rs.getBigDecimal(3);
+							BigDecimal DiscountAmt = rs.getBigDecimal(5);
+							boolean isSOTrx = "Y".equals(rs.getString(4));
+							if (!isSOTrx) {
+								PayAmt = PayAmt.negate();
+								DiscountAmt = DiscountAmt.negate();
+							}
+							//
+							m_CashLine.setAmount(PayAmt.subtract(DiscountAmt));
+							m_CashLine.setDiscountAmt(DiscountAmt);
+							m_CashLine.setWriteOffAmt(Env.ZERO);
+						}
+					} catch(SQLException e) {
+						log.log(Level.SEVERE, "invoice", e);
+						return e.getLocalizedMessage();
+					} finally {
+						DB.close(rs,pstmt);
+						rs = null;
+						pstmt = null;
+					}*/
+					//  Check, if InvTotalAmt exists
+					/*String total = Env.getContext(Env.getCtx(), "InvTotalAmt");
+					if (total == null || total.length() == 0)
+						return "";
+					BigDecimal InvTotalAmt = new BigDecimal(total);
+
+					BigDecimal PayAmt = m_CashLine.getAmount();
+					BigDecimal DiscountAmt = m_CashLine.getDiscountAmt();
+					BigDecimal WriteOffAmt = m_CashLine.getWriteOffAmt();
+					
+					BigDecimal newAmount = (BigDecimal) (m_CashLine.get_Value("Amount") == null ? Env.ZERO : m_CashLine.get_Value("Amount"));
+					BigDecimal oldAmount = (BigDecimal) (m_CashLine.get_ValueOld("Amount") == null ? Env.ZERO : m_CashLine.get_ValueOld("Amount"));
+					
+					if( newAmount.compareTo(oldAmount) == 0)  {
+						WriteOffAmt = InvTotalAmt.subtract(PayAmt).subtract(DiscountAmt);
+						m_CashLine.setWriteOffAmt( WriteOffAmt);
+					} else {
+						PayAmt = InvTotalAmt.subtract(DiscountAmt).subtract(WriteOffAmt);
+						m_CashLine.setAmount(PayAmt);
+					}*/
+			/*	}
+				return "";
+			}*/
+		}
+		//Carlos Parada Set BP_BankAccount to PaySelection if have Payment And Set Description From PaySelection
+		if ((type == TYPE_AFTER_CHANGE || type == TYPE_AFTER_NEW)&& po.get_TableName().equals(MPaySelectionCheck.Table_Name)){
+			MPaySelectionCheck psch = (MPaySelectionCheck) po;
+			if (psch.getC_Payment_ID()!=0){
+				//Set Bank Account
+				if (psch.getC_BP_BankAccount_ID()==0){
+					MBPBankAccount[] bpas = MBPBankAccount.getOfBPartner (Env.getCtx(), psch.getC_BPartner_ID());
+					for (int i =0;i<bpas.length;i++)
+						if (psch.getPaymentRule().equals(bpas[i].get_ValueAsString("PaymentRule")) &&
+								bpas[i].get_ValueAsBoolean("IsDefault")){
+							psch.setC_BP_BankAccount_ID(bpas[i].getC_BP_BankAccount_ID());
+							psch.save();
+						}
+				}
+				//Set Description From PaySelection
+				if (psch.getC_Payment().getDescription()==null && psch.getC_PaySelection().getDescription()!=null) {
+					MPayment pay = (MPayment)psch.getC_Payment();
+					pay.setDescription(psch.getC_PaySelection().getDescription());
+					pay.save();
+				}
+			}
+		}
+
 		return null;
 	}
 }

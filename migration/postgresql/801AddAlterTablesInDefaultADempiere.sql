@@ -108,3 +108,25 @@ ALTER TABLE C_Cash ADD COLUMN C_DocTypeTarget_ID NUMERIC(10) DEFAULT NULL
 -- LVE Withholding
 ALTER TABLE C_Cash ADD COLUMN DocumentNo VARCHAR(30) DEFAULT NULL 
 ;
+
+-- Aug 28, 2013 11:16:58 AM VET
+-- LVE Withholding
+ALTER TABLE C_Invoice ADD COLUMN ControlNo VARCHAR(60) DEFAULT NULL 
+;
+
+-- Nov 3, 2014 3:56:58 PM VET
+-- LVE ADempiere
+ALTER TABLE C_DocType ADD COLUMN AffectsBook CHAR(1) DEFAULT 'N' CHECK (AffectsBook IN ('Y','N'))
+;
+
+-- Dec 13, 2013 6:51:48 AM VET
+-- LVE Withholding
+ALTER TABLE C_Invoice ADD COLUMN AffectsBook CHAR(1) DEFAULT 'N' CHECK (AffectsBook IN ('Y','N'))
+;
+
+
+-- Dec 13, 2013 6:52:36 AM VET
+-- LVE Withholding
+ALTER TABLE C_Invoice ADD COLUMN DocAffected_ID NUMERIC(10) DEFAULT NULL 
+;
+
