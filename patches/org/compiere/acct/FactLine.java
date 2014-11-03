@@ -423,6 +423,13 @@ public final class FactLine extends X_Fact_Acct
 		if (getUser2_ID() == 0)
 			setUser2_ID (m_doc.getUser2_ID());
 		//	References in setAccount
+		//	Dixon Martinez 
+		//	Add support for farmer credit set in fact line
+			if(m_docLine != null
+					&& m_docLine.getFTA_FarmerCredit_ID() > 0)
+				set_Value("FTA_FarmerCredit_ID", m_docLine.getFTA_FarmerCredit_ID());
+				
+		//	End Dixon Martinez
 	}   //  setDocumentInfo
 
 	/**

@@ -109,3 +109,23 @@ ALTER TABLE C_CashLine ADD IsOverUnderPayment CHAR(1) DEFAULT NULL  CHECK (IsOve
 -- LVE Withholding
 ALTER TABLE C_CashLine ADD ReferenceNo NVARCHAR2(40) DEFAULT NULL 
 ;
+
+-- Aug 28, 2013 11:16:58 AM VET
+-- LVE Withholding
+ALTER TABLE C_Invoice ADD ControlNo NVARCHAR2(60) DEFAULT NULL 
+;
+
+-- Nov 3, 2014 3:56:58 PM VET
+-- LVE ADempiere
+ALTER TABLE C_DocType ADD AffectsBook CHAR(1) DEFAULT 'N' CHECK (AffectsBook IN ('Y','N'))
+;
+
+-- Dec 13, 2013 6:51:48 AM VET
+-- LVE Withholding
+ALTER TABLE C_Invoice ADD AffectsBook CHAR(1) DEFAULT 'N' CHECK (AffectsBook IN ('Y','N'))
+;
+
+-- Dec 13, 2013 6:52:36 AM VET
+-- LVE Withholding
+ALTER TABLE C_Invoice ADD DocAffected_ID NUMBER(10) DEFAULT NULL 
+;
