@@ -1,4 +1,4 @@
 LVE-ADempiere
 =============
 
-Adempiere Location Venezuela
+Adempiere Localization Venezuela
