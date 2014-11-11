@@ -129,3 +129,19 @@ ALTER TABLE C_Invoice ADD AffectsBook CHAR(1) DEFAULT 'N' CHECK (AffectsBook IN 
 -- LVE Withholding
 ALTER TABLE C_Invoice ADD DocAffected_ID NUMBER(10) DEFAULT NULL 
 ;
+
+-- Aug 28, 2013 11:16:37 AM VET
+-- LVE Withholding
+ALTER TABLE C_DocType ADD DocTypeDeclare NVARCHAR2(2) DEFAULT NULL 
+;
+
+-- Dec 20, 2013 8:09:55 AM VET
+-- LVE Withholding
+ALTER TABLE C_DocType ADD IsManual CHAR(1) DEFAULT 'N' CHECK (IsManual IN ('Y','N'))
+;
+
+-- Dec 20, 2013 8:11:00 AM VET
+-- LVE Withholding
+ALTER TABLE C_Invoice ADD IsManual CHAR(1) DEFAULT 'N' CHECK (IsManual IN ('Y','N'))
+;
+
