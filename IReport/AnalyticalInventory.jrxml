@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="AnalyticalInventory" pageWidth="612" pageHeight="792" whenNoDataType="BlankPage" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e1c96eec-08a1-4344-8833-51631677ce88">
-	<property name="ireport.zoom" value="0.75"/>
-	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
-	<parameter name="AD_Client_ID" class="java.math.BigDecimal">
-		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
-	</parameter>
+	<property name="ireport.zoom" value="3.446229739767921"/>
+	<property name="ireport.x" value="1274"/>
+	<property name="ireport.y" value="311"/>
 	<parameter name="AD_Org_ID" class="java.math.BigDecimal">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
@@ -33,7 +30,7 @@
 	<queryString>
 		<![CDATA[SELECT
     wh.M_WareHouse_ID,
-   COALESCE(wh.Value,'') AS WareHouseValue,
+    COALESCE(wh.Value,'') AS WareHouseValue,
     COALESCE(wh.Name, '') AS WareHouseName,
     COALESCE(wh.Description,'') AS WareHouseDescription,
     ml.M_Locator_ID,
@@ -56,7 +53,7 @@
     TO_Char($P{MovementDate1}::timestamp,'DD/MM/YYYY') MovementDate1,
     TO_Char($P{MovementDate2}::timestamp,'DD/MM/YYYY') MovementDate2,
     --ref.Name AS ReferenceName,
-    ac.Name AS ClientName,
+    ac.Name AS Client,
     mpc.Name AS ProductCategoryName,
  (Select COALESCE(rft.Name,rf.Name) rName
 	 From AD_Reference r
@@ -95,7 +92,6 @@ WHERE (ao.AD_Org_ID = $P{AD_Org_ID} OR $P{AD_Org_ID} IS NULL)
     AND (mp.M_Product_Category_ID = $P{M_Product_Category_ID} OR $P{M_Product_Category_ID} IS NULL)
     AND (mt.MovementDate >= $P{MovementDate1} OR COALESCE($P{MovementDate1}, Current_Timestamp) = Current_Timestamp)
     AND (mt.MovementDate <= $P{MovementDate2} OR COALESCE($P{MovementDate2}, Current_Timestamp) = Current_Timestamp)
-    AND mt.AD_Client_ID = $P{AD_Client_ID}
 
 ORDER BY wh.M_WareHouse_ID, ml.M_Locator_ID, mp.M_Product_ID, mt.MovementDate]]>
 	</queryString>
@@ -122,7 +118,7 @@ ORDER BY wh.M_WareHouse_ID, ml.M_Locator_ID, mp.M_Product_ID, mt.MovementDate]]>
 	<field name="orgkey" class="java.lang.String"/>
 	<field name="movementdate1" class="java.lang.String"/>
 	<field name="movementdate2" class="java.lang.String"/>
-	<field name="clientname" class="java.lang.String"/>
+	<field name="client" class="java.lang.String"/>
 	<field name="productcategoryname" class="java.lang.String"/>
 	<field name="referencename" class="java.lang.String"/>
 	<variable name="MovementQtyAccumulated" class="java.math.BigDecimal" resetType="Group" resetGroup="M_Product_ID" calculation="Sum">
@@ -131,17 +127,17 @@ ORDER BY wh.M_WareHouse_ID, ml.M_Locator_ID, mp.M_Product_ID, mt.MovementDate]]>
 	<group name="M_WareHouse_ID">
 		<groupExpression><![CDATA[$F{m_warehouse_id}]]></groupExpression>
 		<groupHeader>
-			<band height="13">
+			<band height="12">
 				<staticText>
-					<reportElement x="3" y="0" width="68" height="12" uuid="b927e32a-9ed7-4405-acbf-ea6ba3b05192"/>
-					<textElement>
+					<reportElement x="0" y="0" width="66" height="12" uuid="b927e32a-9ed7-4405-acbf-ea6ba3b05192"/>
+					<textElement verticalAlignment="Middle">
 						<font size="9" isBold="true" isItalic="true" isUnderline="false"/>
 					</textElement>
 					<text><![CDATA[Almacen:]]></text>
 				</staticText>
 				<textField>
-					<reportElement x="71" y="0" width="266" height="12" uuid="3f991196-8266-490c-a6b3-1c0d4b15a1ea"/>
-					<textElement>
+					<reportElement x="66" y="0" width="506" height="12" uuid="3f991196-8266-490c-a6b3-1c0d4b15a1ea"/>
+					<textElement verticalAlignment="Middle">
 						<font size="9" isBold="false" isItalic="true" isUnderline="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{warehousevalue} + " " + $F{warehousename}]]></textFieldExpression>
@@ -152,27 +148,21 @@ ORDER BY wh.M_WareHouse_ID, ml.M_Locator_ID, mp.M_Product_ID, mt.MovementDate]]>
 	<group name="M_Locator_ID">
 		<groupExpression><![CDATA[$F{m_locator_id}]]></groupExpression>
 		<groupHeader>
-			<band height="14">
+			<band height="13">
 				<textField>
-					<reportElement x="71" y="0" width="176" height="12" uuid="3f991196-8266-490c-a6b3-1c0d4b15a1ea"/>
-					<textElement>
+					<reportElement x="66" y="1" width="506" height="12" uuid="3f991196-8266-490c-a6b3-1c0d4b15a1ea"/>
+					<textElement verticalAlignment="Middle">
 						<font size="9" isBold="false" isItalic="true" isUnderline="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{locatorvalue}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement x="3" y="0" width="68" height="12" uuid="b927e32a-9ed7-4405-acbf-ea6ba3b05192"/>
-					<textElement>
+					<reportElement x="0" y="1" width="66" height="12" uuid="b927e32a-9ed7-4405-acbf-ea6ba3b05192"/>
+					<textElement verticalAlignment="Middle">
 						<font size="9" isBold="true" isItalic="true" isUnderline="false"/>
 					</textElement>
 					<text><![CDATA[Localizador:]]></text>
 				</staticText>
-				<line>
-					<reportElement x="0" y="13" width="555" height="1" uuid="1975827c-bd1a-46ab-8649-249f39f9d38d"/>
-					<graphicElement>
-						<pen lineWidth="0.5"/>
-					</graphicElement>
-				</line>
 			</band>
 		</groupHeader>
 	</group>
@@ -181,72 +171,39 @@ ORDER BY wh.M_WareHouse_ID, ml.M_Locator_ID, mp.M_Product_ID, mt.MovementDate]]>
 		<groupHeader>
 			<band height="13">
 				<textField>
-					<reportElement x="2" y="0" width="69" height="12" uuid="c094b34b-4ecd-4c86-a3ee-bd4e21118ce4"/>
-					<textElement>
+					<reportElement x="0" y="0" width="486" height="12" uuid="42d2c686-b449-450c-8e65-9bada46cc43f"/>
+					<box>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
 						<font size="9" isBold="true" isItalic="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{productvalue}]]></textFieldExpression>
-				</textField>
-				<textField>
-					<reportElement x="71" y="0" width="266" height="12" uuid="42d2c686-b449-450c-8e65-9bada46cc43f"/>
-					<textElement>
-						<font size="9" isBold="true" isItalic="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{productname}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{productvalue} + " - " + $F{productname}]]></textFieldExpression>
 				</textField>
 				<textField pattern="#,##0">
-					<reportElement x="464" y="0" width="86" height="12" uuid="3862bfe8-c26a-429e-8969-77e2cbc84751"/>
-					<textElement textAlignment="Right">
+					<reportElement x="486" y="0" width="86" height="12" uuid="3862bfe8-c26a-429e-8969-77e2cbc84751"/>
+					<box>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="9" isBold="true" isItalic="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{qtyinitial}]]></textFieldExpression>
 				</textField>
-				<line>
-					<reportElement x="0" y="12" width="555" height="1" uuid="7d7aee8d-57b9-4072-a21c-a3e57dd40506"/>
-					<graphicElement>
-						<pen lineWidth="0.0" lineStyle="Dotted"/>
-					</graphicElement>
-				</line>
-				<staticText>
-					<reportElement x="384" y="0" width="80" height="12" forecolor="#FFFFFF" uuid="008be9df-de5a-4403-9bf3-caa71d1171e8"/>
-					<textElement textAlignment="Right">
-						<font size="9" isBold="true" isItalic="true"/>
-					</textElement>
-					<text><![CDATA[Saldo Inicial:]]></text>
-				</staticText>
 			</band>
 		</groupHeader>
 		<groupFooter>
 			<band height="16">
 				<textField>
-					<reportElement x="2" y="1" width="69" height="12" uuid="1718c032-6bca-4dc5-ba63-e3d84aa65886"/>
-					<textElement>
-						<font size="9" isBold="true" isItalic="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{productvalue}]]></textFieldExpression>
-				</textField>
-				<textField>
-					<reportElement x="71" y="1" width="207" height="12" uuid="47f2f288-121d-431e-9cac-f05c9bcba867"/>
-					<textElement>
+					<reportElement x="0" y="1" width="278" height="12" uuid="47f2f288-121d-431e-9cac-f05c9bcba867"/>
+					<textElement verticalAlignment="Middle">
 						<font size="9" isBold="true" isItalic="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{productname}]]></textFieldExpression>
 				</textField>
-				<line>
-					<reportElement x="0" y="0" width="555" height="1" uuid="84c943d0-0907-4f6c-a6b0-8098021f0c12"/>
-					<graphicElement>
-						<pen lineWidth="0.0"/>
-					</graphicElement>
-				</line>
-				<line>
-					<reportElement x="0" y="13" width="555" height="1" uuid="46a8a2d2-f2ab-4338-84a7-867a7820f824"/>
-					<graphicElement>
-						<pen lineWidth="0.5"/>
-					</graphicElement>
-				</line>
 				<textField pattern="#,##0">
-					<reportElement x="464" y="1" width="86" height="12" uuid="76554311-2503-41ab-b157-f9b18d11c9a3"/>
-					<textElement textAlignment="Right">
+					<reportElement x="486" y="0" width="86" height="12" uuid="76554311-2503-41ab-b157-f9b18d11c9a3"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="9" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{qtyinitial}.add( $V{MovementQtyAccumulated} )]]></textFieldExpression>
@@ -255,118 +212,20 @@ ORDER BY wh.M_WareHouse_ID, ml.M_Locator_ID, mp.M_Product_ID, mt.MovementDate]]>
 		</groupFooter>
 	</group>
 	<pageHeader>
-		<band height="101">
-			<line>
-				<reportElement x="0" y="98" width="555" height="1" uuid="8c592cd2-f5b3-432e-8dc7-42dbb2ccc97c"/>
-				<graphicElement>
-					<pen lineWidth="0.5"/>
-				</graphicElement>
-			</line>
-			<staticText>
-				<reportElement x="5" y="84" width="66" height="12" uuid="d97743ed-4a9d-47f6-9611-69bf8d1a4881"/>
-				<textElement>
-					<font size="9" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Fecha]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="71" y="84" width="225" height="12" uuid="44625584-1702-4fdd-9bae-94fd76bc8853"/>
-				<textElement>
-					<font size="9" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Documento]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="296" y="84" width="84" height="12" uuid="9ea48a4f-80cb-4d46-8552-0886354bc4ff"/>
-				<textElement textAlignment="Right">
-					<font size="9" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Entradas]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="380" y="84" width="84" height="12" uuid="fdc67b60-a083-41be-96d4-16c278fd90b0"/>
-				<textElement textAlignment="Right">
-					<font size="9" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Salidas]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="465" y="84" width="85" height="12" uuid="9e901e6d-e92e-4e0e-967d-a54da9835841"/>
-				<textElement textAlignment="Right">
-					<font size="9" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Saldo]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="462" y="44" width="38" height="15" uuid="996a1490-25bc-49ce-9fad-44fedff05623"/>
-				<textElement textAlignment="Right">
-					<font size="9" isBold="true" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[Página:]]></text>
-			</staticText>
-			<textField pattern="h.mm.ss a">
-				<reportElement x="507" y="25" width="57" height="15" uuid="f638265a-384d-44a6-8d24-a87053d3f3be"/>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="465" y="5" width="35" height="15" uuid="77a92772-a691-4766-8136-e6ee082bd568"/>
-				<textElement textAlignment="Right">
-					<font size="9" isBold="true" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[Fecha:]]></text>
-			</staticText>
+		<band height="113">
 			<textField>
-				<reportElement x="507" y="44" width="20" height="15" uuid="ebafef37-eb7a-4876-99c1-2800cfbb43b3"/>
-				<textElement textAlignment="Right">
-					<font size="9" isItalic="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
-			<textField pattern="dd/MM/yyyy">
-				<reportElement x="507" y="5" width="57" height="15" uuid="c08168c8-36ab-48da-9ef4-359f9c9f4746"/>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="530" y="44" width="12" height="15" uuid="11484220-65ab-47b6-896c-317325d94153"/>
-				<textElement textAlignment="Center">
-					<font size="9" isBold="true" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[de]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="470" y="25" width="30" height="15" uuid="c706220a-91a5-4680-878c-bb53c9e94ab0"/>
-				<textElement textAlignment="Right">
-					<font size="9" isBold="true" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[Hora:]]></text>
-			</staticText>
-			<textField evaluationTime="Report">
-				<reportElement x="544" y="44" width="20" height="15" uuid="7930678d-8129-4aac-b503-797341cdab39"/>
-				<textElement textAlignment="Right">
-					<font size="9" isItalic="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="227" y="1" width="157" height="43" uuid="2c5cb4b3-244b-4f25-a4bc-1b931e89f9d9"/>
+				<reportElement x="176" y="1" width="220" height="83" uuid="2c5cb4b3-244b-4f25-a4bc-1b931e89f9d9"/>
 				<textElement textAlignment="Center" markup="none">
 					<font size="14" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Variación Diaria de Inventario"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Variación Diaria de Inventario\n\"" + $F{client} + "\""]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="0" y="1" width="266" height="83" uuid="63011de2-e6e1-4337-af62-b0e250b0e679"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="1" width="160" height="12" uuid="63011de2-e6e1-4337-af62-b0e250b0e679"/>
 				<textElement>
 					<font size="7"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{AD_Client_ID} == null ? "" :"Compañía = " + $F{clientname}  + "\n") +
-($P{AD_Org_ID} == null ? "" :"Organización = " + $F{orgkey} + " - " + $F{orgname}  + "\n") +
+				<textFieldExpression><![CDATA[($P{AD_Org_ID} == null ? "" :"Organización = " + $F{orgkey} + " - " + $F{orgname}  + "\n") +
 ($P{M_Warehouse_ID} == null ? "" :"Almacen = " + $F{warehousevalue}  + " - " + $F{warehousename} + "\n") +
 ($P{M_Locator_ID} == null ? "" :"Localizador = " + $F{locatorvalue} + "\n") +
 ($P{M_Product_Category_ID} == null ? "" :"Categoría de Producto = " + $F{productcategoryname} + "\n") +
@@ -374,56 +233,148 @@ ORDER BY wh.M_WareHouse_ID, ml.M_Locator_ID, mp.M_Product_ID, mt.MovementDate]]>
 ($P{MovementDate1} ==null ? "" :"Fecha de Movimiento >=" + $F{movementdate1} + "\n") +
 ($P{MovementDate2} ==null ? "" :"Fecha de Movimiento <=" + $F{movementdate2} + "\n")]]></textFieldExpression>
 			</textField>
+			<staticText>
+				<reportElement x="465" y="16" width="41" height="12" uuid="38ee2fe7-d733-4c1f-adaf-c02440b656ce"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Hora:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="510" y="1" width="61" height="12" uuid="2fb655c9-cf27-4d44-88d5-b6dbe8caa40e"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="465" y="1" width="41" height="12" uuid="8281fd58-bba9-4af3-915c-adc8556ad40b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Fecha:]]></text>
+			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement x="510" y="31" width="61" height="12" uuid="ba8559c3-0c8b-4208-85ac-c30ba495d920"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="h.mm.ss a">
+				<reportElement x="510" y="16" width="61" height="12" uuid="e801fdd3-e908-4152-9c95-ca1a41315c2d"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="465" y="31" width="41" height="12" uuid="7f78f6dd-b7cb-4c93-aa51-7dacce5974c7"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Paginas:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="101" width="66" height="12" uuid="d97743ed-4a9d-47f6-9611-69bf8d1a4881"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="66" y="101" width="252" height="12" uuid="44625584-1702-4fdd-9bae-94fd76bc8853"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Documento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="318" y="101" width="84" height="12" uuid="9ea48a4f-80cb-4d46-8552-0886354bc4ff"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Entradas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="402" y="101" width="84" height="12" uuid="fdc67b60-a083-41be-96d4-16c278fd90b0"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Salidas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="486" y="101" width="86" height="12" uuid="9e901e6d-e92e-4e0e-967d-a54da9835841"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Saldo]]></text>
+			</staticText>
 		</band>
 	</pageHeader>
 	<detail>
 		<band height="13">
 			<textField pattern="dd/MM/yyyy">
-				<reportElement x="2" y="0" width="69" height="12" uuid="029ba0c6-61d0-4168-a8fd-f47f84e8a6c0"/>
+				<reportElement x="0" y="0" width="66" height="12" uuid="029ba0c6-61d0-4168-a8fd-f47f84e8a6c0"/>
 				<box>
 					<bottomPen lineWidth="0.25"/>
 				</box>
-				<textElement>
+				<textElement verticalAlignment="Middle">
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{movementdate}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0" isBlankWhenNull="true">
-				<reportElement x="296" y="0" width="84" height="12" uuid="2f4dec7c-036a-4acf-905e-d2b0b4ebc011"/>
+				<reportElement x="318" y="0" width="84" height="12" uuid="2f4dec7c-036a-4acf-905e-d2b0b4ebc011"/>
 				<box>
 					<bottomPen lineWidth="0.25"/>
 				</box>
-				<textElement textAlignment="Right">
+				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{qtyincoming}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0" isBlankWhenNull="true">
-				<reportElement x="380" y="0" width="84" height="12" uuid="716aa5d9-f4f1-4407-82da-edd6c2981a28"/>
+				<reportElement x="402" y="0" width="84" height="12" uuid="716aa5d9-f4f1-4407-82da-edd6c2981a28"/>
 				<box>
 					<bottomPen lineWidth="0.25"/>
 				</box>
-				<textElement textAlignment="Right">
+				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{qtyoutgoing}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="71" y="0" width="225" height="12" uuid="82088f21-1348-4442-bb28-024d139616b9"/>
+				<reportElement x="66" y="0" width="252" height="12" uuid="82088f21-1348-4442-bb28-024d139616b9"/>
 				<box>
 					<bottomPen lineWidth="0.25"/>
 				</box>
-				<textElement>
+				<textElement verticalAlignment="Middle">
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{referencename} + " (" +$F{documentno} + ")"]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0">
-				<reportElement x="464" y="0" width="86" height="12" uuid="76554311-2503-41ab-b157-f9b18d11c9a3"/>
+				<reportElement x="486" y="0" width="86" height="12" uuid="76554311-2503-41ab-b157-f9b18d11c9a3"/>
 				<box>
 					<bottomPen lineWidth="0.25"/>
 				</box>
-				<textElement textAlignment="Right">
+				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{qtyinitial}.add( $V{MovementQtyAccumulated} )]]></textFieldExpression>
