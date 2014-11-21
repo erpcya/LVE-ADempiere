@@ -865,13 +865,18 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			if (due != null)
 				total = total.add(due);
 		}
+		
+		/** 2014-11-20 Carlos Parada Revert Valid Payment Term With Base Amt*/
 		//	Dixon Martinez
 		//	Check Payment Term based in total line
-		MPaymentTerm pt = new MPaymentTerm(getCtx(), getC_PaymentTerm_ID(), get_TrxName());
+		/*MPaymentTerm pt = new MPaymentTerm(getCtx(), getC_PaymentTerm_ID(), get_TrxName());
 		boolean isLineAmtBased = pt.get_ValueAsBoolean("IsLineAmtBased");
 		BigDecimal amount = isLineAmtBased ? getTotalLines()  : getGrandTotal() ;
-		boolean valid = amount.compareTo(total) == 0;
+		boolean valid = amount.compareTo(total) == 0;*/
+		
 		//	End Dixon Martinez
+		boolean valid = getGrandTotal().compareTo(total) == 0;
+		/** End Carlos Parada */
 		setIsPayScheduleValid(valid);
 
 		//	Update Schedule Lines
