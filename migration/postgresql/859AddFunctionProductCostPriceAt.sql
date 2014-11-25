@@ -31,7 +31,12 @@ BEGIN
 	ORDER BY cd.Created DESC
 	LIMIT 1;
 --  DBMS_OUTPUT.PUT_LINE('== FTA_FarmerLiquidation_ID=' || p_FTA_FarmerLiquidation_ID || ', Amt=' || v_AvailableAmt);
-	RETURN	v_CurrentCostPrice;
+	--	Valid if is null Value
+	IF v_CurrentCostPrice IS NULL THEN
+		v_CurrentCostPrice := 0;
+	END IF;
+	--	Default Return
+	RETURN v_CurrentCostPrice;
 END;
 
 $BODY$

@@ -134,9 +134,14 @@ public class AnalyticalInventory extends SvrProcess {
 				") CumulatedAmt, " + 
 				//	Date Movement
 				DB.TO_DATE(p_MovementDate, true) + " MovementDate, " +
-				"'PB' MovementType, " +
-				"0 Multiply, " +
-				"'" + Msg.translate(getCtx(), (p_MovementDate_To != null
+				"'PB' MovementType, ");
+		//	Validate Multiplier
+		if(p_MovementDate_To != null)
+			sql.append("0 Multiply, ");
+		else
+			sql.append("1 Multiply, ");
+				//	
+				sql.append("'" + Msg.translate(getCtx(), (p_MovementDate_To != null
 													? "PreviousBalance"
 															: "Balance")) + "' DocumentNo, " +
 				"0 seqNo, " +
@@ -402,8 +407,8 @@ public class AnalyticalInventory extends SvrProcess {
 			log.fine("No Inserts = " + noInserts);
 			//	
 		} catch(Exception e){
-			log.severe(e.getLocalizedMessage() + " SQL=" + sql);
-			return e.getLocalizedMessage();
+			log.severe(e.getMessage() + " SQL=" + sql);
+			return e.getMessage();
 		} finally {
 			DB.close(rs, pstmt);
 		}
