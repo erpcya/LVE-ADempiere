@@ -2,7 +2,7 @@
  * @finalidad Launch Report view for Produts
  * @author <a href="mailto:yamelsenih@gmail.com">Yamel Senih</a> 2012-10-02
  */
-package org.spin.process;
+package org.spin.report;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -70,7 +70,7 @@ public class AnalyticalInventory extends SvrProcess {
 		}
 		//	Optional Organization
 		if (p_AD_Org_ID != 0){
-			m_optionalWhere.append(" AND t.AD_Org_ID = ? ");
+			m_optionalWhere.append(" AND w.AD_Org_ID = ? ");
 		}
 		//	Optional Warehouse
 		if (p_M_Warehouse_ID != 0){
@@ -124,16 +124,9 @@ public class AnalyticalInventory extends SvrProcess {
 				"	END" +
 				", 0)) QtyIn, ");
 		//	Add Current Cost Price
-		if(p_MovementDate_To != null)
-			sql.append("0 CurrentCostPrice, ");
-		else
-			sql.append("productCostPriceAt(p.M_Product_ID, ?) CurrentCostPrice, ");
-		//	
-		sql.append("SUM(" +
-				"	t.MovementQty * productCostPriceAt(t.M_Product_ID, t.MovementDate)" + 
-				") CumulatedAmt, " + 
-				//	Date Movement
-				DB.TO_DATE(p_MovementDate, true) + " MovementDate, " +
+		sql.append("productCostPriceAt(p.M_Product_ID, ?) CurrentCostPrice, ");
+		//	Movement Date
+		sql.append(DB.TO_DATE(p_MovementDate, true) + " MovementDate, " +
 				"'PB' MovementType, ");
 		//	Validate Multiplier
 		if(p_MovementDate_To != null)
@@ -146,7 +139,7 @@ public class AnalyticalInventory extends SvrProcess {
 															: "Balance")) + "' DocumentNo, " +
 				"0 seqNo, " +
 				"t.AD_Client_ID, " +
-				"t.AD_Org_ID, " +
+				"w.AD_Org_ID, " +
 				getAD_PInstance_ID() + " AD_PInstance_ID " +
 				//	From
 				"FROM M_Transaction t " +
@@ -166,7 +159,7 @@ public class AnalyticalInventory extends SvrProcess {
 		//	Group By
 		if(p_MovementDate_To != null) {
 			sql.append("GROUP BY " +
-					"t.AD_Org_ID, " +
+					"w.AD_Org_ID, " +
 					"w.M_Warehouse_ID, " +
 					"w.Name, " +
 					"l.M_Locator_ID, " +
@@ -189,7 +182,7 @@ public class AnalyticalInventory extends SvrProcess {
 					"p.Value, " +
 					"p.Name, " +
 					"p.C_UOM_ID, " +
-					"t.AD_Org_ID, " +
+					"w.AD_Org_ID, " +
 					"w.M_Warehouse_ID, " +
 					"w.Name, " +
 					"l.M_Locator_ID, " +
@@ -222,7 +215,6 @@ public class AnalyticalInventory extends SvrProcess {
 					"END, 0) " +
 					"QtyIn, " +
 					"productCostPriceAt(t.M_Product_ID, t.MovementDate) CurrentCostPrice, " + 
-					"0 CumulatedAmt, " + 
 					"t.MovementDate, " +
 					"t.MovementType, " +
 					"1 Multiply, " +
@@ -236,7 +228,7 @@ public class AnalyticalInventory extends SvrProcess {
 					"DocumentNo, " +
 					"1 SeqNo, " +
 					"t.AD_Client_ID, " +
-					"t.AD_Org_ID, " +
+					"w.AD_Org_ID, " +
 					getAD_PInstance_ID() + " AD_PInstance_ID " +
 					//	From
 					"FROM M_Transaction t " +
@@ -276,8 +268,7 @@ public class AnalyticalInventory extends SvrProcess {
 			pstmt = DB.prepareStatement (sql.toString(), null);
 			//	Query 1 
 			//	Movement Date for Cost
-			if(p_MovementDate_To == null)
-				pstmt.setTimestamp(i++, p_MovementDate);
+			pstmt.setTimestamp(i++, p_MovementDate);
 			//	Movement Date Where
 			pstmt.setTimestamp(i++, p_MovementDate);
 			//	Optional Organization
@@ -349,16 +340,12 @@ public class AnalyticalInventory extends SvrProcess {
 				v_QtyIn = rs.getBigDecimal("QtyIn");
 				v_Multiply = rs.getBigDecimal("Multiply");
 				v_CurrentCostPrice = rs.getBigDecimal("CurrentCostPrice");
-				v_CumulatedAmt = rs.getBigDecimal("CumulatedAmt");
 				//	Calculate Balance
 				v_Balance = v_Balance.multiply(v_Multiply);
 				v_LinealBalance = v_QtyIn.subtract(v_QtyOut);
 				v_Balance = v_Balance.add(v_LinealBalance);
 				//	Calculate Cumulated Cost
-				if(v_CumulatedAmt == null
-						|| v_CumulatedAmt.equals(Env.ZERO))
-					v_CumulatedAmt = v_CurrentCostPrice.multiply(v_LinealBalance);
-				
+				v_CumulatedAmt = v_CurrentCostPrice.multiply(v_LinealBalance);
 				//	Sql Insert
 				String sqlInsert = new String("INSERT INTO T_AnalyticalInventory(" +
 						"M_Warehouse_ID, " +
