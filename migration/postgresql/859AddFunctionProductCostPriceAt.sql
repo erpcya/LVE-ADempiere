@@ -20,7 +20,7 @@ $BODY$
  *		
  ************************************************************************/
 DECLARE
-	v_CurrentCostPrice	NUMERIC(10);
+	v_CurrentCostPrice	NUMERIC(10, 5);
 BEGIN
     --	Get Cost At
 	SELECT cd.CurrentCostPrice 
