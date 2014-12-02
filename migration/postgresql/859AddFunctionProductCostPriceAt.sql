@@ -33,10 +33,10 @@ BEGIN
 --  DBMS_OUTPUT.PUT_LINE('== FTA_FarmerLiquidation_ID=' || p_FTA_FarmerLiquidation_ID || ', Amt=' || v_AvailableAmt);
 	--	Valid if is null Value
 	IF v_CurrentCostPrice IS NULL THEN
-		v_CurrentCostPrice := 0.00000;
+		v_CurrentCostPrice := 0;
 	END IF;
 	--	Default Return
-	RETURN v_CurrentCostPrice;
+	RETURN 	v_CurrentCostPrice;
 END;
 
 $BODY$
