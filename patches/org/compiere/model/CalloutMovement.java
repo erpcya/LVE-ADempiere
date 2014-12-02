@@ -123,10 +123,10 @@ public class CalloutMovement extends CalloutEngine
 				//	Dixon Martinez 2014-12-01
 				//	Set locator of distribution order line				
 				int M_Locator_ID ;
-				int p_DD_OrderLine_ID	= (Integer) mTab.getValue("DD_OrderLine_ID");
 				MDDOrderLine m_DDOrderLine	= null;
 				if(mTab.getValue("DD_OrderLine_ID") != null 
 								&& (Integer) mTab.getValue("DD_OrderLine_ID") > 0) {
+					int p_DD_OrderLine_ID	= (Integer) mTab.getValue("DD_OrderLine_ID");
 					m_DDOrderLine = new MDDOrderLine(ctx, p_DD_OrderLine_ID , null);
 					p_M_Locator_ID = m_DDOrderLine.getM_Locator_ID();
 				}
