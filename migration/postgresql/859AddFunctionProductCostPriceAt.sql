@@ -1,4 +1,4 @@
-﻿-- Function: productCostPriceAt(NUMERIC, TIMESTAMP)
+-- Function: productCostPriceAt(NUMERIC, TIMESTAMP)
 
 -- DROP FUNCTION productCostPriceAt(NUMERIC, TIMESTAMP);
 
@@ -20,10 +20,10 @@ $BODY$
  *		
  ************************************************************************/
 DECLARE
-	v_CurrentCostPrice	NUMERIC(10, 5);
+	v_CurrentCostPrice	NUMERIC;
 BEGIN
     --	Get Cost At
-	SELECT cd.CurrentCostPrice 
+	SELECT cd.CurrentCostPrice CurrentCostPrice
 		INTO v_CurrentCostPrice
 	FROM M_CostDetail cd 
 	WHERE cd.M_Product_ID = p_M_Product_ID 
@@ -33,7 +33,7 @@ BEGIN
 --  DBMS_OUTPUT.PUT_LINE('== FTA_FarmerLiquidation_ID=' || p_FTA_FarmerLiquidation_ID || ', Amt=' || v_AvailableAmt);
 	--	Valid if is null Value
 	IF v_CurrentCostPrice IS NULL THEN
-		v_CurrentCostPrice := 0;
+		v_CurrentCostPrice := 0.00000;
 	END IF;
 	--	Default Return
 	RETURN v_CurrentCostPrice;
