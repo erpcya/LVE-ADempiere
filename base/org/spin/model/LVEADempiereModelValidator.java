@@ -16,23 +16,34 @@
  *****************************************************************************/
 package org.spin.model;
 
+import java.math.BigDecimal;
+import java.sql.CallableStatement;
+import java.sql.SQLException;
+
 import org.compiere.model.I_C_Cash;
+import org.compiere.model.MAllocationHdr;
+import org.compiere.model.MAllocationLine;
 import org.compiere.model.MBPBankAccount;
 import org.compiere.model.MCash;
 import org.compiere.model.MCashLine;
 import org.compiere.model.MClient;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MMovement;
 import org.compiere.model.MPaySelectionCheck;
 import org.compiere.model.MPayment;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
+import org.compiere.model.X_C_DocType;
 import org.compiere.model.X_C_Invoice;
+import org.compiere.process.DocumentEngine;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Trx;
 
 /**
  * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a>
@@ -96,7 +107,152 @@ public class LVEADempiereModelValidator implements ModelValidator {
 						return Msg.translate(Env.getLanguage(Env.getCtx()), "TaxCalculatingError");
 				}
 			} 
-		}	
+		} /*else if(timing == TIMING_AFTER_COMPLETE){
+			log.fine(MInvoice.Table_Name + " -- TIMING_AFTER_COMPLETE");
+			if(po.get_TableName().equals(MInvoice.Table_Name)){
+				MInvoice inv = (MInvoice) po;
+				if(inv.get_Value("DocAffected_ID") != null) {
+					/**	Current Multiplier Withholding Doc	*
+					BigDecimal			invoice_Mlp	= Env.ZERO;
+					BigDecimal			invoiceAffected_Mlp	= Env.ZERO;
+					MAllocationHdr m_Current_Alloc = null;
+					MInvoice m_InvoiceAffected =
+							new MInvoice(inv.getCtx(), inv.get_ValueAsInt("DocAffected_ID"), inv.get_TrxName());
+					
+					MDocType docType = (MDocType) inv.getC_DocType();
+					String docBaseType = docType.getDocBaseType();
+					Trx trx = Trx.get(Trx.createTrxName(), true);
+					trx.start();
+					try {
+						if(docType.getDocBaseType().equals(X_C_DocType.DOCBASETYPE_APCreditMemo)) {
+//							Create Multiplier
+							invoiceAffected_Mlp= (docBaseType.substring(2).equals("C")? Env.ONE.negate(): Env.ONE)
+									.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
+							docType = (MDocType) m_InvoiceAffected.getC_DocType();
+							docBaseType = docType.getDocBaseType();
+							invoice_Mlp  = (docBaseType.substring(2).equals("C")? Env.ONE.negate(): Env.ONE)
+									.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
+							m_Current_Alloc = new MAllocationHdr(Env.getCtx(), true,	//	manual
+									inv.getDateAcct(), inv.getC_Currency_ID(), Env.getContext(Env.getCtx(), "#AD_User_Name"), trx.getTrxName());
+							m_Current_Alloc.setAD_Org_ID(inv.getAD_Org_ID());
+							m_Current_Alloc.saveEx();
+							
+							BigDecimal openAmt = Env.ZERO;
+							try {
+								CallableStatement cs = null;
+								cs = DB.prepareCall("{call invoiceopen(?, 0, ?)}");
+								cs.setInt(1, m_InvoiceAffected.get_ID());
+								cs.registerOutParameter(2, java.sql.Types.NUMERIC);
+								cs.execute();
+								openAmt = cs.getBigDecimal(2);
+							} catch (SQLException e) {
+								e.printStackTrace();
+							}
+							
+							
+							BigDecimal amt = inv.getTotalLines();
+							BigDecimal newOpenAmt = openAmt.subtract(amt.multiply(invoiceAffected_Mlp));
+							log.fine("Current Invoice Allocation Amt=" + amt);
+							log.fine("newOpenAmt=" + newOpenAmt);
+							
+							//	
+							MAllocationLine aLine = new MAllocationLine (m_Current_Alloc, amt.multiply(invoice_Mlp), 
+									Env.ZERO, Env.ZERO, newOpenAmt.multiply(invoice_Mlp));
+							aLine.setDocInfo(inv.getC_BPartner_ID(), 0, m_InvoiceAffected.get_ID());
+							aLine.saveEx();
+							
+							if(m_Current_Alloc.getDocStatus().equals(DocumentEngine.STATUS_Drafted)){
+								log.fine("Amt Total Allocation=" + inv.getGrandTotal().multiply(invoice_Mlp));
+								//	
+								aLine = new MAllocationLine (m_Current_Alloc, inv.getGrandTotal().multiply(invoiceAffected_Mlp), 
+										Env.ZERO, Env.ZERO, Env.ZERO);
+								aLine.setDocInfo(inv.getC_BPartner_ID(), 0, inv.getC_Invoice_ID());
+								aLine.saveEx();
+								//	
+								if(m_Current_Alloc.getDocStatus().equals(DocumentEngine.STATUS_Drafted)){
+									log.fine("Current Allocation = " + m_Current_Alloc.getDocumentNo());
+									//	
+									m_Current_Alloc.setDocAction(DocumentEngine.ACTION_Complete);
+									m_Current_Alloc.processIt(DocumentEngine.ACTION_Complete);
+									m_Current_Alloc.saveEx();	
+									
+								}
+								
+							} 
+							inv.setIsPaid(true);
+							inv.saveEx();
+
+						}else if(docType.getDocBaseType().equals(X_C_DocType.DOCBASETYPE_APInvoice)) {
+//								Create Multiplier
+								invoice_Mlp = (docBaseType.substring(2).equals("C")? Env.ONE.negate(): Env.ONE)
+										.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
+								docType = (MDocType) m_InvoiceAffected.getC_DocType();
+								docBaseType = docType.getDocBaseType();
+								invoiceAffected_Mlp = (docBaseType.substring(2).equals("C")? Env.ONE.negate(): Env.ONE)
+										.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
+								m_Current_Alloc = new MAllocationHdr(Env.getCtx(), true,	//	manual
+										inv.getDateAcct(), inv.getC_Currency_ID(), Env.getContext(Env.getCtx(), "#AD_User_Name"), inv.get_TrxName());
+								m_Current_Alloc.setAD_Org_ID(inv.getAD_Org_ID());
+								m_Current_Alloc.saveEx();
+								
+								BigDecimal openAmt = Env.ZERO;
+								try {
+									CallableStatement cs = null;
+									cs = DB.prepareCall("{call invoiceopen(?, 0, ?)}");
+									cs.setInt(1, inv.get_ID());
+									cs.registerOutParameter(2, java.sql.Types.NUMERIC);
+									cs.execute();
+									openAmt = cs.getBigDecimal(2);
+								} catch (SQLException e) {
+									e.printStackTrace();
+								}
+								BigDecimal amt = m_InvoiceAffected.getTotalLines();
+								BigDecimal newOpenAmt = openAmt.subtract(amt.multiply(invoiceAffected_Mlp));
+								log.fine("Current Invoice Allocation Amt=" + amt);
+								log.fine("newOpenAmt=" + newOpenAmt);
+								
+								//
+								MAllocationLine aLine = new MAllocationLine (m_Current_Alloc, amt.multiply(invoice_Mlp), 
+										Env.ZERO, Env.ZERO, newOpenAmt.multiply(invoice_Mlp));
+								aLine.setDocInfo(inv.getC_BPartner_ID(), 0, inv.get_ID());
+								aLine.saveEx();
+								
+								if(m_Current_Alloc.getDocStatus().equals(DocumentEngine.STATUS_Drafted)){
+									log.fine("Amt Total Allocation=" + inv.getGrandTotal().multiply(invoice_Mlp));
+									//	
+									aLine = new MAllocationLine (m_Current_Alloc, m_InvoiceAffected.getGrandTotal().multiply(invoiceAffected_Mlp), 
+											Env.ZERO, Env.ZERO, Env.ZERO);
+									aLine.setDocInfo(inv.getC_BPartner_ID(), 0, m_InvoiceAffected.getC_Invoice_ID());
+									aLine.saveEx();
+									//	
+									if(m_Current_Alloc.getDocStatus().equals(DocumentEngine.STATUS_Drafted)){
+										log.fine("Current Allocation = " + m_Current_Alloc.getDocumentNo());
+										//	
+										m_Current_Alloc.setDocAction(DocumentEngine.ACTION_Complete);
+										m_Current_Alloc.processIt(DocumentEngine.ACTION_Complete);
+										m_Current_Alloc.saveEx();	
+										
+									}	
+									m_InvoiceAffected.setIsPaid(true);
+									m_InvoiceAffected.saveEx();
+								}
+						}
+						if(m_Current_Alloc != null)
+							trx.commit();
+						
+					} catch(Exception ex) { 
+						trx.rollback();
+						log.severe(ex.getMessage());
+						if(docType.getDocBaseType().equals(X_C_DocType.DOCBASETYPE_APCreditMemo)) {
+													} 
+						
+					} finally{
+						trx.close();
+					}
+				}
+			}
+					
+		}*/
 		//
 		return null;
 	}
@@ -198,6 +354,15 @@ public class LVEADempiereModelValidator implements ModelValidator {
 			/*	}
 				return "";
 			}*/
+			
+			if(po.get_TableName().equals(MMovement.Table_Name)) {
+				MMovement m_Current_Movement = (MMovement) po;
+				MDocType m_DocType = (MDocType) m_Current_Movement.getC_DocType();
+				if(m_DocType.get_ValueAsBoolean("IsInTransit")) {
+					m_Current_Movement.setIsInTransit(true);
+					m_Current_Movement.saveEx();
+				}
+			}
 		}
 		//Carlos Parada Set BP_BankAccount to PaySelection if have Payment And Set Description From PaySelection
 		if ((type == TYPE_AFTER_CHANGE || type == TYPE_AFTER_NEW)&& po.get_TableName().equals(MPaySelectionCheck.Table_Name)){
