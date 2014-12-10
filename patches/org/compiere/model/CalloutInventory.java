@@ -185,7 +185,8 @@ public class CalloutInventory extends CalloutEngine
 		if (M_AttributeSetInstance_ID == 0)
 			sql = "SELECT SUM(QtyOnHand) FROM M_Storage "
 			+ "WHERE M_Product_ID=?"	//	1
-			+ " AND M_Locator_ID=?";	//	2
+			+ " AND M_Locator_ID=?"	//	2
+			+ " AND (M_AttributeSetInstance_ID=0 OR M_AttributeSetInstance_ID IS NULL)";
 		
 		try
 		{
