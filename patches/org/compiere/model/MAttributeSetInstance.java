@@ -403,7 +403,7 @@ public class MAttributeSetInstance extends X_M_AttributeSetInstance
 		//
 		
 		//2014-12-09 Carlos Parada Create AttributeSetInstance only when product have attribute set
-		if (asi.getM_AttributeSet_ID()!=0)
+		if (asi.getM_AttributeSetInstance_ID()!=0)
 			asi.saveEx();
 		return asi;
 	}
