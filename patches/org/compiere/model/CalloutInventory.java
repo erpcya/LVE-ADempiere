@@ -51,15 +51,20 @@ public class CalloutInventory extends CalloutEngine
 			return "";
 		Integer InventoryLine = (Integer)mTab.getValue("M_InventoryLine_ID");
 		BigDecimal bd = null;
+		int M_AttributeSetInstanceOld_ID = -1;
+		if (mField.getColumnName().equals(X_M_InventoryLine.COLUMNNAME_M_AttributeSetInstance_ID))
+			M_AttributeSetInstanceOld_ID = (Integer) mField.getOldValue(); 
+		
 		
 		if (InventoryLine != null && InventoryLine.intValue() != 0) {
 			MInventoryLine _ILine = new MInventoryLine(ctx, InventoryLine, null);
 			Integer M_Product_ID = (Integer)mTab.getValue("M_Product_ID");
 			Integer M_Locator_ID = (Integer)mTab.getValue("M_Locator_ID");		
-			Integer M_AttributeSetInstance_ID = 0;
+			Integer M_AttributeSetInstance_ID = (Integer)mTab.getValue("M_AttributeSetInstance_ID");
 			// if product or locator has changed recalculate Book Qty
 			if ((M_Product_ID != null && M_Product_ID != _ILine.getM_Product_ID()) || 
-					(M_Locator_ID !=null && M_Locator_ID != _ILine.getM_Locator_ID())) {
+					(M_Locator_ID !=null && M_Locator_ID != _ILine.getM_Locator_ID())||
+						M_AttributeSetInstance_ID != M_AttributeSetInstanceOld_ID) {
 
 				// Check ASI - if product has been changed remove old ASI
 				if (M_Product_ID == _ILine.getM_Product_ID()) {
