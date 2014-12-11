@@ -29,6 +29,7 @@ import org.compiere.model.MCashLine;
 import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MMovement;
 import org.compiere.model.MPaySelectionCheck;
 import org.compiere.model.MPayment;
@@ -36,14 +37,12 @@ import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
-import org.compiere.model.X_C_DocType;
 import org.compiere.model.X_C_Invoice;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
-import org.compiere.util.Trx;
 
 /**
  * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a>
@@ -63,6 +62,18 @@ public class LVEADempiereModelValidator implements ModelValidator {
 	private static CLogger log = CLogger.getCLogger(LVEADempiereModelValidator.class);
 	/** Client */
 	private int m_AD_Client_ID = -1;
+	/**	Current Business Partner				*/
+	private int m_Current_C_BPartner_ID 		= 	0;
+	/**	Current Allocation						*/
+	private MAllocationHdr m_Current_Alloc 		= 	null;
+	/**	Current Invoice							*/
+	private MInvoice m_Current_Invoice 			= 	null;
+	/**	Grand Amount							*/
+	private BigDecimal grandAmount				= 	Env.ZERO;
+	/**	Multiplier								*/
+	private BigDecimal multiplier				= 	Env.ZERO;
+	/**	Open Amount								*/
+	private BigDecimal openAmt 					= 	Env.ZERO;
 	
 	@Override
 	public void initialize(ModelValidationEngine engine, MClient client) {
@@ -75,6 +86,7 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		}
 		//	Add Timing change in C_Order and C_Invoice
 		engine.addDocValidate(MInvoice.Table_Name, this);
+		engine.addDocValidate(MAllocationHdr.Table_Name, this);
 		engine.addDocValidate(I_C_Cash.Table_Name, this);
 		engine.addModelChange(MCashLine.Table_Name, this);
 	}
@@ -89,7 +101,7 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		log.info("AD_User_ID=" + AD_User_ID);
 		return null;
 	}
-
+	
 	@Override
 	public String docValidate(PO po, int timing) {
 		if(timing == TIMING_BEFORE_REVERSECORRECT){
@@ -107,156 +119,136 @@ public class LVEADempiereModelValidator implements ModelValidator {
 						return Msg.translate(Env.getLanguage(Env.getCtx()), "TaxCalculatingError");
 				}
 			} 
-		} /*else if(timing == TIMING_AFTER_COMPLETE){
-			log.fine(MInvoice.Table_Name + " -- TIMING_AFTER_COMPLETE");
-			if(po.get_TableName().equals(MInvoice.Table_Name)){
-				MInvoice inv = (MInvoice) po;
-				if(inv.get_Value("DocAffected_ID") != null) {
-					/**	Current Multiplier Withholding Doc	*
-					BigDecimal			invoice_Mlp	= Env.ZERO;
-					BigDecimal			invoiceAffected_Mlp	= Env.ZERO;
-					MAllocationHdr m_Current_Alloc = null;
-					MInvoice m_InvoiceAffected =
-							new MInvoice(inv.getCtx(), inv.get_ValueAsInt("DocAffected_ID"), inv.get_TrxName());
-					
-					MDocType docType = (MDocType) inv.getC_DocType();
+		}
+		else if(timing == TIMING_AFTER_COMPLETE ) {
+			if(po.get_TableName().equals(X_C_Invoice.Table_Name)) {
+				m_Current_Invoice = (MInvoice) po;
+				grandAmount = Env.ZERO;m_Current_C_BPartner_ID = 0;
+				MInvoiceLine [] m_InvoiceLine = m_Current_Invoice.getLines();
+				int p_C_Invoice_ID = 0;
+				
+				int p_C_BPartner_ID = 0;
+				for (MInvoiceLine mInvoiceLine : m_InvoiceLine) {
+					if(mInvoiceLine.get_Value("DocAffected_ID") != null 
+							&& mInvoiceLine.get_ValueAsInt("DocAffected_ID") > 0 )
+						p_C_Invoice_ID = mInvoiceLine.get_ValueAsInt("DocAffected_ID");
+					else 
+						continue;
+					p_C_BPartner_ID = m_Current_Invoice.getC_BPartner_ID();
+					MInvoice m_InvoiceAffected = MInvoice.get(m_Current_Invoice.getCtx(), p_C_Invoice_ID);
+					MDocType docType = (MDocType) m_InvoiceAffected.getC_DocType();
 					String docBaseType = docType.getDocBaseType();
-					Trx trx = Trx.get(Trx.createTrxName(), true);
-					trx.start();
 					try {
-						if(docType.getDocBaseType().equals(X_C_DocType.DOCBASETYPE_APCreditMemo)) {
-//							Create Multiplier
-							invoiceAffected_Mlp= (docBaseType.substring(2).equals("C")? Env.ONE.negate(): Env.ONE)
-									.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
-							docType = (MDocType) m_InvoiceAffected.getC_DocType();
-							docBaseType = docType.getDocBaseType();
-							invoice_Mlp  = (docBaseType.substring(2).equals("C")? Env.ONE.negate(): Env.ONE)
-									.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
-							m_Current_Alloc = new MAllocationHdr(Env.getCtx(), true,	//	manual
-									inv.getDateAcct(), inv.getC_Currency_ID(), Env.getContext(Env.getCtx(), "#AD_User_Name"), trx.getTrxName());
-							m_Current_Alloc.setAD_Org_ID(inv.getAD_Org_ID());
-							m_Current_Alloc.saveEx();
-							
-							BigDecimal openAmt = Env.ZERO;
-							try {
-								CallableStatement cs = null;
-								cs = DB.prepareCall("{call invoiceopen(?, 0, ?)}");
-								cs.setInt(1, m_InvoiceAffected.get_ID());
-								cs.registerOutParameter(2, java.sql.Types.NUMERIC);
-								cs.execute();
-								openAmt = cs.getBigDecimal(2);
-							} catch (SQLException e) {
-								e.printStackTrace();
-							}
-							
-							
-							BigDecimal amt = inv.getTotalLines();
-							BigDecimal newOpenAmt = openAmt.subtract(amt.multiply(invoiceAffected_Mlp));
-							log.fine("Current Invoice Allocation Amt=" + amt);
-							log.fine("newOpenAmt=" + newOpenAmt);
-							
-							//	
-							MAllocationLine aLine = new MAllocationLine (m_Current_Alloc, amt.multiply(invoice_Mlp), 
-									Env.ZERO, Env.ZERO, newOpenAmt.multiply(invoice_Mlp));
-							aLine.setDocInfo(inv.getC_BPartner_ID(), 0, m_InvoiceAffected.get_ID());
-							aLine.saveEx();
-							
-							if(m_Current_Alloc.getDocStatus().equals(DocumentEngine.STATUS_Drafted)){
-								log.fine("Amt Total Allocation=" + inv.getGrandTotal().multiply(invoice_Mlp));
-								//	
-								aLine = new MAllocationLine (m_Current_Alloc, inv.getGrandTotal().multiply(invoiceAffected_Mlp), 
-										Env.ZERO, Env.ZERO, Env.ZERO);
-								aLine.setDocInfo(inv.getC_BPartner_ID(), 0, inv.getC_Invoice_ID());
-								aLine.saveEx();
-								//	
-								if(m_Current_Alloc.getDocStatus().equals(DocumentEngine.STATUS_Drafted)){
-									log.fine("Current Allocation = " + m_Current_Alloc.getDocumentNo());
-									//	
-									m_Current_Alloc.setDocAction(DocumentEngine.ACTION_Complete);
-									m_Current_Alloc.processIt(DocumentEngine.ACTION_Complete);
-									m_Current_Alloc.saveEx();	
-									
-								}
-								
-							} 
-							inv.setIsPaid(true);
-							inv.saveEx();
-
-						}else if(docType.getDocBaseType().equals(X_C_DocType.DOCBASETYPE_APInvoice)) {
-//								Create Multiplier
-								invoice_Mlp = (docBaseType.substring(2).equals("C")? Env.ONE.negate(): Env.ONE)
-										.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
-								docType = (MDocType) m_InvoiceAffected.getC_DocType();
-								docBaseType = docType.getDocBaseType();
-								invoiceAffected_Mlp = (docBaseType.substring(2).equals("C")? Env.ONE.negate(): Env.ONE)
-										.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
-								m_Current_Alloc = new MAllocationHdr(Env.getCtx(), true,	//	manual
-										inv.getDateAcct(), inv.getC_Currency_ID(), Env.getContext(Env.getCtx(), "#AD_User_Name"), inv.get_TrxName());
-								m_Current_Alloc.setAD_Org_ID(inv.getAD_Org_ID());
-								m_Current_Alloc.saveEx();
-								
-								BigDecimal openAmt = Env.ZERO;
-								try {
-									CallableStatement cs = null;
-									cs = DB.prepareCall("{call invoiceopen(?, 0, ?)}");
-									cs.setInt(1, inv.get_ID());
-									cs.registerOutParameter(2, java.sql.Types.NUMERIC);
-									cs.execute();
-									openAmt = cs.getBigDecimal(2);
-								} catch (SQLException e) {
-									e.printStackTrace();
-								}
-								BigDecimal amt = m_InvoiceAffected.getTotalLines();
-								BigDecimal newOpenAmt = openAmt.subtract(amt.multiply(invoiceAffected_Mlp));
-								log.fine("Current Invoice Allocation Amt=" + amt);
-								log.fine("newOpenAmt=" + newOpenAmt);
-								
-								//
-								MAllocationLine aLine = new MAllocationLine (m_Current_Alloc, amt.multiply(invoice_Mlp), 
-										Env.ZERO, Env.ZERO, newOpenAmt.multiply(invoice_Mlp));
-								aLine.setDocInfo(inv.getC_BPartner_ID(), 0, inv.get_ID());
-								aLine.saveEx();
-								
-								if(m_Current_Alloc.getDocStatus().equals(DocumentEngine.STATUS_Drafted)){
-									log.fine("Amt Total Allocation=" + inv.getGrandTotal().multiply(invoice_Mlp));
-									//	
-									aLine = new MAllocationLine (m_Current_Alloc, m_InvoiceAffected.getGrandTotal().multiply(invoiceAffected_Mlp), 
-											Env.ZERO, Env.ZERO, Env.ZERO);
-									aLine.setDocInfo(inv.getC_BPartner_ID(), 0, m_InvoiceAffected.getC_Invoice_ID());
-									aLine.saveEx();
-									//	
-									if(m_Current_Alloc.getDocStatus().equals(DocumentEngine.STATUS_Drafted)){
-										log.fine("Current Allocation = " + m_Current_Alloc.getDocumentNo());
-										//	
-										m_Current_Alloc.setDocAction(DocumentEngine.ACTION_Complete);
-										m_Current_Alloc.processIt(DocumentEngine.ACTION_Complete);
-										m_Current_Alloc.saveEx();	
-										
-									}	
-									m_InvoiceAffected.setIsPaid(true);
-									m_InvoiceAffected.saveEx();
-								}
-						}
-						if(m_Current_Alloc != null)
-							trx.commit();
-						
-					} catch(Exception ex) { 
-						trx.rollback();
-						log.severe(ex.getMessage());
-						if(docType.getDocBaseType().equals(X_C_DocType.DOCBASETYPE_APCreditMemo)) {
-													} 
-						
-					} finally{
-						trx.close();
+						CallableStatement cs = null;
+						cs = DB.prepareCall("{call invoiceopen(?, 0, ?)}");
+						cs.setInt(1, p_C_Invoice_ID);
+						cs.registerOutParameter(2, java.sql.Types.NUMERIC);
+						cs.execute();
+						openAmt = cs.getBigDecimal(2);
+					} catch (SQLException e) {
+						e.printStackTrace();
 					}
+					multiplier = (docBaseType.substring(2).equals("C")? Env.ONE.negate(): Env.ONE)
+							.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
+					BigDecimal amt = mInvoiceLine.getLineNetAmt();
+					BigDecimal newOpenAmt = (openAmt.subtract(amt)).multiply(multiplier);
+					//
+					if(p_C_BPartner_ID != m_Current_C_BPartner_ID) {
+						completeAllocation();
+					}
+					grandAmount = grandAmount.add(amt);
+					addAllocation(p_C_BPartner_ID, amt, openAmt, newOpenAmt, m_Current_Invoice, p_C_Invoice_ID);
 				}
+				completeAllocation();
+				
+			}else if(po.get_TableName().equals(MAllocationHdr.Table_Name)) {
+				MInvoice.setIsPaid(m_Current_Invoice.getCtx(), m_Current_C_BPartner_ID, m_Current_Invoice.get_TrxName());
+				m_Current_Invoice.saveEx();
 			}
-					
+		} /*else if(timing == TIMING_AFTER_POST){
+			if(po.get_TableName().equals(X_C_Invoice.Table_Name)) {
+				MInvoice m_Invoice = (MInvoice) po;
+				MInvoice.setIsPaid(m_Invoice.getCtx(), m_Invoice.getC_BPartner_ID(), m_Invoice.get_TrxName());
+			}
 		}*/
 		//
 		return null;
 	}
 	
+	/**
+	 * Complete Allocation
+	 * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a> 10/12/2014, 17:23:23
+	 * @return void
+	 */
+	private void completeAllocation(){
+		if(m_Current_Alloc != null){
+			if(m_Current_Alloc.getDocStatus().equals(DocumentEngine.STATUS_Drafted)){
+				log.fine("Amt Total Allocation=" + m_Current_Invoice.getGrandTotal());
+				//	
+				try {
+					CallableStatement cs = null;
+					cs = DB.prepareCall("{call invoiceopen(?, 0, ?)}");
+					cs.setInt(1, m_Current_Invoice.get_ID());
+					cs.registerOutParameter(2, java.sql.Types.NUMERIC);
+					cs.execute();
+					openAmt = cs.getBigDecimal(2);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				MDocType docType = (MDocType) m_Current_Invoice.getC_DocType();
+				String docBaseType = docType.getDocBaseType();
+				multiplier //DB.getSQLValueBD(m_Current_Invoice.get_TrxName(), sql, p_C_Invoice_ID);
+					= (docBaseType.substring(2).equals("C")? Env.ONE.negate(): Env.ONE)
+					.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
+	
+				BigDecimal amt = m_Current_Invoice.getGrandTotal();
+				BigDecimal newOpenAmt = grandAmount.subtract(amt);
+				
+				MAllocationLine aLine = new MAllocationLine (m_Current_Alloc, grandAmount.multiply(multiplier), 
+						Env.ZERO, Env.ZERO, newOpenAmt);
+				aLine.setDocInfo(m_Current_C_BPartner_ID, 0, m_Current_Invoice.getC_Invoice_ID());
+				aLine.saveEx();
+				//	
+				if(m_Current_Alloc.getDocStatus().equals(DocumentEngine.STATUS_Drafted)){
+					log.fine("Current Allocation = " + m_Current_Alloc.getDocumentNo());
+					//	
+					m_Current_Alloc.setDocAction(DocumentEngine.ACTION_Complete);
+					m_Current_Alloc.processIt(DocumentEngine.ACTION_Complete);
+					m_Current_Alloc.saveEx();			
+				}	
+			}
+			m_Current_Alloc = null;
+			
+		}
+	}
+	/**
+	 * Add Document Allocation
+	 * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a> 10/12/2014, 17:23:45
+	 * @param p_C_BPartner_ID
+	 * @param amt
+	 * @param openAmt
+	 * @param newOpenAmt
+	 * @param m_Invoice
+	 * @param p_C_Invoice_ID
+	 * @return void
+	 */
+	private void addAllocation(int p_C_BPartner_ID, BigDecimal amt,
+			BigDecimal openAmt, BigDecimal newOpenAmt, MInvoice m_Invoice, int p_C_Invoice_ID) {
+		if(m_Current_C_BPartner_ID != p_C_BPartner_ID){
+			m_Current_Alloc = new MAllocationHdr(Env.getCtx(), true,	//	manual
+					Env.getContextAsDate(m_Invoice.getCtx(), "#Date"), m_Invoice.getC_Currency_ID(), Env.getContext(Env.getCtx(), "#AD_User_Name"), m_Invoice.get_TrxName());
+			m_Current_Alloc.setAD_Org_ID(m_Invoice.getAD_Org_ID());
+			m_Current_Alloc.saveEx();
+		}
+		//	
+		MAllocationLine aLine = new MAllocationLine (m_Current_Alloc, amt.multiply(multiplier), 
+				Env.ZERO, Env.ZERO, newOpenAmt);
+		aLine.setDocInfo(p_C_BPartner_ID, 0, p_C_Invoice_ID);
+		aLine.saveEx();
+		//
+		m_Current_C_BPartner_ID = p_C_BPartner_ID;
+	}
+
 	/**
 	 * Valid Reference in other record
 	 * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a> 01/07/2014, 10:45:30
