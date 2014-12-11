@@ -63,4 +63,4 @@ CREATE OR REPLACE VIEW AD_Field_VT AS
    INNER JOIN AD_Table tbl ON c.AD_Table_ID = tbl.AD_Table_ID
    INNER JOIN AD_Reference r ON c.AD_Reference_ID = r.AD_Reference_ID
    LEFT JOIN AD_Val_Rule vr ON vr.AD_Val_Rule_ID = COALESCE(f.AD_Val_Rule_ID, c.AD_Val_Rule_ID)
-  WHERE f.IsActive = 'Y' AND c.IsActive = 'Y';
+  WHERE f.IsActive = 'Y' AND c.IsActive = 'Y'
