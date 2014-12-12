@@ -71,14 +71,28 @@ public class ChangeWarehouse extends SvrProcess {
 	 */
 	@Override
 	protected String doIt() throws Exception {
-		
 		if(p_Record_ID < 0) 
 			throw new AdempiereException("@C_Order_ID@ @NotFound@");
 			
 		MOrder m_Order = 
 				new MOrder(getCtx(), p_Record_ID, get_TrxName());
-		
-		m_Order.processIt(X_C_Order.DOCACTION_Re_Activate);
+		//	Validate status of order
+		if(m_Order.getDocStatus().equals(X_C_Order.DOCSTATUS_InProgress)){
+			changeWarehouse(m_Order);
+		}else if(m_Order.getDocStatus().equals(X_C_Order.DOCSTATUS_Completed)){
+			m_Order.processIt(X_C_Order.DOCACTION_Re_Activate);
+			changeWarehouse(m_Order);
+		}
+		return "";
+	}
+
+	/**
+	 * Change Warehouse 
+	 * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a> 12/12/2014, 16:43:55
+	 * @param m_Order
+	 * @return void
+	 */
+	private void changeWarehouse(MOrder m_Order) {
 		String sqlWhere = "";
 		if(p_C_OrderLine_ID > 0) {
 			sqlWhere = " AND C_OrderLine_ID = " + p_C_OrderLine_ID;
@@ -97,7 +111,6 @@ public class ChangeWarehouse extends SvrProcess {
 		}
 		m_Order.processIt(X_C_Order.DOCACTION_Prepare);
 		m_Order.saveEx();
-		
 		m_lines = null;
 		if(p_C_OrderLine_ID > 0) {
 			sqlWhere = " AND C_OrderLine_ID = " + p_C_OrderLine_ID;
@@ -113,10 +126,10 @@ public class ChangeWarehouse extends SvrProcess {
 		}
 		m_Order.processIt(X_C_Order.DOCACTION_Prepare);
 		m_Order.saveEx();
+		m_Order.setDocAction(X_C_Order.DOCACTION_Complete);
+		m_Order.saveEx();
 		m_Order.processIt(X_C_Order.DOCACTION_Complete);
 		m_Order.saveEx();
-		
-		return "";
 	}
 
 }
