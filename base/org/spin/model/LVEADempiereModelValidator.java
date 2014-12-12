@@ -21,6 +21,7 @@ import java.sql.CallableStatement;
 import java.sql.SQLException;
 
 import org.compiere.model.I_C_Cash;
+import org.compiere.model.I_C_DocType;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
 import org.compiere.model.MBPBankAccount;
@@ -125,15 +126,18 @@ public class LVEADempiereModelValidator implements ModelValidator {
 				m_Current_Invoice = (MInvoice) po;
 				grandAmount = Env.ZERO;
 				m_Current_C_BPartner_ID = 0;
-				MInvoiceLine [] m_InvoiceLine = m_Current_Invoice.getLines();
 				int p_C_Invoice_ID = 0;
-				
 				int p_C_BPartner_ID = 0;
+				
+				//	get invoice lines  
+				MInvoiceLine [] m_InvoiceLine = m_Current_Invoice.getLines();
+				//	Check Current Invoice if is paid return 
 				if(m_Current_Invoice.isPaid())
 					return null;
+				//	Check Current Invoice if is reversal return 
 				if(m_Current_Invoice.getReversal_ID() >  0 ) 
 					return null;
-				
+				//	Instance Lines
 				for (MInvoiceLine mInvoiceLine : m_InvoiceLine) {
 					if(mInvoiceLine.get_Value("DocAffected_ID") != null 
 							&& mInvoiceLine.get_ValueAsInt("DocAffected_ID") > 0 )
@@ -142,20 +146,11 @@ public class LVEADempiereModelValidator implements ModelValidator {
 						continue;
 					p_C_BPartner_ID = m_Current_Invoice.getC_BPartner_ID();
 					MInvoice m_InvoiceAffected = MInvoice.get(m_Current_Invoice.getCtx(), p_C_Invoice_ID);
-					MDocType docType = (MDocType) m_InvoiceAffected.getC_DocType();
-					String docBaseType = docType.getDocBaseType();
-					try {
-						CallableStatement cs = null;
-						cs = DB.prepareCall("{call invoiceopen(?, 0, ?)}");
-						cs.setInt(1, p_C_Invoice_ID);
-						cs.registerOutParameter(2, java.sql.Types.NUMERIC);
-						cs.execute();
-						openAmt = cs.getBigDecimal(2);
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-					multiplier = (docBaseType.substring(2).equals("C")? Env.ONE.negate(): Env.ONE)
-							.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
+					//	Set Multiplier depending of document type
+					setMultiplier(m_InvoiceAffected.getC_DocType());
+					//	get open amount of document
+					openAmount(p_C_Invoice_ID);
+					//
 					BigDecimal amt = mInvoiceLine.getLineNetAmt();
 					BigDecimal newOpenAmt = (openAmt.subtract(amt)).multiply(multiplier);
 					if(newOpenAmt.multiply(multiplier).compareTo(Env.ZERO) < 0){
@@ -169,30 +164,43 @@ public class LVEADempiereModelValidator implements ModelValidator {
 								+ " @DifferenceAmt@=" + newOpenAmt;
 						continue;
 					}
-					
 					//
 					if(p_C_BPartner_ID != m_Current_C_BPartner_ID)
 						completeAllocation();
-
 					grandAmount = grandAmount.add(amt);
-					
+					//	Add allocation 
 					addAllocation(p_C_BPartner_ID, amt, openAmt, newOpenAmt, m_Current_Invoice, p_C_Invoice_ID);
 				}
+				//	Complete Allocation
 				completeAllocation();
-				
+				//	Check current invoice
 				m_Current_Invoice.testAllocation();
-			}/*else if(po.get_TableName().equals(MAllocationHdr.Table_Name)) {
-				MInvoice.setIsPaid(m_Current_Invoice.getCtx(), m_Current_C_BPartner_ID, m_Current_Invoice.get_TrxName());
-				m_Current_Invoice.saveEx();
-			}*/
-		} /*else if(timing == TIMING_AFTER_POST){
-			if(po.get_TableName().equals(X_C_Invoice.Table_Name)) {
-				MInvoice m_Invoice = (MInvoice) po;
-				MInvoice.setIsPaid(m_Invoice.getCtx(), m_Invoice.getC_BPartner_ID(), m_Invoice.get_TrxName());
 			}
-		}*/
+		} 
 		//
 		return null;
+	}
+	
+	/**
+	 * Open Amount
+	 * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a> 12/12/2014, 11:27:54
+	 * @param p_C_Invoice_ID
+	 * @return
+	 * @return BigDecimal
+	 */
+	private BigDecimal openAmount(int p_C_Invoice_ID) {
+		//	
+		try {
+			CallableStatement cs = null;
+			cs = DB.prepareCall("{call invoiceopen(?, 0, ?)}");
+			cs.setInt(1, p_C_Invoice_ID);
+			cs.registerOutParameter(2, java.sql.Types.NUMERIC);
+			cs.execute();
+			openAmt = cs.getBigDecimal(2);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return openAmt;
 	}
 	
 	/**
@@ -204,23 +212,11 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		if(m_Current_Alloc != null){
 			if(m_Current_Alloc.getDocStatus().equals(DocumentEngine.STATUS_Drafted)){
 				log.fine("Amt Total Allocation=" + m_Current_Invoice.getGrandTotal());
-				//	
-				try {
-					CallableStatement cs = null;
-					cs = DB.prepareCall("{call invoiceopen(?, 0, ?)}");
-					cs.setInt(1, m_Current_Invoice.get_ID());
-					cs.registerOutParameter(2, java.sql.Types.NUMERIC);
-					cs.execute();
-					openAmt = cs.getBigDecimal(2);
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-				MDocType docType = (MDocType) m_Current_Invoice.getC_DocType();
-				String docBaseType = docType.getDocBaseType();
-				multiplier //DB.getSQLValueBD(m_Current_Invoice.get_TrxName(), sql, p_C_Invoice_ID);
-					= (docBaseType.substring(2).equals("C")? Env.ONE.negate(): Env.ONE)
-					.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
-	
+				//	get open amount of document
+				openAmount(m_Current_Invoice.get_ID());
+				//	Set Multiplier depending of document type
+				setMultiplier(m_Current_Invoice.getC_DocType());
+				
 				BigDecimal amt = m_Current_Invoice.getGrandTotal();
 				BigDecimal newOpenAmt = grandAmount.subtract(amt);
 				
@@ -241,6 +237,20 @@ public class LVEADempiereModelValidator implements ModelValidator {
 			
 		}
 	}
+	/**
+	 * Set Multiplier
+	 * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a> 12/12/2014, 11:35:58
+	 * @param c_DocType
+	 * @return void
+	 */
+	private void setMultiplier(I_C_DocType c_DocType) {
+		MDocType docType = (MDocType) c_DocType;
+		String docBaseType = docType.getDocBaseType();
+		multiplier = (docBaseType.substring(2).equals("C")? Env.ONE.negate(): Env.ONE)
+			.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
+		
+	}
+
 	/**
 	 * Add Document Allocation
 	 * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a> 10/12/2014, 17:23:45
