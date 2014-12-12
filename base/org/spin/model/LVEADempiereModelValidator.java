@@ -123,11 +123,17 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		else if(timing == TIMING_AFTER_COMPLETE ) {
 			if(po.get_TableName().equals(X_C_Invoice.Table_Name)) {
 				m_Current_Invoice = (MInvoice) po;
-				grandAmount = Env.ZERO;m_Current_C_BPartner_ID = 0;
+				grandAmount = Env.ZERO;
+				m_Current_C_BPartner_ID = 0;
 				MInvoiceLine [] m_InvoiceLine = m_Current_Invoice.getLines();
 				int p_C_Invoice_ID = 0;
 				
 				int p_C_BPartner_ID = 0;
+				if(m_Current_Invoice.isPaid())
+					return null;
+				if(m_Current_Invoice.getReversal_ID() >  0 ) 
+					return null;
+				
 				for (MInvoiceLine mInvoiceLine : m_InvoiceLine) {
 					if(mInvoiceLine.get_Value("DocAffected_ID") != null 
 							&& mInvoiceLine.get_ValueAsInt("DocAffected_ID") > 0 )
@@ -152,19 +158,33 @@ public class LVEADempiereModelValidator implements ModelValidator {
 							.multiply((docBaseType.substring(1,2).equals("P")? Env.ONE.negate(): Env.ONE));
 					BigDecimal amt = mInvoiceLine.getLineNetAmt();
 					BigDecimal newOpenAmt = (openAmt.subtract(amt)).multiply(multiplier);
-					//
-					if(p_C_BPartner_ID != m_Current_C_BPartner_ID) {
-						completeAllocation();
+					if(newOpenAmt.multiply(multiplier).compareTo(Env.ZERO) < 0){
+						MInvoice inv = new MInvoice(m_Current_Invoice.getCtx(), p_C_Invoice_ID, m_Current_Invoice.get_TrxName());
+						String msg = m_Current_Invoice.getDocumentNo() + 
+								": Error @ExcededOpenInvoiceAmt@" 
+								+ " @C_Invoice_ID@=" 
+								+ inv.getDocumentNo() 
+								+ " @OpenAmt@=" + openAmt 
+								+ " @AllocatedAmt@=" + amt 
+								+ " @DifferenceAmt@=" + newOpenAmt;
+						continue;
 					}
+					
+					//
+					if(p_C_BPartner_ID != m_Current_C_BPartner_ID)
+						completeAllocation();
+
 					grandAmount = grandAmount.add(amt);
+					
 					addAllocation(p_C_BPartner_ID, amt, openAmt, newOpenAmt, m_Current_Invoice, p_C_Invoice_ID);
 				}
 				completeAllocation();
 				
-			}else if(po.get_TableName().equals(MAllocationHdr.Table_Name)) {
+				m_Current_Invoice.testAllocation();
+			}/*else if(po.get_TableName().equals(MAllocationHdr.Table_Name)) {
 				MInvoice.setIsPaid(m_Current_Invoice.getCtx(), m_Current_C_BPartner_ID, m_Current_Invoice.get_TrxName());
 				m_Current_Invoice.saveEx();
-			}
+			}*/
 		} /*else if(timing == TIMING_AFTER_POST){
 			if(po.get_TableName().equals(X_C_Invoice.Table_Name)) {
 				MInvoice m_Invoice = (MInvoice) po;
