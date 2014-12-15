@@ -35,17 +35,17 @@ import org.compiere.util.Env;
 public class ChangeWarehouse extends SvrProcess {
 
 	/**	Warehouse					*/
-	int	p_M_Warehouse_ID			=	0;
+	private int	p_M_Warehouse_ID			=	0;
 	/**	Order Line					*/
-	int	p_C_OrderLine_ID			=	0;
+	private int	p_C_OrderLine_ID			=	0;
 	/**	Record ID					*/
-	int p_Record_ID					= 	0;
+	private int p_C_Order_ID				= 	0;
 	/**	Qty Entered					*/
-	private BigDecimal qtyEntereds[]= 	null;
+	private BigDecimal m_QtyEntereds[]		= 	null;
 	/**	Lines Array					*/
-	private MOrderLine[] m_lines	= 	null;
-	/** Document Status Old*/
-	private String old_DocStatus	=	"";
+	private MOrderLine[] m_lines			= 	null;
+	/** Document Status Old			*/
+	private String m_OldDocStatus			=	null;
 	
 	/* (non-Javadoc)
 	 * @see org.compiere.process.SvrProcess#prepare()
@@ -57,15 +57,18 @@ public class ChangeWarehouse extends SvrProcess {
 			//	
 			if (para.getParameter() == null)
 				;
+			else if(name.equals("C_Order_ID"))
+				p_C_Order_ID = para.getParameterAsInt();
 			else if(name.equals("M_Warehouse_ID"))
-				p_M_Warehouse_ID	= para.getParameterAsInt();
+				p_M_Warehouse_ID = para.getParameterAsInt();
 			else if(name.equals("C_OrderLine_ID"))
-				p_C_OrderLine_ID	= para.getParameterAsInt();
+				p_C_OrderLine_ID = para.getParameterAsInt();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
-		
-		p_Record_ID = getRecord_ID();
+		//	Get from Record Identifier
+		if(p_C_Order_ID <= 0)
+			p_C_Order_ID = getRecord_ID();
 	}
 
 	/* (non-Javadoc)
@@ -73,24 +76,29 @@ public class ChangeWarehouse extends SvrProcess {
 	 */
 	@Override
 	protected String doIt() throws Exception {
-		if(p_Record_ID < 0) 
+		//	Valid Order
+		if(p_C_Order_ID <= 0) 
 			throw new AdempiereException("@C_Order_ID@ @NotFound@");
-			
-		MOrder m_Order = 
-				new MOrder(getCtx(), p_Record_ID, get_TrxName());
-		old_DocStatus = m_Order.getDocStatus();
+		//	
+		MOrder m_Order = new MOrder(getCtx(), p_C_Order_ID, get_TrxName());
+		//	Get Current Document Status
+		m_OldDocStatus = m_Order.getDocStatus();
 		//	Validate status of order
 		if(m_Order.getDocStatus().equals(X_C_Order.DOCSTATUS_InProgress)){
 			changeWarehouse(m_Order);
-		}else if(m_Order.getDocStatus().equals(X_C_Order.DOCSTATUS_Completed)){
+		} else if(m_Order.getDocStatus().equals(X_C_Order.DOCSTATUS_Completed)){
 			m_Order.processIt(X_C_Order.DOCACTION_Re_Activate);
+			m_Order.saveEx();
 			changeWarehouse(m_Order);
 		}
-		
-		m_Order.processIt(old_DocStatus);
+		//	
+		if(m_Order.getDocStatus().equals(X_C_Order.DOCSTATUS_Invalid))
+			throw new AdempiereException(m_Order.getProcessMsg());
+		//	Process
+		m_Order.processIt(m_OldDocStatus);
 		m_Order.saveEx();
-		
-		return "";
+		//	
+		return "Ok";
 	}
 
 	/**
@@ -104,36 +112,38 @@ public class ChangeWarehouse extends SvrProcess {
 		if(p_C_OrderLine_ID > 0) {
 			sqlWhere = " AND C_OrderLine_ID = " + p_C_OrderLine_ID;
 			m_lines = m_Order.getLines(sqlWhere,X_C_OrderLine.COLUMNNAME_Line);
-		} else 
+		} else {
 			m_lines = m_Order.getLines(true,X_C_OrderLine.COLUMNNAME_Line);
-		
-		qtyEntereds = null;
-		qtyEntereds = new BigDecimal[m_lines.length];
-		
+		}
+		//	
+		m_QtyEntereds = new BigDecimal[m_lines.length];
+		//	
 		for(int i = 0; i < m_lines.length; i++) {
 			MOrderLine mOrderLine = m_lines[i];
-			qtyEntereds[i] = mOrderLine.getQtyEntered();
+			m_QtyEntereds[i] = mOrderLine.getQtyEntered();
 			mOrderLine.setQty(Env.ZERO);
 			mOrderLine.saveEx();
 		}
+		//	
 		m_Order.processIt(X_C_Order.DOCACTION_Prepare);
 		m_Order.saveEx();
-		m_lines = null;
+		//	
 		if(p_C_OrderLine_ID > 0) {
 			sqlWhere = " AND C_OrderLine_ID = " + p_C_OrderLine_ID;
 			m_lines = m_Order.getLines(sqlWhere,X_C_OrderLine.COLUMNNAME_Line);
-		} else 
+		} else {
 			m_lines = m_Order.getLines(true,X_C_OrderLine.COLUMNNAME_Line);
-
+		}
+		//	
 		for(int i = 0; i < m_lines.length; i++) {
 			MOrderLine mOrderLine = m_lines[i];
 			mOrderLine.setM_Warehouse_ID(p_M_Warehouse_ID);
-			mOrderLine.setQty(qtyEntereds[i]);
+			mOrderLine.setQty(m_QtyEntereds[i]);
 			mOrderLine.saveEx();
 		}
+		//	
 		m_Order.processIt(X_C_Order.DOCACTION_Prepare);
 		m_Order.saveEx();
-		
 	}
 
 }
