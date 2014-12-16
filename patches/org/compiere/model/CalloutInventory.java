@@ -53,7 +53,7 @@ public class CalloutInventory extends CalloutEngine
 		BigDecimal bd = null;
 		int M_AttributeSetInstanceOld_ID = -1;
 		if (mField.getColumnName().equals(X_M_InventoryLine.COLUMNNAME_M_AttributeSetInstance_ID))
-			M_AttributeSetInstanceOld_ID = (Integer) mField.getOldValue(); 
+			M_AttributeSetInstanceOld_ID = (Integer) (mField.getOldValue() == null ? M_AttributeSetInstanceOld_ID : mField.getOldValue()); 
 		
 		
 		if (InventoryLine != null && InventoryLine.intValue() != 0) {
