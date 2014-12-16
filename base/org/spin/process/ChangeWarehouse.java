@@ -86,6 +86,10 @@ public class ChangeWarehouse extends SvrProcess {
 			m_Order.processIt(X_C_Order.DOCACTION_Re_Activate);
 			changeWarehouse(m_Order);
 		}
+		
+		m_Order.processIt(old_DocStatus);
+		m_Order.saveEx();
+		
 		return "";
 	}
 
@@ -127,7 +131,7 @@ public class ChangeWarehouse extends SvrProcess {
 			mOrderLine.setQty(qtyEntereds[i]);
 			mOrderLine.saveEx();
 		}
-		m_Order.processIt(old_DocStatus);
+		m_Order.processIt(X_C_Order.DOCACTION_Prepare);
 		m_Order.saveEx();
 		
 	}
