@@ -44,6 +44,8 @@ public class ChangeWarehouse extends SvrProcess {
 	private BigDecimal qtyEntereds[]= 	null;
 	/**	Lines Array					*/
 	private MOrderLine[] m_lines	= 	null;
+	/** Document Status Old*/
+	private String old_DocStatus	=	"";
 	
 	/* (non-Javadoc)
 	 * @see org.compiere.process.SvrProcess#prepare()
@@ -76,6 +78,7 @@ public class ChangeWarehouse extends SvrProcess {
 			
 		MOrder m_Order = 
 				new MOrder(getCtx(), p_Record_ID, get_TrxName());
+		old_DocStatus = m_Order.getDocStatus();
 		//	Validate status of order
 		if(m_Order.getDocStatus().equals(X_C_Order.DOCSTATUS_InProgress)){
 			changeWarehouse(m_Order);
@@ -124,12 +127,9 @@ public class ChangeWarehouse extends SvrProcess {
 			mOrderLine.setQty(qtyEntereds[i]);
 			mOrderLine.saveEx();
 		}
-		m_Order.processIt(X_C_Order.DOCACTION_Prepare);
+		m_Order.processIt(old_DocStatus);
 		m_Order.saveEx();
-		m_Order.setDocAction(X_C_Order.DOCACTION_Complete);
-		m_Order.saveEx();
-		m_Order.processIt(X_C_Order.DOCACTION_Complete);
-		m_Order.saveEx();
+		
 	}
 
 }
