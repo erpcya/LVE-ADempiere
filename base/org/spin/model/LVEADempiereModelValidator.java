@@ -22,6 +22,7 @@ import java.sql.SQLException;
 
 import org.compiere.model.I_C_Cash;
 import org.compiere.model.I_C_DocType;
+import org.compiere.model.I_M_Movement;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
 import org.compiere.model.MBPBankAccount;
@@ -90,6 +91,7 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		engine.addDocValidate(MAllocationHdr.Table_Name, this);
 		engine.addDocValidate(I_C_Cash.Table_Name, this);
 		engine.addModelChange(MCashLine.Table_Name, this);
+		engine.addModelChange(I_M_Movement.Table_Name, this);
 	}
 
 	@Override
