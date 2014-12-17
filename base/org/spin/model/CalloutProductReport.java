@@ -43,13 +43,16 @@ public class CalloutProductReport extends CalloutEngine {
 		//	Set Variable of Doc Type ID of Context
 		Integer p_M_Product_ID = (Integer) value;
 		
-		if (p_M_Product_ID == null || p_M_Product_ID.intValue() == 0)
+		if (p_M_Product_ID == null 
+				|| p_M_Product_ID.intValue() == 0){
+			mTab.setValue("PrintName", "");
 			return "";
+		}
 		//	Set Product
 		MProduct product = MProduct.get(ctx, p_M_Product_ID.intValue());
 		//	
 		mTab.setValue("PrintName", product.getValue() + " - " + product.getName());
-		
+		//
 		return "";
 	}
 	
@@ -67,13 +70,16 @@ public class CalloutProductReport extends CalloutEngine {
 		//	Set Variable of Doc Type ID of Context
 		Integer p_M_Product_Category_ID = (Integer) value;
 		
-		if (p_M_Product_Category_ID == null || p_M_Product_Category_ID.intValue() == 0)
+		if (p_M_Product_Category_ID == null 
+				|| p_M_Product_Category_ID.intValue() == 0){
+			mTab.setValue("PrintName", "");
 			return "";
+		}
 		//	Set Product
 		MProductCategory productCategory = MProductCategory.get(ctx, p_M_Product_Category_ID.intValue());
 		//	
 		mTab.setValue("PrintName", productCategory.getName());
-		
+		//
 		return "";
 	}
 	
