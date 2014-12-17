@@ -22,7 +22,6 @@ import java.sql.SQLException;
 
 import org.compiere.model.I_C_Cash;
 import org.compiere.model.I_C_DocType;
-import org.compiere.model.I_M_Movement;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
 import org.compiere.model.MBPBankAccount;
@@ -40,6 +39,7 @@ import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.X_C_Invoice;
+import org.compiere.model.X_M_Movement;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -91,7 +91,7 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		engine.addDocValidate(MAllocationHdr.Table_Name, this);
 		engine.addDocValidate(I_C_Cash.Table_Name, this);
 		engine.addModelChange(MCashLine.Table_Name, this);
-		engine.addModelChange(I_M_Movement.Table_Name, this);
+		engine.addModelChange(X_M_Movement.Table_Name, this);
 	}
 
 	@Override
@@ -307,11 +307,10 @@ public class LVEADempiereModelValidator implements ModelValidator {
 	public String modelChange(PO po, int type) throws Exception {
 		if(type == TYPE_BEFORE_NEW
 				|| type == TYPE_BEFORE_CHANGE) {
-			if(po.get_TableName().equals(MMovement.Table_Name)) {
+			if(po.get_TableName().equals(X_M_Movement.Table_Name)) {
 				MMovement m_Current_Movement = (MMovement) po;
 				MDocType m_DocType = (MDocType) m_Current_Movement.getC_DocType();
 				m_Current_Movement.setIsInTransit(m_DocType.get_ValueAsBoolean("IsInTransit"));
-				m_Current_Movement.saveEx();
 			}
 		}
 		//Carlos Parada Set BP_BankAccount to PaySelection if have Payment And Set Description From PaySelection
