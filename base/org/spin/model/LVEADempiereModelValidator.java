@@ -154,14 +154,14 @@ public class LVEADempiereModelValidator implements ModelValidator {
 					BigDecimal amt = mInvoiceLine.getLineNetAmt();
 					BigDecimal newOpenAmt = (openAmt.subtract(amt)).multiply(multiplier);
 					if(newOpenAmt.multiply(multiplier).compareTo(Env.ZERO) < 0){
-						MInvoice inv = new MInvoice(m_Current_Invoice.getCtx(), p_C_Invoice_ID, m_Current_Invoice.get_TrxName());
-						String msg = m_Current_Invoice.getDocumentNo() + 
-								": Error @ExcededOpenInvoiceAmt@" 
-								+ " @C_Invoice_ID@=" 
-								+ inv.getDocumentNo() 
-								+ " @OpenAmt@=" + openAmt 
-								+ " @AllocatedAmt@=" + amt 
-								+ " @DifferenceAmt@=" + newOpenAmt;
+						//MInvoice inv = new MInvoice(m_Current_Invoice.getCtx(), p_C_Invoice_ID, m_Current_Invoice.get_TrxName());
+						//String msg = m_Current_Invoice.getDocumentNo() + 
+							//	": Error @ExcededOpenInvoiceAmt@" 
+								//+ " @C_Invoice_ID@=" 
+								//+ inv.getDocumentNo() 
+								//+ " @OpenAmt@=" + openAmt 
+								//+ " @AllocatedAmt@=" + amt 
+								//+ " @DifferenceAmt@=" + newOpenAmt;
 						continue;
 					}
 					//
@@ -305,85 +305,11 @@ public class LVEADempiereModelValidator implements ModelValidator {
 	public String modelChange(PO po, int type) throws Exception {
 		if(type == TYPE_BEFORE_NEW
 				|| type == TYPE_BEFORE_CHANGE) {
-			/*if(po.get_TableName().equals(MCashLine.Table_Name)) {
-				MCashLine m_CashLine = (MCashLine) po;
-				if(m_CashLine.getCashType().equals(MCashLine.CASHTYPE_Invoice)) {
-					Timestamp ts = Env.getContextAsDate(Env.getCtx(), "DateAcct");     //  from C_Cash
-					if (ts == null)
-						ts = new Timestamp(System.currentTimeMillis());
-					
-					String sql = " SELECT C_BPartner_ID, C_Currency_ID, "
-							+ " invoiceOpen(i.C_Invoice_ID, COALESCE(ips.C_InvoicePaySchedule_ID,0)), IsSOTrx,"
-							+ " invoiceDiscount(i.C_Invoice_ID,?,COALESCE(ips.C_InvoicePaySchedule_ID,0))"
-							+ " FROM C_Invoice i"
-							+ " LEFT JOIN C_InvoicePaySchedule ips ON (i.C_Invoice_ID = ips.C_Invoice_ID)"
-							+ " WHERE i.C_Invoice_ID = ?";
-					
-					int p_C_Invoice_ID = m_CashLine.getC_Invoice_ID();
-					
-					PreparedStatement pstmt = null;
-					ResultSet rs = null;
-					
-					try {
-						pstmt = DB.prepareStatement(sql,m_CashLine.get_TrxName());
-						pstmt.setTimestamp(1, ts);
-						pstmt.setInt(2, p_C_Invoice_ID);
-						
-						rs = pstmt.executeQuery();
-						
-						if(rs.next()) {
-							m_CashLine.setC_Currency_ID(new Integer(rs.getInt(2)));
-							BigDecimal PayAmt = rs.getBigDecimal(3);
-							BigDecimal DiscountAmt = rs.getBigDecimal(5);
-							boolean isSOTrx = "Y".equals(rs.getString(4));
-							if (!isSOTrx) {
-								PayAmt = PayAmt.negate();
-								DiscountAmt = DiscountAmt.negate();
-							}
-							//
-							m_CashLine.setAmount(PayAmt.subtract(DiscountAmt));
-							m_CashLine.setDiscountAmt(DiscountAmt);
-							m_CashLine.setWriteOffAmt(Env.ZERO);
-						}
-					} catch(SQLException e) {
-						log.log(Level.SEVERE, "invoice", e);
-						return e.getLocalizedMessage();
-					} finally {
-						DB.close(rs,pstmt);
-						rs = null;
-						pstmt = null;
-					}*/
-					//  Check, if InvTotalAmt exists
-					/*String total = Env.getContext(Env.getCtx(), "InvTotalAmt");
-					if (total == null || total.length() == 0)
-						return "";
-					BigDecimal InvTotalAmt = new BigDecimal(total);
-
-					BigDecimal PayAmt = m_CashLine.getAmount();
-					BigDecimal DiscountAmt = m_CashLine.getDiscountAmt();
-					BigDecimal WriteOffAmt = m_CashLine.getWriteOffAmt();
-					
-					BigDecimal newAmount = (BigDecimal) (m_CashLine.get_Value("Amount") == null ? Env.ZERO : m_CashLine.get_Value("Amount"));
-					BigDecimal oldAmount = (BigDecimal) (m_CashLine.get_ValueOld("Amount") == null ? Env.ZERO : m_CashLine.get_ValueOld("Amount"));
-					
-					if( newAmount.compareTo(oldAmount) == 0)  {
-						WriteOffAmt = InvTotalAmt.subtract(PayAmt).subtract(DiscountAmt);
-						m_CashLine.setWriteOffAmt( WriteOffAmt);
-					} else {
-						PayAmt = InvTotalAmt.subtract(DiscountAmt).subtract(WriteOffAmt);
-						m_CashLine.setAmount(PayAmt);
-					}*/
-			/*	}
-				return "";
-			}*/
-			
 			if(po.get_TableName().equals(MMovement.Table_Name)) {
 				MMovement m_Current_Movement = (MMovement) po;
 				MDocType m_DocType = (MDocType) m_Current_Movement.getC_DocType();
-				if(m_DocType.get_ValueAsBoolean("IsInTransit")) {
-					m_Current_Movement.setIsInTransit(true);
-					m_Current_Movement.saveEx();
-				}
+				m_Current_Movement.setIsInTransit(m_DocType.get_ValueAsBoolean("IsInTransit"));
+				m_Current_Movement.saveEx();
 			}
 		}
 		//Carlos Parada Set BP_BankAccount to PaySelection if have Payment And Set Description From PaySelection
@@ -408,7 +334,6 @@ public class LVEADempiereModelValidator implements ModelValidator {
 				}
 			}
 		}
-
 		return null;
 	}
 }
