@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import org.compiere.model.MCurrency;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
@@ -96,6 +97,9 @@ public class AnalyticalInventory extends SvrProcess {
 	
 	@Override
 	protected String doIt() throws SQLException{
+	//	Get Precision
+		int precision = MCurrency.getStdPrecision(getCtx(), 
+								Env.getContextAsInt(getCtx(), "$C_Currency_ID"));
 		
 		StringBuffer sql = new StringBuffer();	
 		//	Select for Previous Balance
@@ -265,7 +269,7 @@ public class AnalyticalInventory extends SvrProcess {
 		//	
 		try{
 			//	
-			pstmt = DB.prepareStatement (sql.toString(), null);
+			pstmt = DB.prepareStatement (sql.toString(), get_TrxName());
 			//	Query 1 
 			//	Movement Date for Cost
 			pstmt.setTimestamp(i++, p_MovementDate);
@@ -335,7 +339,9 @@ public class AnalyticalInventory extends SvrProcess {
 			BigDecimal v_CurrentCostPrice = Env.ZERO;
 			BigDecimal v_CumulatedAmt = Env.ZERO;
 			BigDecimal v_Multiply = Env.ZERO;
+			//	Loop
 			while (rs.next()){
+				i = 1;
 				v_QtyOut = rs.getBigDecimal("QtyOut");
 				v_QtyIn = rs.getBigDecimal("QtyIn");
 				v_Multiply = rs.getBigDecimal("Multiply");
@@ -347,7 +353,7 @@ public class AnalyticalInventory extends SvrProcess {
 				//	Calculate Cumulated Cost
 				v_CumulatedAmt = v_CurrentCostPrice.multiply(v_LinealBalance);
 				//	Sql Insert
-				String sqlInsert = new String("INSERT INTO T_AnalyticalInventory(" +
+				sql = new StringBuffer("INSERT INTO T_AnalyticalInventory(" +
 						"M_Warehouse_ID, " +
 						"M_Locator_ID, " +
 						"M_Product_Category_ID, " +
@@ -366,29 +372,33 @@ public class AnalyticalInventory extends SvrProcess {
 						"AD_Client_ID, " +
 						"AD_Org_ID, " +
 						"AD_PInstance_ID) " +
-						"VALUES(" +
-						rs.getInt("M_Warehouse_ID") + "," +
-						rs.getInt("M_Locator_ID") + "," +
-						rs.getInt("M_Product_Category_ID") + "," +
-						rs.getInt("M_Product_ID") + "," +
-						rs.getInt("C_UOM_ID") + "," +
-						rs.getBigDecimal("QtyOut") + "," +
-						rs.getBigDecimal("QtyIn") + "," +
-						v_CurrentCostPrice + "," +
-						v_CumulatedAmt + "," +
-						v_Balance + "," +
-						v_LinealBalance + "," +
-						"'" + rs.getDate("MovementDate") + "'," +
-						"'" + rs.getString("MovementType") + "'," +
-						"'" + rs.getString("DocumentNo") + "'," +
-						rs.getInt("seqNo") + "," +
-						rs.getInt("AD_Client_ID") + "," +
-						rs.getInt("AD_Org_ID") + "," +
-						rs.getInt("AD_PInstance_ID") +
-						")");
+						"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+				//	
 				noInserts++;
-				log.fine("SQL Insert = " + sqlInsert);
-				DB.executeUpdateEx(sqlInsert, get_TrxName());
+				log.fine("SQL Insert = " + sql);
+				//	
+				pstmt = DB.prepareStatement (sql.toString(), get_TrxName());
+				//	Add Parameters
+				pstmt.setInt(i++, rs.getInt("M_Warehouse_ID"));
+				pstmt.setInt(i++, rs.getInt("M_Locator_ID"));
+				pstmt.setInt(i++, rs.getInt("M_Product_Category_ID"));
+				pstmt.setInt(i++, rs.getInt("M_Product_ID"));
+				pstmt.setInt(i++, rs.getInt("C_UOM_ID"));
+				pstmt.setBigDecimal(i++, rs.getBigDecimal("QtyOut").setScale(precision, BigDecimal.ROUND_HALF_UP));
+				pstmt.setBigDecimal(i++, rs.getBigDecimal("QtyIn").setScale(precision, BigDecimal.ROUND_HALF_UP));
+				pstmt.setBigDecimal(i++, v_CurrentCostPrice.setScale(precision, BigDecimal.ROUND_HALF_UP));
+				pstmt.setBigDecimal(i++, v_CumulatedAmt.setScale(precision, BigDecimal.ROUND_HALF_UP));
+				pstmt.setBigDecimal(i++, v_Balance.setScale(precision, BigDecimal.ROUND_HALF_UP));
+				pstmt.setBigDecimal(i++, v_LinealBalance.setScale(precision, BigDecimal.ROUND_HALF_UP));
+				pstmt.setTimestamp(i++, rs.getTimestamp("MovementDate"));
+				pstmt.setString(i++, rs.getString("MovementType"));
+				pstmt.setString(i++, rs.getString("DocumentNo"));
+				pstmt.setInt(i++, rs.getInt("seqNo"));
+				pstmt.setInt(i++, rs.getInt("AD_Client_ID"));
+				pstmt.setInt(i++, rs.getInt("AD_Org_ID"));
+				pstmt.setInt(i++, rs.getInt("AD_PInstance_ID"));
+				//	
+				pstmt.executeUpdate();
 			}
 			//	
 			log.fine("No Inserts = " + noInserts);
