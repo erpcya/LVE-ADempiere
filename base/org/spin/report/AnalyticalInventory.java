@@ -265,6 +265,7 @@ public class AnalyticalInventory extends SvrProcess {
 		int i = 1;
 		int noInserts = 0;
 		PreparedStatement pstmt = null;
+		PreparedStatement pstmtInsert = null;
 		ResultSet rs = null;
 		//	
 		try{
@@ -377,28 +378,28 @@ public class AnalyticalInventory extends SvrProcess {
 				noInserts++;
 				log.fine("SQL Insert = " + sql);
 				//	
-				pstmt = DB.prepareStatement (sql.toString(), get_TrxName());
+				pstmtInsert = DB.prepareStatement (sql.toString(), get_TrxName());
 				//	Add Parameters
-				pstmt.setInt(i++, rs.getInt("M_Warehouse_ID"));
-				pstmt.setInt(i++, rs.getInt("M_Locator_ID"));
-				pstmt.setInt(i++, rs.getInt("M_Product_Category_ID"));
-				pstmt.setInt(i++, rs.getInt("M_Product_ID"));
-				pstmt.setInt(i++, rs.getInt("C_UOM_ID"));
-				pstmt.setBigDecimal(i++, rs.getBigDecimal("QtyOut").setScale(precision, BigDecimal.ROUND_HALF_UP));
-				pstmt.setBigDecimal(i++, rs.getBigDecimal("QtyIn").setScale(precision, BigDecimal.ROUND_HALF_UP));
-				pstmt.setBigDecimal(i++, v_CurrentCostPrice.setScale(precision, BigDecimal.ROUND_HALF_UP));
-				pstmt.setBigDecimal(i++, v_CumulatedAmt.setScale(precision, BigDecimal.ROUND_HALF_UP));
-				pstmt.setBigDecimal(i++, v_Balance.setScale(precision, BigDecimal.ROUND_HALF_UP));
-				pstmt.setBigDecimal(i++, v_LinealBalance.setScale(precision, BigDecimal.ROUND_HALF_UP));
-				pstmt.setTimestamp(i++, rs.getTimestamp("MovementDate"));
-				pstmt.setString(i++, rs.getString("MovementType"));
-				pstmt.setString(i++, rs.getString("DocumentNo"));
-				pstmt.setInt(i++, rs.getInt("seqNo"));
-				pstmt.setInt(i++, rs.getInt("AD_Client_ID"));
-				pstmt.setInt(i++, rs.getInt("AD_Org_ID"));
-				pstmt.setInt(i++, rs.getInt("AD_PInstance_ID"));
+				pstmtInsert.setInt(i++, rs.getInt("M_Warehouse_ID"));
+				pstmtInsert.setInt(i++, rs.getInt("M_Locator_ID"));
+				pstmtInsert.setInt(i++, rs.getInt("M_Product_Category_ID"));
+				pstmtInsert.setInt(i++, rs.getInt("M_Product_ID"));
+				pstmtInsert.setInt(i++, rs.getInt("C_UOM_ID"));
+				pstmtInsert.setBigDecimal(i++, rs.getBigDecimal("QtyOut").setScale(precision, BigDecimal.ROUND_HALF_UP));
+				pstmtInsert.setBigDecimal(i++, rs.getBigDecimal("QtyIn").setScale(precision, BigDecimal.ROUND_HALF_UP));
+				pstmtInsert.setBigDecimal(i++, v_CurrentCostPrice.setScale(precision, BigDecimal.ROUND_HALF_UP));
+				pstmtInsert.setBigDecimal(i++, v_CumulatedAmt.setScale(precision, BigDecimal.ROUND_HALF_UP));
+				pstmtInsert.setBigDecimal(i++, v_Balance.setScale(precision, BigDecimal.ROUND_HALF_UP));
+				pstmtInsert.setBigDecimal(i++, v_LinealBalance.setScale(precision, BigDecimal.ROUND_HALF_UP));
+				pstmtInsert.setTimestamp(i++, rs.getTimestamp("MovementDate"));
+				pstmtInsert.setString(i++, rs.getString("MovementType"));
+				pstmtInsert.setString(i++, rs.getString("DocumentNo"));
+				pstmtInsert.setInt(i++, rs.getInt("seqNo"));
+				pstmtInsert.setInt(i++, rs.getInt("AD_Client_ID"));
+				pstmtInsert.setInt(i++, rs.getInt("AD_Org_ID"));
+				pstmtInsert.setInt(i++, rs.getInt("AD_PInstance_ID"));
 				//	
-				pstmt.executeUpdate();
+				pstmtInsert.executeUpdate();
 			}
 			//	
 			log.fine("No Inserts = " + noInserts);
@@ -408,6 +409,7 @@ public class AnalyticalInventory extends SvrProcess {
 			return e.getMessage();
 		} finally {
 			DB.close(rs, pstmt);
+			DB.close(pstmtInsert);
 		}
 		//	
 		log.fine((System.currentTimeMillis() - m_start) + " ms");
