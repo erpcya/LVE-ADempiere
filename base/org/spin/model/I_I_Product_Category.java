@@ -1,4 +1,3 @@
-package org.spin.model;
 /******************************************************************************
  * Product: Adempiere ERP & CRM Smart Business Solution                       *
  * Copyright (C) 1999-2007 ComPiere, Inc. All Rights Reserved.                *
@@ -15,7 +14,7 @@ package org.spin.model;
  * ComPiere, Inc., 2620 Augustine Dr. #245, Santa Clara, CA 95054, USA        *
  * or via info@compiere.org or http://www.compiere.org/license.html           *
  *****************************************************************************/
-
+package org.spin.model;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -24,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for I_Product_Category
  *  @author Adempiere (generated) 
- *  @version Release 3.6.0LTS
+ *  @version Release 3.7.0LTS
  */
 public interface I_I_Product_Category 
 {
@@ -141,7 +140,7 @@ public interface I_I_Product_Category
 	  */
 	public int getM_Product_Category_ID();
 
-	public I_M_Product_Category getM_Product_Category() throws RuntimeException;
+	public org.compiere.model.I_M_Product_Category getM_Product_Category() throws RuntimeException;
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

@@ -25,14 +25,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for LVE_CashTax
  *  @author Adempiere (generated) 
- *  @version Release 3.7.0LTS (1252452765) - $Id$ */
+ *  @version Release 3.7.0LTS - $Id$ */
 public class X_LVE_CashTax extends PO implements I_LVE_CashTax, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20140727L;
+	private static final long serialVersionUID = 20150113L;
 
     /** Standard Constructor */
     public X_LVE_CashTax (Properties ctx, int LVE_CashTax_ID, String trxName)

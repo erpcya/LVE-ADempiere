@@ -1,4 +1,3 @@
-package org.spin.model;
 /******************************************************************************
  * Product: Adempiere ERP & CRM Smart Business Solution                       *
  * Copyright (C) 1999-2007 ComPiere, Inc. All Rights Reserved.                *
@@ -16,24 +15,23 @@ package org.spin.model;
  * or via info@compiere.org or http://www.compiere.org/license.html           *
  *****************************************************************************/
 /** Generated Model - DO NOT CHANGE */
-
+package org.spin.model;
 
 import java.sql.ResultSet;
 import java.util.Properties;
-
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for I_Product_Category
  *  @author Adempiere (generated) 
- *  @version Release 3.6.0LTS - $Id$ */
+ *  @version Release 3.7.0LTS - $Id$ */
 public class X_I_Product_Category extends PO implements I_I_Product_Category, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20130920L;
+	private static final long serialVersionUID = 20150113L;
 
     /** Standard Constructor */
     public X_I_Product_Category (Properties ctx, int I_Product_Category_ID, String trxName)
@@ -134,9 +132,9 @@ public class X_I_Product_Category extends PO implements I_I_Product_Category, I_
 		return ii.intValue();
 	}
 
-	public I_M_Product_Category getM_Product_Category() throws RuntimeException
+	public org.compiere.model.I_M_Product_Category getM_Product_Category() throws RuntimeException
     {
-		return (I_M_Product_Category)MTable.get(getCtx(), I_M_Product_Category.Table_Name)
+		return (org.compiere.model.I_M_Product_Category)MTable.get(getCtx(), org.compiere.model.I_M_Product_Category.Table_Name)
 			.getPO(getM_Product_Category_ID(), get_TrxName());	}
 
 	/** Set Product Category.

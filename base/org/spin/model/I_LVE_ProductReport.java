@@ -21,17 +21,17 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for LVE_CashTax
+/** Generated Interface for LVE_ProductReport
  *  @author Adempiere (generated) 
  *  @version Release 3.7.0LTS
  */
-public interface I_LVE_CashTax 
+public interface I_LVE_ProductReport 
 {
 
-    /** TableName=LVE_CashTax */
-    public static final String Table_Name = "LVE_CashTax";
+    /** TableName=LVE_ProductReport */
+    public static final String Table_Name = "LVE_ProductReport";
 
-    /** AD_Table_ID=53563 */
+    /** AD_Table_ID=53901 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -63,21 +63,6 @@ public interface I_LVE_CashTax
 	  */
 	public int getAD_Org_ID();
 
-    /** Column name C_Cash_ID */
-    public static final String COLUMNNAME_C_Cash_ID = "C_Cash_ID";
-
-	/** Set Cash Journal.
-	  * Cash Journal
-	  */
-	public void setC_Cash_ID (int C_Cash_ID);
-
-	/** Get Cash Journal.
-	  * Cash Journal
-	  */
-	public int getC_Cash_ID();
-
-	public org.compiere.model.I_C_Cash getC_Cash() throws RuntimeException;
-
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -94,20 +79,18 @@ public interface I_LVE_CashTax
 	  */
 	public int getCreatedBy();
 
-    /** Column name C_Tax_ID */
-    public static final String COLUMNNAME_C_Tax_ID = "C_Tax_ID";
+    /** Column name Description */
+    public static final String COLUMNNAME_Description = "Description";
 
-	/** Set Tax.
-	  * Tax identifier
+	/** Set Description.
+	  * Optional short description of the record
 	  */
-	public void setC_Tax_ID (int C_Tax_ID);
+	public void setDescription (String Description);
 
-	/** Get Tax.
-	  * Tax identifier
+	/** Get Description.
+	  * Optional short description of the record
 	  */
-	public int getC_Tax_ID();
-
-	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException;
+	public String getDescription();
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
@@ -122,57 +105,27 @@ public interface I_LVE_CashTax
 	  */
 	public boolean isActive();
 
-    /** Column name IsTaxIncluded */
-    public static final String COLUMNNAME_IsTaxIncluded = "IsTaxIncluded";
+    /** Column name LVE_ProductReport_ID */
+    public static final String COLUMNNAME_LVE_ProductReport_ID = "LVE_ProductReport_ID";
 
-	/** Set Price includes Tax.
-	  * Tax is included in the price 
+	/** Set Product Report ID	  */
+	public void setLVE_ProductReport_ID (int LVE_ProductReport_ID);
+
+	/** Get Product Report ID	  */
+	public int getLVE_ProductReport_ID();
+
+    /** Column name Name */
+    public static final String COLUMNNAME_Name = "Name";
+
+	/** Set Name.
+	  * Alphanumeric identifier of the entity
 	  */
-	public void setIsTaxIncluded (boolean IsTaxIncluded);
+	public void setName (String Name);
 
-	/** Get Price includes Tax.
-	  * Tax is included in the price 
+	/** Get Name.
+	  * Alphanumeric identifier of the entity
 	  */
-	public boolean isTaxIncluded();
-
-    /** Column name Processed */
-    public static final String COLUMNNAME_Processed = "Processed";
-
-	/** Set Processed.
-	  * The document has been processed
-	  */
-	public void setProcessed (boolean Processed);
-
-	/** Get Processed.
-	  * The document has been processed
-	  */
-	public boolean isProcessed();
-
-    /** Column name TaxAmt */
-    public static final String COLUMNNAME_TaxAmt = "TaxAmt";
-
-	/** Set Tax Amount.
-	  * Tax Amount for a document
-	  */
-	public void setTaxAmt (BigDecimal TaxAmt);
-
-	/** Get Tax Amount.
-	  * Tax Amount for a document
-	  */
-	public BigDecimal getTaxAmt();
-
-    /** Column name TaxBaseAmt */
-    public static final String COLUMNNAME_TaxBaseAmt = "TaxBaseAmt";
-
-	/** Set Tax base Amount.
-	  * Base for calculating the tax amount
-	  */
-	public void setTaxBaseAmt (BigDecimal TaxBaseAmt);
-
-	/** Get Tax base Amount.
-	  * Base for calculating the tax amount
-	  */
-	public BigDecimal getTaxBaseAmt();
+	public String getName();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

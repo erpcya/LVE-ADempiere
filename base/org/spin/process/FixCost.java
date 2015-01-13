@@ -216,40 +216,42 @@ public class FixCost extends SvrProcess{
 								
 						}
 						else if (cd.getM_InOutLine_ID()!=0){
-							/*2015-01-05 Add Support to Average PO*/
-							if (cost.getCostingMethod().equals(X_LVE_CostVersion.COSTINGMETHOD_AverageInvoice)){
-								currentQty = currentQty.add(cd.getQty());
-								sumQty = sumQty.add(cd.getQty());
-								
-								if (!currentCost.abs().setScale(costingPrecision,BigDecimal.ROUND_HALF_UP).equals(cd.getAmt().divide(cd.getQty(),MathContext.DECIMAL128).abs().setScale(costingPrecision,BigDecimal.ROUND_HALF_UP)))
-									sumAmt = sumAmt.add(currentCost.multiply(cd.getQty()));
-								else
-									sumAmt = sumAmt.add(cd.getAmt().multiply(new BigDecimal(cd.getQty().signum())));
-								
-								//Only Calculate When Sum Qty Nt Equals to Zero
-								if (!sumQty.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP).equals(Env.ZERO.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP)))
-									currentCost = sumAmt.divide(sumQty, costingPrecision);
-								
-								DB.executeUpdateEx("Update M_CostDetail Set CumulatedAmt=?, CumulatedQty=?, CurrentQty=?,Amt=Abs(Qty * ?),CurrentCostPrice=? Where M_CostDetail_ID=?", new Object[]{cumulatedAmt,cumulatedQty,currentQty,currentCost,currentCost,cd.getM_CostDetail_ID()}, get_TrxName());
-							}else if (cost.getCostingMethod().equals(X_LVE_CostVersion.COSTINGMETHOD_AveragePO)){
-								cumulatedAmt = cumulatedAmt.add(cd.getAmt());
-								cumulatedQty = cumulatedQty.add(cd.getQty());
-								currentQty = currentQty.add(cd.getQty());
-								
-								sumQty = sumQty.add(cd.getQty());
+							
+							currentQty = currentQty.add(cd.getQty());
+							sumQty = sumQty.add(cd.getQty());
+							
+							if (!currentCost.abs().setScale(costingPrecision,BigDecimal.ROUND_HALF_UP).equals(cd.getAmt().divide(cd.getQty(),MathContext.DECIMAL128).abs().setScale(costingPrecision,BigDecimal.ROUND_HALF_UP)))
+								sumAmt = sumAmt.add(currentCost.multiply(cd.getQty()));
+							else
 								sumAmt = sumAmt.add(cd.getAmt().multiply(new BigDecimal(cd.getQty().signum())));
-								//Only Calculate When Sum Qty Nt Equals to Zero
-								if (!sumQty.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP).equals(Env.ZERO.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP)))
-									currentCost = sumAmt.divide(sumQty, costingPrecision);
-								
-								DB.executeUpdateEx("Update M_CostDetail Set CumulatedAmt=?, CumulatedQty=? ,CurrentQty=? ,CurrentCostPrice=?  Where M_CostDetail_ID=?", new Object[]{cumulatedAmt,cumulatedQty,currentQty,currentCost,cd.getM_CostDetail_ID()}, get_TrxName());
-							}
+							
+							//Only Calculate When Sum Qty Nt Equals to Zero
+							if (!sumQty.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP).equals(Env.ZERO.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP)))
+								currentCost = sumAmt.divide(sumQty, costingPrecision);
+							
+							DB.executeUpdateEx("Update M_CostDetail Set CumulatedAmt=?, CumulatedQty=?, CurrentQty=?,Amt=Abs(Qty * ?),CurrentCostPrice=? Where M_CostDetail_ID=?", new Object[]{cumulatedAmt,cumulatedQty,currentQty,currentCost,currentCost,cd.getM_CostDetail_ID()}, get_TrxName());
 						}
 						
 					}//End Inventory Receipt / Shipment Movement
 					//Order Movements 
 					else if (cd.getC_OrderLine_ID()!=0){
-						DB.executeUpdateEx("Update M_CostDetail Set CumulatedAmt=?, CumulatedQty=?, CurrentQty=? ,CurrentCostPrice=? Where M_CostDetail_ID=?", new Object[]{cumulatedAmt,cumulatedQty,currentQty,currentCost,cd.getM_CostDetail_ID()}, get_TrxName());
+						/*2015-01-05 Add Support to Average PO*/
+						if (cost.getCostingMethod().equals(X_LVE_CostVersion.COSTINGMETHOD_AverageInvoice))
+							DB.executeUpdateEx("Update M_CostDetail Set CumulatedAmt=?, CumulatedQty=?, CurrentQty=? ,CurrentCostPrice=? Where M_CostDetail_ID=?", new Object[]{cumulatedAmt,cumulatedQty,currentQty,currentCost,cd.getM_CostDetail_ID()}, get_TrxName());
+						else if (cost.getCostingMethod().equals(X_LVE_CostVersion.COSTINGMETHOD_AveragePO)){
+							cumulatedAmt = cumulatedAmt.add(cd.getAmt());
+							cumulatedQty = cumulatedQty.add(cd.getQty());
+							currentQty = currentQty.add(cd.getQty());
+							
+							sumQty = sumQty.add(cd.getQty());
+							sumAmt = sumAmt.add(cd.getAmt().multiply(new BigDecimal(cd.getQty().signum())));
+							//Only Calculate When Sum Qty Nt Equals to Zero
+							if (!sumQty.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP).equals(Env.ZERO.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP)))
+								currentCost = sumAmt.divide(sumQty, costingPrecision);
+							
+							DB.executeUpdateEx("Update M_CostDetail Set CumulatedAmt=?, CumulatedQty=? ,CurrentQty=? ,CurrentCostPrice=?  Where M_CostDetail_ID=?", new Object[]{cumulatedAmt,cumulatedQty,currentQty,currentCost,cd.getM_CostDetail_ID()}, get_TrxName());
+						}
+							
 					}//End Order Movements
 					//Invoice
 					else if (cd.getC_InvoiceLine_ID()!=0){

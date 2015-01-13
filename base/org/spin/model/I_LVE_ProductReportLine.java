@@ -21,17 +21,17 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for LVE_CashTax
+/** Generated Interface for LVE_ProductReportLine
  *  @author Adempiere (generated) 
  *  @version Release 3.7.0LTS
  */
-public interface I_LVE_CashTax 
+public interface I_LVE_ProductReportLine 
 {
 
-    /** TableName=LVE_CashTax */
-    public static final String Table_Name = "LVE_CashTax";
+    /** TableName=LVE_ProductReportLine */
+    public static final String Table_Name = "LVE_ProductReportLine";
 
-    /** AD_Table_ID=53563 */
+    /** AD_Table_ID=53902 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -63,21 +63,6 @@ public interface I_LVE_CashTax
 	  */
 	public int getAD_Org_ID();
 
-    /** Column name C_Cash_ID */
-    public static final String COLUMNNAME_C_Cash_ID = "C_Cash_ID";
-
-	/** Set Cash Journal.
-	  * Cash Journal
-	  */
-	public void setC_Cash_ID (int C_Cash_ID);
-
-	/** Get Cash Journal.
-	  * Cash Journal
-	  */
-	public int getC_Cash_ID();
-
-	public org.compiere.model.I_C_Cash getC_Cash() throws RuntimeException;
-
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -94,21 +79,6 @@ public interface I_LVE_CashTax
 	  */
 	public int getCreatedBy();
 
-    /** Column name C_Tax_ID */
-    public static final String COLUMNNAME_C_Tax_ID = "C_Tax_ID";
-
-	/** Set Tax.
-	  * Tax identifier
-	  */
-	public void setC_Tax_ID (int C_Tax_ID);
-
-	/** Get Tax.
-	  * Tax identifier
-	  */
-	public int getC_Tax_ID();
-
-	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException;
-
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -122,57 +92,83 @@ public interface I_LVE_CashTax
 	  */
 	public boolean isActive();
 
-    /** Column name IsTaxIncluded */
-    public static final String COLUMNNAME_IsTaxIncluded = "IsTaxIncluded";
+    /** Column name LVE_ProductReport_ID */
+    public static final String COLUMNNAME_LVE_ProductReport_ID = "LVE_ProductReport_ID";
 
-	/** Set Price includes Tax.
-	  * Tax is included in the price 
+	/** Set Product Report ID	  */
+	public void setLVE_ProductReport_ID (int LVE_ProductReport_ID);
+
+	/** Get Product Report ID	  */
+	public int getLVE_ProductReport_ID();
+
+	public org.spin.model.I_LVE_ProductReport getLVE_ProductReport() throws RuntimeException;
+
+    /** Column name LVE_ProductReportLine_ID */
+    public static final String COLUMNNAME_LVE_ProductReportLine_ID = "LVE_ProductReportLine_ID";
+
+	/** Set Product Report Line ID	  */
+	public void setLVE_ProductReportLine_ID (int LVE_ProductReportLine_ID);
+
+	/** Get Product Report Line ID	  */
+	public int getLVE_ProductReportLine_ID();
+
+    /** Column name M_Product_Category_ID */
+    public static final String COLUMNNAME_M_Product_Category_ID = "M_Product_Category_ID";
+
+	/** Set Product Category.
+	  * Category of a Product
 	  */
-	public void setIsTaxIncluded (boolean IsTaxIncluded);
+	public void setM_Product_Category_ID (int M_Product_Category_ID);
 
-	/** Get Price includes Tax.
-	  * Tax is included in the price 
+	/** Get Product Category.
+	  * Category of a Product
 	  */
-	public boolean isTaxIncluded();
+	public int getM_Product_Category_ID();
 
-    /** Column name Processed */
-    public static final String COLUMNNAME_Processed = "Processed";
+	public org.compiere.model.I_M_Product_Category getM_Product_Category() throws RuntimeException;
 
-	/** Set Processed.
-	  * The document has been processed
+    /** Column name M_Product_ID */
+    public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";
+
+	/** Set Product.
+	  * Product, Service, Item
 	  */
-	public void setProcessed (boolean Processed);
+	public void setM_Product_ID (int M_Product_ID);
 
-	/** Get Processed.
-	  * The document has been processed
+	/** Get Product.
+	  * Product, Service, Item
 	  */
-	public boolean isProcessed();
+	public int getM_Product_ID();
 
-    /** Column name TaxAmt */
-    public static final String COLUMNNAME_TaxAmt = "TaxAmt";
+	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException;
 
-	/** Set Tax Amount.
-	  * Tax Amount for a document
+    /** Column name PrintName */
+    public static final String COLUMNNAME_PrintName = "PrintName";
+
+	/** Set Print Text.
+	  * The label text to be printed on a document or correspondence.
 	  */
-	public void setTaxAmt (BigDecimal TaxAmt);
+	public void setPrintName (String PrintName);
 
-	/** Get Tax Amount.
-	  * Tax Amount for a document
+	/** Get Print Text.
+	  * The label text to be printed on a document or correspondence.
 	  */
-	public BigDecimal getTaxAmt();
+	public String getPrintName();
 
-    /** Column name TaxBaseAmt */
-    public static final String COLUMNNAME_TaxBaseAmt = "TaxBaseAmt";
+    /** Column name SeqNo */
+    public static final String COLUMNNAME_SeqNo = "SeqNo";
 
-	/** Set Tax base Amount.
-	  * Base for calculating the tax amount
+	/** Set Sequence.
+	  * Method of ordering records;
+ lowest number comes first
 	  */
-	public void setTaxBaseAmt (BigDecimal TaxBaseAmt);
+	public void setSeqNo (int SeqNo);
 
-	/** Get Tax base Amount.
-	  * Base for calculating the tax amount
+	/** Get Sequence.
+	  * Method of ordering records;
+ lowest number comes first
 	  */
-	public BigDecimal getTaxBaseAmt();
+	public int getSeqNo();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

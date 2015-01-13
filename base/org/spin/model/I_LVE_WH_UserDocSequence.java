@@ -21,17 +21,17 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for LVE_CashTax
+/** Generated Interface for LVE_WH_UserDocSequence
  *  @author Adempiere (generated) 
  *  @version Release 3.7.0LTS
  */
-public interface I_LVE_CashTax 
+public interface I_LVE_WH_UserDocSequence 
 {
 
-    /** TableName=LVE_CashTax */
-    public static final String Table_Name = "LVE_CashTax";
+    /** TableName=LVE_WH_UserDocSequence */
+    public static final String Table_Name = "LVE_WH_UserDocSequence";
 
-    /** AD_Table_ID=53563 */
+    /** AD_Table_ID=53751 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -63,20 +63,61 @@ public interface I_LVE_CashTax
 	  */
 	public int getAD_Org_ID();
 
-    /** Column name C_Cash_ID */
-    public static final String COLUMNNAME_C_Cash_ID = "C_Cash_ID";
+    /** Column name AD_Sequence_ID */
+    public static final String COLUMNNAME_AD_Sequence_ID = "AD_Sequence_ID";
 
-	/** Set Cash Journal.
-	  * Cash Journal
+	/** Set Sequence.
+	  * Document Sequence
 	  */
-	public void setC_Cash_ID (int C_Cash_ID);
+	public void setAD_Sequence_ID (int AD_Sequence_ID);
 
-	/** Get Cash Journal.
-	  * Cash Journal
+	/** Get Sequence.
+	  * Document Sequence
 	  */
-	public int getC_Cash_ID();
+	public int getAD_Sequence_ID();
 
-	public org.compiere.model.I_C_Cash getC_Cash() throws RuntimeException;
+	public org.compiere.model.I_AD_Sequence getAD_Sequence() throws RuntimeException;
+
+    /** Column name AD_User_ID */
+    public static final String COLUMNNAME_AD_User_ID = "AD_User_ID";
+
+	/** Set Usuario.
+	  * User within the system - Internal or Business Partner Contact
+	  */
+	public void setAD_User_ID (int AD_User_ID);
+
+	/** Get Usuario.
+	  * User within the system - Internal or Business Partner Contact
+	  */
+	public int getAD_User_ID();
+
+	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException;
+
+    /** Column name C_DocType_ID */
+    public static final String COLUMNNAME_C_DocType_ID = "C_DocType_ID";
+
+	/** Set Document Type.
+	  * Document type or rules
+	  */
+	public void setC_DocType_ID (int C_DocType_ID);
+
+	/** Get Document Type.
+	  * Document type or rules
+	  */
+	public int getC_DocType_ID();
+
+	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException;
+
+    /** Column name ControlNoSequence_ID */
+    public static final String COLUMNNAME_ControlNoSequence_ID = "ControlNoSequence_ID";
+
+	/** Set Control No Sequence	  */
+	public void setControlNoSequence_ID (int ControlNoSequence_ID);
+
+	/** Get Control No Sequence	  */
+	public int getControlNoSequence_ID();
+
+	public org.compiere.model.I_AD_Sequence getControlNoSequence() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -94,21 +135,6 @@ public interface I_LVE_CashTax
 	  */
 	public int getCreatedBy();
 
-    /** Column name C_Tax_ID */
-    public static final String COLUMNNAME_C_Tax_ID = "C_Tax_ID";
-
-	/** Set Tax.
-	  * Tax identifier
-	  */
-	public void setC_Tax_ID (int C_Tax_ID);
-
-	/** Get Tax.
-	  * Tax identifier
-	  */
-	public int getC_Tax_ID();
-
-	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException;
-
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -122,57 +148,14 @@ public interface I_LVE_CashTax
 	  */
 	public boolean isActive();
 
-    /** Column name IsTaxIncluded */
-    public static final String COLUMNNAME_IsTaxIncluded = "IsTaxIncluded";
+    /** Column name IsPrintSetControlNo */
+    public static final String COLUMNNAME_IsPrintSetControlNo = "IsPrintSetControlNo";
 
-	/** Set Price includes Tax.
-	  * Tax is included in the price 
-	  */
-	public void setIsTaxIncluded (boolean IsTaxIncluded);
+	/** Set Print Set Control No	  */
+	public void setIsPrintSetControlNo (boolean IsPrintSetControlNo);
 
-	/** Get Price includes Tax.
-	  * Tax is included in the price 
-	  */
-	public boolean isTaxIncluded();
-
-    /** Column name Processed */
-    public static final String COLUMNNAME_Processed = "Processed";
-
-	/** Set Processed.
-	  * The document has been processed
-	  */
-	public void setProcessed (boolean Processed);
-
-	/** Get Processed.
-	  * The document has been processed
-	  */
-	public boolean isProcessed();
-
-    /** Column name TaxAmt */
-    public static final String COLUMNNAME_TaxAmt = "TaxAmt";
-
-	/** Set Tax Amount.
-	  * Tax Amount for a document
-	  */
-	public void setTaxAmt (BigDecimal TaxAmt);
-
-	/** Get Tax Amount.
-	  * Tax Amount for a document
-	  */
-	public BigDecimal getTaxAmt();
-
-    /** Column name TaxBaseAmt */
-    public static final String COLUMNNAME_TaxBaseAmt = "TaxBaseAmt";
-
-	/** Set Tax base Amount.
-	  * Base for calculating the tax amount
-	  */
-	public void setTaxBaseAmt (BigDecimal TaxBaseAmt);
-
-	/** Get Tax base Amount.
-	  * Base for calculating the tax amount
-	  */
-	public BigDecimal getTaxBaseAmt();
+	/** Get Print Set Control No	  */
+	public boolean isPrintSetControlNo();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
