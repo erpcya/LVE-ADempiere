@@ -36,6 +36,8 @@ public class ChangeWarehouse extends SvrProcess {
 
 	/**	Warehouse					*/
 	private int	p_M_Warehouse_ID			=	0;
+	/**	Organization					*/
+	private int	p_AD_Org_ID					=	0;
 	/**	Order Line					*/
 	private int	p_C_OrderLine_ID			=	0;
 	/**	Record ID					*/
@@ -59,6 +61,8 @@ public class ChangeWarehouse extends SvrProcess {
 				;
 			else if(name.equals("C_Order_ID"))
 				p_C_Order_ID = para.getParameterAsInt();
+			else if(name.equals("AD_Org_ID"))
+				p_AD_Org_ID = para.getParameterAsInt();
 			else if(name.equals("M_Warehouse_ID"))
 				p_M_Warehouse_ID = para.getParameterAsInt();
 			else if(name.equals("C_OrderLine_ID"))
