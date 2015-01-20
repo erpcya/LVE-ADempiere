@@ -216,6 +216,7 @@ public class AmtInWords_ES implements AmtInWords
 	 */
 	public String getAmtInWords (String amount) throws Exception
 	{
+		System.out.println("El Monto del metodo es " + amount);
 		if (amount == null)
 			return amount;
 
@@ -249,8 +250,15 @@ public class AmtInWords_ES implements AmtInWords
 			newpos = amount.lastIndexOf ('.');  // Old
 		else
 			newpos = amount.lastIndexOf (',');
+		//	Dixon Martinez 2015-01-20 
+		//	Add support for check new pos before parse
+		long pesos = 0; 
+		if(newpos > 0)
+			pesos = Long.parseLong(amount.substring (0, newpos));
+		else 
+			return "";
+		//	End Dixon Martinez
 		
-		long pesos = Long.parseLong(amount.substring (0, newpos));
 		sb.append (convert (pesos));
 		for (int i = 0; i < oldamt.length (); i++)
 		{
