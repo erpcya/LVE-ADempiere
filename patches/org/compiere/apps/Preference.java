@@ -73,6 +73,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Ini;
 import org.compiere.util.Msg;
 import org.compiere.util.ValueNamePair;
+import org.zkoss.zhtml.Object;
 
 /**
  *	Customize settings like L&F, AutoCommit, etc. & Diagnostics
@@ -185,7 +186,13 @@ public final class Preference extends CDialog
 	//	Font Size
 	private JScrollPane scrollPane = new JScrollPane();
 	private CLabel lFontSize = new CLabel();
-	private CComboBox fFontSize = new CComboBox();
+	private final Integer[] FONT_SIZE = new Integer[] 
+			{5, 6, 7, 8, 9, 10, 
+			11, 12, 13, 14, 15, 
+			16, 17, 18, 19, 20, 
+			21, 22, 23, 24, 25, 
+			26, 27, 28, 29, 30};
+	private CComboBox fFontSize = new CComboBox(FONT_SIZE);
 	//	End Yamel Senih
 	private CPanel configPanel = new CPanel();
 
@@ -562,11 +569,6 @@ public final class Preference extends CDialog
 		String[] context = Env.getEntireContext(Env.getCtx());
 		Arrays.sort(context);
 		infoList.setListData(context);
-		//	Yamel Senih 2014-01-27, 16:32:52
-		//	Load Size
-		for(int i = 4; i < 80; i++){
-			fFontSize.addItem(i);
-		}
 		String m_FontSize = Ini.getProperty("FontSize");
 		//	Set Font Size
 		if(m_FontSize != null
