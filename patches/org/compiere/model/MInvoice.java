@@ -932,14 +932,19 @@ public class MInvoice extends X_C_Invoice implements DocAction
 				setC_Currency_ID(Env.getContextAsInt(getCtx(), "#C_Currency_ID"));
 		}
 
-		//	Sales Rep
-		if (getSalesRep_ID() == 0)
-		{
-			int ii = Env.getContextAsInt(getCtx(), "#SalesRep_ID");
-			if (ii != 0)
+		//		Changed By Jorge Colmenarez 2015-01-22 
+		//		Comment the validation for Default Sales Representative because is not Mandatory
+			/*
+		//		Sales Rep
+			if (getSalesRep_ID() == 0)
+			{
+				int ii = Env.getContextAsInt(getCtx(), "#SalesRep_ID");
+				if (ii != 0)
 				setSalesRep_ID (ii);
-		}
-
+			}
+			*/
+		//		End Jorge Colmenarez
+		
 		//	Document Type
 		if (getC_DocType_ID() == 0)
 			setC_DocType_ID (0);	//	make sure it's set to 0
