@@ -952,14 +952,18 @@ public class MOrder extends X_C_Order implements DocAction
 			else
 				setC_Currency_ID(Env.getContextAsInt(getCtx(), "#C_Currency_ID"));
 		}
-
 		//	Default Sales Rep
+		//	Changed By Jorge Colmenarez 2015-01-22 
+		//	Comment the validation for Default Sales Representative because is not Mandatory
+		/*
 		if (getSalesRep_ID() == 0)
 		{
 			int ii = Env.getContextAsInt(getCtx(), "#SalesRep_ID");
 			if (ii != 0)
-				setSalesRep_ID (ii);
+			setSalesRep_ID (ii);
 		}
+		*/
+		//		End Jorge Colmenarez
 
 		//	Default Document Type
 		if (getC_DocTypeTarget_ID() == 0)
