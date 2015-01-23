@@ -216,7 +216,6 @@ public class AmtInWords_ES implements AmtInWords
 	 */
 	public String getAmtInWords (String amount) throws Exception
 	{
-		System.out.println("El Monto del metodo es " + amount);
 		if (amount == null)
 			return amount;
 
