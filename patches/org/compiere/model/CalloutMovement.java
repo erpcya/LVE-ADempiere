@@ -174,6 +174,10 @@ public class CalloutMovement extends CalloutEngine
 	
 		//	Set value Affects Book
 		mTab.setValue("IsInTransit", m_DocType.get_ValueAsBoolean("IsInTransit"));
+		//	Dixon Martinez 2015-01-27
+		//	Set Value is manual
+		mTab.setValue("IsManual", m_DocType.get_ValueAsBoolean("IsManual"));
+		//	End Dixon Martinez
 		
 		return "";
 	}
