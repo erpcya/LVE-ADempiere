@@ -157,17 +157,9 @@ public class LVEADempiereModelValidator implements ModelValidator {
 					//	get open amount of document
 					openAmount(p_C_Invoice_ID);
 					//
-					BigDecimal amt = mInvoiceLine.getLineNetAmt();
+					BigDecimal amt = mInvoiceLine.getLineTotalAmt();
 					BigDecimal newOpenAmt = (openAmt.subtract(amt)).multiply(multiplier);
 					if(newOpenAmt.multiply(multiplier).compareTo(Env.ZERO) < 0){
-						//MInvoice inv = new MInvoice(m_Current_Invoice.getCtx(), p_C_Invoice_ID, m_Current_Invoice.get_TrxName());
-						//String msg = m_Current_Invoice.getDocumentNo() + 
-							//	": Error @ExcededOpenInvoiceAmt@" 
-								//+ " @C_Invoice_ID@=" 
-								//+ inv.getDocumentNo() 
-								//+ " @OpenAmt@=" + openAmt 
-								//+ " @AllocatedAmt@=" + amt 
-								//+ " @DifferenceAmt@=" + newOpenAmt;
 						continue;
 					}
 					//
@@ -179,8 +171,6 @@ public class LVEADempiereModelValidator implements ModelValidator {
 				}
 				//	Complete Allocation
 				completeAllocation();
-				//	Check current invoice
-				m_Current_Invoice.testAllocation();
 			}
 			else if(po.get_TableName().equals(MInOut.Table_Name)){
 				MInOut inv = (MInOut) po;
@@ -222,7 +212,10 @@ public class LVEADempiereModelValidator implements ModelValidator {
 					}
 					
 				}
-			}
+			}/*else if(po.get_TableName().equals(MAllocationHdr.Table_Name)) {
+				MInvoice.setIsPaid(m_Current_Invoice.getCtx(), m_Current_C_BPartner_ID, m_Current_Invoice.get_TrxName());
+				m_Current_Invoice.saveEx();
+			}*/
 		} 
 		//
 		return null;

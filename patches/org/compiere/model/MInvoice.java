@@ -1883,6 +1883,11 @@ public class MInvoice extends X_C_Invoice implements DocAction
 
 		m_processMsg = info.toString().trim();
 		setProcessed(true);
+		//	Dixon Martinez 2015-01-05
+		//	Verify if invoice is paid
+		saveEx();
+		testAllocation();
+		//	End Dixon Martinez
 		setDocAction(DOCACTION_Close);
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
