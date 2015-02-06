@@ -94,7 +94,8 @@ public class VInvoiceGen extends InvoiceGen implements FormPanel, ActionListener
 			dynInit();
 			jbInit();
 			//	Initial Load
-			initialLoad();
+			//initialLoad();
+			loadDocumentType();
 		}
 		catch(Exception ex)
 		{
@@ -212,7 +213,7 @@ public class VInvoiceGen extends InvoiceGen implements FormPanel, ActionListener
         lDocumentType.setText(Msg.translate(Env.getCtx(), "C_DocTypeTarget_ID"));
         cmbDocumentType.addActionListener(this);
         //	Load Document Type
-        loadDocumentType();
+        //	loadDocumentType();
         
         panel.getStatusBar().setStatusLine(Msg.getMsg(Env.getCtx(), "InvGenerateSel"));//@@
 	}	//	fillPicks
@@ -247,7 +248,8 @@ public class VInvoiceGen extends InvoiceGen implements FormPanel, ActionListener
 			return;
 		} else if(cmbDocumentType.equals(e.getSource())
 				|| cmbIsImmediateDelivery.equals(e.getSource())) {
-			executeQuery();
+			//executeQuery();
+			initialLoad();
 		    return;
 		}
 		
