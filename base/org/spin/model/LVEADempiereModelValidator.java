@@ -231,14 +231,16 @@ public class LVEADempiereModelValidator implements ModelValidator {
 	/**
 	 * Open Amount
 	 * @author <a href="mailto:dixon.22martinez@gmail.com">Dixon Martinez</a> 12/12/2014, 11:27:54
+	 * Close Connection
+	 * @contributor <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 06/02/2015, 14:30:13
 	 * @param p_C_Invoice_ID
 	 * @return
 	 * @return BigDecimal
 	 */
 	private BigDecimal openAmount(int p_C_Invoice_ID) {
 		//	
+		CallableStatement cs = null;
 		try {
-			CallableStatement cs = null;
 			cs = DB.prepareCall("{call invoiceopen(?, 0, ?)}");
 			cs.setInt(1, p_C_Invoice_ID);
 			cs.registerOutParameter(2, java.sql.Types.NUMERIC);
@@ -246,6 +248,9 @@ public class LVEADempiereModelValidator implements ModelValidator {
 			openAmt = cs.getBigDecimal(2);
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
+		finally{
+			DB.close(cs);
 		}
 		return openAmt;
 	}
