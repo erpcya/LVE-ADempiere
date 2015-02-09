@@ -37,6 +37,7 @@ import org.compiere.model.MPaySelectionCheck;
 import org.compiere.model.MPayment;
 import org.compiere.model.MSequence;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTax;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -134,6 +135,9 @@ public class LVEADempiereModelValidator implements ModelValidator {
 				m_Current_C_BPartner_ID = 0;
 				int p_C_Invoice_ID = 0;
 				int p_C_BPartner_ID = 0;
+				MDocType docType = (MDocType) m_Current_Invoice.getC_DocType();
+				if(!docType.get_ValueAsBoolean("IsAutoAllocation")) 
+					return null;
 				
 				//	get invoice lines  
 				MInvoiceLine [] m_InvoiceLine = m_Current_Invoice.getLines();
@@ -156,8 +160,21 @@ public class LVEADempiereModelValidator implements ModelValidator {
 					setMultiplier(m_InvoiceAffected.getC_DocType());
 					//	get open amount of document
 					openAmount(p_C_Invoice_ID);
+					
+					BigDecimal amt;// = mInvoiceLine.getLineNetAmt() ;
 					//
-					BigDecimal amt = mInvoiceLine.getLineTotalAmt();
+					BigDecimal TaxAmt = Env.ZERO;
+				//	setLineNetAmt();
+					MTax tax = MTax.get (mInvoiceLine.getCtx(), mInvoiceLine.getC_Tax_ID());
+					//
+					TaxAmt = tax.calculateTax(mInvoiceLine.getLineNetAmt(), mInvoiceLine.isTaxIncluded(), mInvoiceLine.getPrecision());
+					if (mInvoiceLine.isTaxIncluded())
+						amt = mInvoiceLine.getLineNetAmt();
+					else
+						amt = mInvoiceLine.getLineNetAmt().add(TaxAmt);
+					
+					
+					
 					BigDecimal newOpenAmt = (openAmt.subtract(amt)).multiply(multiplier);
 					if(newOpenAmt.multiply(multiplier).compareTo(Env.ZERO) < 0){
 						continue;
