@@ -97,6 +97,10 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		engine.addModelChange(MCashLine.Table_Name, this);
 		engine.addModelChange(X_M_Movement.Table_Name, this);
 		engine.addDocValidate(X_M_InOut.Table_Name, this);
+		
+		engine.addModelChange(X_M_Movement.Table_Name, this);
+		engine.addModelChange(X_M_InOut.Table_Name, this);
+		engine.addModelChange(MInvoice.Table_Name, this);
 	}
 
 	@Override
@@ -371,6 +375,15 @@ public class LVEADempiereModelValidator implements ModelValidator {
 				MMovement m_Current_Movement = (MMovement) po;
 				MDocType m_DocType = (MDocType) m_Current_Movement.getC_DocType();
 				m_Current_Movement.setIsInTransit(m_DocType.get_ValueAsBoolean("IsInTransit"));
+				m_Current_Movement.set_ValueOfColumn("IsManual", m_DocType.get_ValueAsBoolean("IsManual"));
+			}else if(po.get_TableName().equals(X_M_InOut.Table_Name)) {
+				X_M_InOut m_Current_InOut = (X_M_InOut) po;
+				MDocType m_DocType = (MDocType) m_Current_InOut.getC_DocType();
+				m_Current_InOut.set_ValueOfColumn("IsManual", m_DocType.get_ValueAsBoolean("IsManual"));
+			}else if(po.get_TableName().equals(MInvoice.Table_Name)) {
+				MInvoice m_Current_Invoice = (MInvoice) po;
+				MDocType m_DocType = (MDocType) m_Current_Invoice.getC_DocTypeTarget();
+				m_Current_Invoice.set_ValueOfColumn("IsManual", m_DocType.get_ValueAsBoolean("IsManual"));
 			}
 		}
 		//Carlos Parada Set BP_BankAccount to PaySelection if have Payment And Set Description From PaySelection
