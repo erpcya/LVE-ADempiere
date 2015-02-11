@@ -73,7 +73,6 @@ import org.compiere.util.Env;
 import org.compiere.util.Ini;
 import org.compiere.util.Msg;
 import org.compiere.util.ValueNamePair;
-import org.zkoss.zhtml.Object;
 
 /**
  *	Customize settings like L&F, AutoCommit, etc. & Diagnostics
