@@ -30,7 +30,7 @@ INSERT INTO AD_Column_Trl (AD_Language,AD_Column_ID, Name, IsTranslated,AD_Clien
 
 -- Feb 9, 2015 9:18:31 AM VET
 -- LVE ADempiere
-ALTER TABLE C_DocType ADD IsAutoAllocation CHAR(1) DEFAULT NULL  CHECK (IsAutoAllocation IN ('Y','N'))
+ALTER TABLE C_DocType ADD IsAutoAllocation CHAR(1) DEFAULT 'Y'  CHECK (IsAutoAllocation IN ('Y','N'))
 ;
 
 -- Feb 9, 2015 9:18:45 AM VET
