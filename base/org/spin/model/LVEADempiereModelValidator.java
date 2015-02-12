@@ -139,7 +139,7 @@ public class LVEADempiereModelValidator implements ModelValidator {
 				m_Current_C_BPartner_ID = 0;
 				int p_C_Invoice_ID = 0;
 				int p_C_BPartner_ID = 0;
-				MDocType docType = (MDocType) m_Current_Invoice.getC_DocType();
+				MDocType docType = (MDocType) m_Current_Invoice.getC_DocTypeTarget();
 				if(!docType.get_ValueAsBoolean("IsAutoAllocation")) 
 					return null;
 				
