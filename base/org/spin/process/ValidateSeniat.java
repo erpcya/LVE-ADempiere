@@ -58,7 +58,7 @@ public class ValidateSeniat extends SvrProcess {
 		if(p_C_BPartner_ID == 0)
 			throw new AdempiereException("@C_BPartner_ID@ @NotFound@");
 		//	Do
-		MBPartner m_BPartner = new MBPartner(getCtx(), p_C_BPartner_ID, get_TrxName());
+		MBPartner m_BPartner = MBPartner.get(getCtx(), p_C_BPartner_ID);
 		//	
 		String m_TaxID = m_BPartner.getTaxID();
 		//	Validate Tax ID
@@ -89,10 +89,10 @@ public class ValidateSeniat extends SvrProcess {
 				m_BPartner.saveEx();
 			}
 			//	Set Message
-			String msg = "@Value@ :" +validate.getM_Rif()+" "+
-					 "@Name@: "+validate.getM_Name()+" "+
-					 "@RetentionAgent@ :" +validate.getM_Agent()+"  "+
-					 "@IVATaxpayer@ :" + validate.getM_Contributor();
+			String msg = "@Value@ : " +validate.getM_Rif()+"\n"+
+					 "@Name@: "+validate.getM_Name()+"\n"+
+					 "@RetentionAgent@: " +validate.getM_Agent()+"\n"+
+					 "@IVATaxpayer@: " + validate.getM_Contributor();
 			
 			addLog(msg);
 			return msg;

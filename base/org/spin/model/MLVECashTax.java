@@ -207,7 +207,7 @@ public class MLVECashTax extends X_LVE_CashTax
 		String sql = "SELECT COALESCE(cl.A_Base_Amount,cl.Amount), cl.Amount-COALESCE(cl.A_Base_Amount,0),cl.AffectsBook "
 			+ " FROM C_CashLine cl "
 			+ " INNER JOIN C_Cash c ON (cl.C_Cash_ID=c.C_Cash_ID) "
-			+ " WHERE cl.C_Cash_ID=? AND cl.C_Tax_ID=? And cl.AffectsBook='Y'";
+			+ " WHERE cl.C_Cash_ID=? AND cl.C_Tax_ID=?";
 		PreparedStatement pstmt = null;
 		try
 		{
