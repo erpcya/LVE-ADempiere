@@ -96,7 +96,7 @@
       	<src path="${patches}"/>
       	<src path="${base}"/>
 		<classpath refid="project.class.path"/>
-		</javac>
+	</javac>
   	</target>
   	
 	<target name="makedir" depends="init" unless="dist.dir.exists">
