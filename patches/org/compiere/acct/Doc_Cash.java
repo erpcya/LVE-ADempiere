@@ -27,6 +27,7 @@ import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCash;
 import org.compiere.model.MCashBook;
 import org.compiere.model.MCashLine;
+import org.compiere.model.MDocType;
 import org.compiere.model.MSysConfig;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -237,7 +238,7 @@ public class Doc_Cash extends Doc
 				 */
 				// fact.createLine(line, getAccount(Doc.ACCTTYPE_CashAsset, as),
 				// p_vo.C_Currency_ID, null, line.getAmount().negate());
-				assetAmt = assetAmt.subtract(line.getAmount().negate());
+				assetAmt = assetAmt.subtract(line.getBaseAmount().negate());
 			} else if (CashType.equals(DocLine_Cash.CASHTYPE_DIFFERENCE))
 			{ // amount is pos/neg
 				// CashDifference DR
@@ -281,24 +282,46 @@ public class Doc_Cash extends Doc
 		} // lines
 
 		/**
-		 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a>
+		 * 	@author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a>
 		 *         Jun 21, 2013, 11:53:01 AM Add Tax To acct
+		 * 	@collaborator <a href="mailto:jlct.master@gmail.com">Jorge Colmenarez</a>
+		 * 	Add Support for set Account Type from Document Type of the Cash
 		 */
 		if (MSysConfig.getBooleanValue("TAX_ACCT_CASH", false))
 		{
 			BigDecimal amt = Env.ZERO;
+			/**	Added By Jorge Colmenarez 2014-12-18 */
+			MCash mCash = new MCash(getCtx(), get_ID(), getTrxName());
+			MDocType mDocType = new MDocType(getCtx(), mCash.get_ValueAsInt("C_DocTypeTarget_ID"), getTrxName());
+			/** End Jorge Colmenarez */
 			// TaxDue CR
 			for (int i = 0; i < m_taxes.length; i++)
 			{
 				amt = m_taxes[i].getAmount();
 				if (amt != null && amt.signum() != 0)
 				{
-					FactLine tl = fact.createLine(null,
-							m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),
+					/**
+					 * 	Commented By Jorge Colmenarez 2014-12-18 
+					 *  FactLine tl = fact.createLine(null,m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),getC_Currency_ID(), amt.negate(), null);
+					 *  
+					 *  Added By Jorge Colmenarez 
+					 *  Set Account Type from Document Type 
+					 *   */
+					FactLine tl;
+					if(mDocType.isSOTrx()==true){
+						tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),
+								getC_Currency_ID(), amt.negate(), null);
+					}else{
+						tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxCredit, as),
 							getC_Currency_ID(), amt.negate(), null);
-
+					}
+					
+					assetAmt=assetAmt.add(amt);
+					
+					/** End Jorge Colmenarez */
 					if (tl != null)
 						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+					
 				}
 			}
 		}

@@ -25,6 +25,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
+import org.compiere.model.X_C_Cash;
 import org.compiere.util.Env;
 
 /**
@@ -43,7 +44,6 @@ public class DocLine_Cash extends DocLine
 	 *  @param line cash line
 	 *  @param doc header
 	 */
-	@SuppressWarnings("static-access")
 	public DocLine_Cash (MCashLine line, Doc_Cash doc)
 	{
 		super (line, doc);
@@ -51,7 +51,7 @@ public class DocLine_Cash extends DocLine
 		m_C_BankAccount_ID = line.getC_BankAccount_ID();
 		m_C_Invoice_ID = line.getC_Invoice_ID();
 		m_C_Payment_ID = line.getC_Payment_ID();
-
+		BigDecimal baseAmt = Env.ZERO;
 		//
 		if (m_C_Invoice_ID != 0)
 		{
@@ -72,16 +72,18 @@ public class DocLine_Cash extends DocLine
 		 */
 		if (MSysConfig.getBooleanValue("TAX_ACCT_CASH", false))
 		{
+			baseAmt = (BigDecimal)line.get_Value("a_Base_Amount");
 			MCash cash = new MCash(line.getCtx(), line.getC_Cash_ID(), line.get_TrxName());
 			if (m_CashType.equals(DocLine_Cash.CASHTYPE_CHARGE) && 
-					line.get_ValueAsBoolean("AffectsBook") &&
-						((BigDecimal)line.get_Value("a_Base_Amount"))!=Env.ZERO && 
-							(cash.getDocStatus().equals(cash.DOCACTION_Complete)||cash.getDocStatus().equals(cash.DOCACTION_Close)))
+					baseAmt !=Env.ZERO && 
+						(cash.getDocStatus().equals(X_C_Cash.DOCACTION_Complete)||cash.getDocStatus().equals(X_C_Cash.DOCACTION_Close)))
 			{
 				MTax tax = new MTax(line.getCtx(), line.get_ValueAsInt("C_Tax_ID"), null);
 				MCharge charge = new MCharge(line.getCtx(), line.getC_Charge_ID(), null);
-				BigDecimal taxAmt =tax.calculateTax(((BigDecimal)line.get_Value("a_Base_Amount")),charge.isTaxIncluded() ,2); 
-				m_BaseAmount= line.getAmount().subtract(taxAmt);
+				BigDecimal taxAmt =tax.calculateTax(baseAmt,charge.isTaxIncluded() ,2); 
+				m_BaseAmount =baseAmt.add(
+						line.getAmount().subtract(baseAmt).subtract(taxAmt)
+						) ;
 			}
 			else
 				m_BaseAmount = line.getAmount();
