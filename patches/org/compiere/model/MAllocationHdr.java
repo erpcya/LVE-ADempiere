@@ -413,10 +413,16 @@ public final class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			{
 				final String whereClause = I_C_Invoice.COLUMNNAME_C_Invoice_ID + "=? AND " 
 								   + I_C_Invoice.COLUMNNAME_IsPaid + "=? AND "
-								   + I_C_Invoice.COLUMNNAME_DocStatus + " NOT IN (?,?)";
+								   + I_C_Invoice.COLUMNNAME_DocStatus + " NOT IN (?,?) "
+								   //2015-02-19 Carlos Parada Add Filter GrandTotal Distinct Zero
+								   		+ " AND GrandTotal <> ? " ;
+									//End Carlos Parada
 				boolean InvoiceIsPaid = new Query(getCtx(), I_C_Invoice.Table_Name, whereClause, get_TrxName())
 				.setClient_ID()
-				.setParameters(line.getC_Invoice_ID(), "Y", X_C_Invoice.DOCSTATUS_Voided, X_C_Invoice.DOCSTATUS_Reversed)
+				.setParameters(line.getC_Invoice_ID(), "Y", X_C_Invoice.DOCSTATUS_Voided, X_C_Invoice.DOCSTATUS_Reversed
+						//2015-02-19 Carlos Parada Add Filter GrandTotal Distinct Zero
+						,Env.ZERO)
+						//End Carlos Parada
 				.match();
 				if(InvoiceIsPaid){
 					//	Yamel Senih 2013-11-22, 09:36:32
