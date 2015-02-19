@@ -240,7 +240,7 @@ public class StorageMaintaining extends SvrProcess {
 			stg.setM_AttributeSetInstance_ID(rs.getInt("M_AttributeSetInstance_ID"));
 			stg.setQtyOnHand(rs.getBigDecimal("MovementQty"));
 			stg.save(get_TrxName());
-			addLog("@QtyOnHand@ " + stg.getQtyOnHand() + "@Processed@");
+			addLog("@QtyOnHand@ " + stg.getQtyOnHand() + " @Processed@");
 		}
 		
 		DB.close(rs, ps);
