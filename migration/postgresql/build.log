@@ -75,6 +75,7 @@ File /opt/Development/workspace/LVE-ADempiere/migration/postgresql/070UpdateTran
 File /opt/Development/workspace/LVE-ADempiere/migration/postgresql/071AddColumnIsPrintSetControlNo.sql status 0
 File /opt/Development/workspace/LVE-ADempiere/migration/postgresql/072AddColumnReversal_IDInM_Production.sql status 0
 File /opt/Development/workspace/LVE-ADempiere/migration/postgresql/073AddColumnsIsAutoAllocationInDocumentType_postgresql.sql status 0
+File /opt/Development/workspace/LVE-ADempiere/migration/postgresql/106AddMessagesforWithholding.sql status 0
 File /opt/Development/workspace/LVE-ADempiere/migration/postgresql/800AddTables_To_SGDB_postgresql.sql status 0
 File /opt/Development/workspace/LVE-ADempiere/migration/postgresql/801AddAlterTablesInDefaultADempiere.sql status 0
 File /opt/Development/workspace/LVE-ADempiere/migration/postgresql/802AddForeignKeys.sql status 0
