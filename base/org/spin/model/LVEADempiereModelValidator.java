@@ -116,9 +116,43 @@ public class LVEADempiereModelValidator implements ModelValidator {
 	
 	@Override
 	public String docValidate(PO po, int timing) {
-		if(timing == TIMING_BEFORE_REVERSECORRECT){
+		if(timing == TIMING_BEFORE_REVERSECORRECT 
+				|| timing == TIMING_BEFORE_VOID) {
 			if(po.get_TableName().equals(X_C_Invoice.Table_Name)){
-				return validCashLineReference(po.get_TrxName(), po.get_ID());
+				//	Yamel Senih 2015-02-23
+				//	Add Valid Reference for Affected Document
+				String msg =  validCashLineReference(po.get_TrxName(), po.get_ID());
+				//	
+				if(msg != null)
+					return msg;
+				//	Valid Affected Document
+				log.fine(MInvoice.Table_Name + " -- TIMING_BEFORE_REVERSECORRECT || TIMING_BEFORE_VOID");
+				//	Retention
+				MInvoice ret = (MInvoice) po;
+				//	Verify Reference from Declaration
+				String sql = new String("SELECT MAX(dr.C_Invoice_ID) C_Invoice_ID " +
+						"FROM C_Invoice dr " +
+						"INNER JOIN C_InvoiceLine drl ON(drl.C_Invoice_ID = dr.C_Invoice_ID) " +
+						"WHERE dr.DocStatus IN('CO', 'CL') " +
+						"AND drl.DocAffected_ID = ?");
+				//	Log
+				log.fine("SQL Declaration=" + sql);
+				//	Search
+				int m_C_Invoice_ID = DB.getSQLValue(ret.get_TrxName(), 
+						sql, ret.getC_Invoice_ID());
+				//	Valid Exists
+				if(m_C_Invoice_ID <= 0)
+					return null;
+				//	If exist a Declaration
+				MInvoice m_Affect = MInvoice.get(Env.getCtx(), m_C_Invoice_ID);
+				//	Get Document Type
+				MDocType m_DocType = MDocType.get(Env.getCtx(), m_Affect.getC_DocType_ID());
+				//	Valid Document
+				if(m_DocType.get_ValueAsBoolean("IsValidateReference")) {
+					return "@Error@ @SQLErrorReferenced@ "
+							+ "@DocumentNo@ " + m_Affect.getDocumentInfo();
+				}
+				//	End Yamel Senih
 			}
 		}else if (timing==TIMING_BEFORE_PREPARE)	{	//	Dixon Martinez Add Tax in Cash
 			if(po.get_TableName().equals(MCash.Table_Name))
@@ -131,8 +165,7 @@ public class LVEADempiereModelValidator implements ModelValidator {
 						return Msg.translate(Env.getLanguage(Env.getCtx()), "TaxCalculatingError");
 				}
 			} 
-		}
-		else if(timing == TIMING_AFTER_COMPLETE ) {
+		} else if(timing == TIMING_AFTER_COMPLETE ) {
 			if(po.get_TableName().equals(X_C_Invoice.Table_Name)) {
 				m_Current_Invoice = (MInvoice) po;
 				grandAmount = Env.ZERO;
