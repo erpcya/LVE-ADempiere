@@ -726,17 +726,32 @@ public class DocLine
 	 *	@param whereClause null are OK
 	 *  @return costs
 	 */
-	public BigDecimal getProductCosts (MAcctSchema as, int AD_Org_ID, boolean zeroCostsOK, String whereClause)
+	public BigDecimal getProductCosts (MAcctSchema as, int AD_Org_ID, boolean zeroCostsOK, String whereClause, int p_ID)
 	{
 		if (whereClause != null && !as.getCostingMethod().equals(MAcctSchema.COSTINGMETHOD_StandardCosting))
 		{
 			MCostDetail cd = MCostDetail.get (Env.getCtx(), whereClause, 
-					get_ID(), getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), p_po.get_TrxName());
+					(p_ID==0? get_ID(): p_ID), getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), p_po.get_TrxName());
 			if (cd != null)
 				return cd.getAmt();
 		}
 		return getProductCosts(as, AD_Org_ID, zeroCostsOK);
 	}   //  getProductCosts
+	
+	/**
+	 * get Product Cost
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> Mar 10, 2015, 9:40:57 PM
+	 * @param as
+	 * @param AD_Org_ID
+	 * @param zeroCostsOK
+	 * @param whereClause
+	 * @return
+	 * @return BigDecimal
+	 */
+	public BigDecimal getProductCosts (MAcctSchema as, int AD_Org_ID, boolean zeroCostsOK, String whereClause)
+	{
+		return getProductCosts(as, AD_Org_ID,zeroCostsOK,whereClause, 0);
+	}
 	// end MZ
 	
 	/**
