@@ -54,6 +54,7 @@ public class CreateFromRequisition extends SvrProcess{
 			rfqline.setM_Product_ID(rl.getM_Product_ID());
 			rfqline.setDescription(rl.getDescription());
 			rfqline.setLine(line*lines);
+			rfqline.setM_AttributeSetInstance_ID(rl.getM_AttributeSetInstance_ID());;
 			rfqline.saveEx(get_TrxName());
 			
 			MRfQLineQty rfqlineqty = new MRfQLineQty(rfqline);
