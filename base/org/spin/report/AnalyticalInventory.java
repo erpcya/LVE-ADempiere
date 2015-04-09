@@ -130,7 +130,7 @@ public class AnalyticalInventory extends SvrProcess {
 		//	Add Current Cost Price
 		sql.append("productCostPriceAt(p.M_Product_ID, ?) CurrentCostPrice, ");
 		//	Movement Date
-		sql.append(DB.TO_DATE(p_MovementDate, true) + " MovementDate, " +
+		sql.append("NULL MovementDate, " +
 				"'PB' MovementType, ");
 		//	Validate Multiplier
 		if(p_MovementDate_To != null)
@@ -340,6 +340,7 @@ public class AnalyticalInventory extends SvrProcess {
 			BigDecimal v_CurrentCostPrice = Env.ZERO;
 			BigDecimal v_CumulatedAmt = Env.ZERO;
 			BigDecimal v_Multiply = Env.ZERO;
+			Timestamp v_MovementDate = null;
 			//	Loop
 			while (rs.next()){
 				i = 1;
@@ -353,6 +354,10 @@ public class AnalyticalInventory extends SvrProcess {
 				v_Balance = v_Balance.add(v_LinealBalance);
 				//	Calculate Cumulated Cost
 				v_CumulatedAmt = v_CurrentCostPrice.multiply(v_LinealBalance);
+				//	Movement Date
+				v_MovementDate = rs.getTimestamp("MovementDate");
+				if(v_MovementDate == null)
+					v_MovementDate = p_MovementDate;
 				//	Sql Insert
 				sql = new StringBuffer("INSERT INTO T_AnalyticalInventory(" +
 						"M_Warehouse_ID, " +
@@ -391,7 +396,7 @@ public class AnalyticalInventory extends SvrProcess {
 				pstmtInsert.setBigDecimal(i++, v_CumulatedAmt.setScale(precision, BigDecimal.ROUND_HALF_UP));
 				pstmtInsert.setBigDecimal(i++, v_Balance.setScale(precision, BigDecimal.ROUND_HALF_UP));
 				pstmtInsert.setBigDecimal(i++, v_LinealBalance.setScale(precision, BigDecimal.ROUND_HALF_UP));
-				pstmtInsert.setTimestamp(i++, rs.getTimestamp("MovementDate"));
+				pstmtInsert.setTimestamp(i++, v_MovementDate);
 				pstmtInsert.setString(i++, rs.getString("MovementType"));
 				pstmtInsert.setString(i++, rs.getString("DocumentNo"));
 				pstmtInsert.setInt(i++, rs.getInt("seqNo"));
