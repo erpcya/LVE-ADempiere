@@ -196,7 +196,7 @@ public class FixCost extends SvrProcess{
 								if (!sumQty.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP).equals(Env.ZERO.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP)))
 									currentCost = sumAmt.divide(sumQty, costingPrecision);
 								
-								DB.executeUpdateEx("Update M_CostDetail Set CumulatedAmt=?, CumulatedQty=?,CurrentQty=? Where M_CostDetail_ID=?", new Object[]{cumulatedAmt,cumulatedQty,currentQty,cd.getM_CostDetail_ID()}, get_TrxName());
+								DB.executeUpdateEx("Update M_CostDetail Set CumulatedAmt=?, CumulatedQty=?,CurrentQty=?,CurrentCostPrice=? Where M_CostDetail_ID=?", new Object[]{cumulatedAmt,cumulatedQty,currentQty,currentCost,cd.getM_CostDetail_ID()}, get_TrxName());
 							}
 							else{
 								currentQty = currentQty.add(cd.getQty());
