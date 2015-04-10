@@ -98,9 +98,10 @@ public class AnalyticalInventory extends SvrProcess {
 	@Override
 	protected String doIt() throws SQLException{
 	//	Get Precision
-		int precision = MCurrency.getStdPrecision(getCtx(), 
-								Env.getContextAsInt(getCtx(), "$C_Currency_ID"));
-		
+		//int precision = MCurrency.getStdPrecision(getCtx(), 
+		//						Env.getContextAsInt(getCtx(), "$C_Currency_ID"));
+		MCurrency currency = new MCurrency(getCtx(), Env.getContextAsInt(getCtx(), "$C_Currency_ID"), get_TrxName());
+		int precision = currency.getCostingPrecision();
 		StringBuffer sql = new StringBuffer();	
 		//	Select for Previous Balance
 		sql.append("SELECT " +
