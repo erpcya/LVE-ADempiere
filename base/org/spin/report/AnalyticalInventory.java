@@ -129,7 +129,7 @@ public class AnalyticalInventory extends SvrProcess {
 				"	END" +
 				", 0)) QtyIn, ");
 		//	Add Current Cost Price
-		sql.append("productCostPriceAt(p.M_Product_ID, ?) CurrentCostPrice, ");
+		sql.append("productCostPriceAt(p.M_Product_ID, ?,w.AD_Org_ID) CurrentCostPrice, ");
 		//	Movement Date
 		sql.append("NULL MovementDate, " +
 				"'PB' MovementType, ");
@@ -219,7 +219,7 @@ public class AnalyticalInventory extends SvrProcess {
 					"	ELSE 0 " +
 					"END, 0) " +
 					"QtyIn, " +
-					"productCostPriceAt(t.M_Product_ID, t.MovementDate) CurrentCostPrice, " + 
+					"productCostPriceAt(t.M_Product_ID, t.MovementDate,w.AD_Org_ID) CurrentCostPrice, " + 
 					"t.MovementDate, " +
 					"t.MovementType, " +
 					"1 Multiply, " +
