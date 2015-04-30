@@ -29,13 +29,11 @@ import org.compiere.model.MCash;
 import org.compiere.model.MCashLine;
 import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
-import org.compiere.model.MInOut;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MMovement;
 import org.compiere.model.MPaySelectionCheck;
 import org.compiere.model.MPayment;
-import org.compiere.model.MSequence;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
 import org.compiere.model.ModelValidationEngine;
@@ -96,7 +94,6 @@ public class LVEADempiereModelValidator implements ModelValidator {
 		engine.addDocValidate(I_C_Cash.Table_Name, this);
 		engine.addModelChange(MCashLine.Table_Name, this);
 		engine.addModelChange(X_M_Movement.Table_Name, this);
-		engine.addDocValidate(X_M_InOut.Table_Name, this);
 		
 		engine.addModelChange(X_M_Movement.Table_Name, this);
 		engine.addModelChange(X_M_InOut.Table_Name, this);
@@ -225,47 +222,6 @@ public class LVEADempiereModelValidator implements ModelValidator {
 				}
 				//	Complete Allocation
 				completeAllocation();
-			}
-			else if(po.get_TableName().equals(MInOut.Table_Name)){
-				MInOut inv = (MInOut) po;
-				MDocType doc = (MDocType) inv.getC_DocType();
-				if(inv.isSOTrx() 
-						&& inv.getReversal_ID() == 0){
-					//	Verify if Control No is Not Null
-					if(inv.get_Value("ControlNo") != null)
-						return null;
-
-					//	
-					if(!doc.get_ValueAsBoolean("IsPrintSetControlNo")){
-						//	Get Control No Sequence by User
-						int m_ControlNo_Seq = MLVEWHUserDocSequence.getControlNoSequence_ID(Env.getAD_User_ID(Env.getCtx()), doc.get_ID());
-						//	Verify if is not user sequence
-						if(m_ControlNo_Seq == 0)
-							m_ControlNo_Seq = doc.get_ValueAsInt("ControlNoSequence_ID");
-						//	Load Sequence
-						if(m_ControlNo_Seq != 0){
-							MSequence seq_ControlNo = new MSequence(Env.getCtx(), m_ControlNo_Seq, inv.get_TrxName());
-							String prefix = seq_ControlNo.getPrefix();
-							String suffix = seq_ControlNo.getSuffix();
-							int next = seq_ControlNo.getNextID();
-							
-							if(prefix == null 
-									|| prefix.length() == 0)
-								prefix = "";
-							
-							if(suffix == null 
-									|| suffix.length() == 0)
-								suffix = "";
-							
-							inv.set_ValueOfColumn("ControlNo", prefix + next + suffix);
-							if(!inv.save())
-								return inv.getProcessMsg();
-							if(!seq_ControlNo.save())
-								return "Error @ControlNo@";
-						}
-					}
-					
-				}
 			}/*else if(po.get_TableName().equals(MAllocationHdr.Table_Name)) {
 				MInvoice.setIsPaid(m_Current_Invoice.getCtx(), m_Current_C_BPartner_ID, m_Current_Invoice.get_TrxName());
 				m_Current_Invoice.saveEx();
