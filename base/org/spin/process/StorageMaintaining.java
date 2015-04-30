@@ -132,7 +132,7 @@ public class StorageMaintaining extends SvrProcess {
 				"INNER JOIN C_OrderLine ol ON(ol.C_Order_ID = o.C_Order_ID) " +
 				"INNER JOIN C_DocType dt ON(dt.C_DocType_ID = o.C_DocType_ID) " +
 				"WHERE o.DocStatus IN('IP', 'CO') " +
-				"AND (ol.QtyOrdered - ol.QtyDelivered) > 0 " +
+				"AND (ol.QtyOrdered - ol.QtyDelivered) <> 0 " +
 				//"AND o.IsSOTrx = 'Y' " +
 				"AND o.AD_Client_ID = ").append(getAD_Client_ID()).append(" ");
 		//	Org
@@ -180,7 +180,7 @@ public class StorageMaintaining extends SvrProcess {
 		StringBuffer deleteSQL = new StringBuffer("DELETE FROM M_Storage " +
 				"WHERE (QtyOnHand <> 0 OR (QtyOnHand=0 AND QtyReserved = 0)) " +
 				"AND AD_Client_ID = ").append(getAD_Client_ID()).append(" ");
-		//	Org
+		//	OrgCOM. MBO
 		if(p_AD_Org_ID != 0)
 			deleteSQL.append("AND AD_Org_ID = ").append(p_AD_Org_ID).append(" ");
 		//	Warehouse
@@ -286,6 +286,19 @@ public class StorageMaintaining extends SvrProcess {
 		for (int i = 0; i < lines.length; i++)
 		{
 			MOrderLine line = lines[i];
+			
+			BigDecimal m_DeliveredQty = DB.getSQLValueBD(get_TrxName(), "SELECT SUM(MovementQty) MovementQty "
+					+ "FROM M_InOutLine "
+					+ "WHERE C_OrderLine_ID = ?", line.getC_OrderLine_ID());
+			//	Valid Quantity
+			if(m_DeliveredQty == null)
+				m_DeliveredQty = Env.ZERO;
+			//	Get Old Delivered
+			BigDecimal m_OldDeliveredQty = line.getQtyDelivered();
+			if(m_OldDeliveredQty == null)
+				m_OldDeliveredQty = Env.ZERO;
+			//	Set Value
+			line.setQtyDelivered(m_DeliveredQty);
 			//	Set Reserved to Zero
 			line.setQtyReserved(Env.ZERO);
 			//	Check/set WH/Org
@@ -308,6 +321,13 @@ public class StorageMaintaining extends SvrProcess {
 				{
 					Volume = Volume.add(product.getVolume().multiply(line.getQtyOrdered()));
 					Weight = Weight.add(product.getWeight().multiply(line.getQtyOrdered()));
+					//	Change Value in Line
+					if(!m_DeliveredQty.equals(m_OldDeliveredQty)) {
+						//	Set Reserved Quantity
+						line.setQtyReserved(difference);
+						if (!line.save(get_TrxName()))
+							return false;
+					}
 				}
 				continue;
 			}
