@@ -45,6 +45,11 @@ public class FixCost extends SvrProcess{
 			String name = para.getParameterName();
 			if (para.getParameter() == null)
 				;
+			//	Added By Jorge Colmenarez 2015-05-04 
+			//	Add Support for Filter by Product Category
+			else if (name.equals("M_Product_Category_ID"))
+				p_M_Product_Category_ID = para.getParameterAsInt();
+			//	End Jorge Colmenarez
 			else if (name.equals("M_Product_ID"))
 				p_M_Product_ID = para.getParameterAsInt();
 			
@@ -56,6 +61,11 @@ public class FixCost extends SvrProcess{
 			*/
 			else if (name.equals("C_AcctSchema_ID"))
 				p_C_AcctSchema_ID = para.getParameterAsInt();
+			//	Added By Jorge Colmenarez 2015-05-04 
+			//	Add Support for Delete Old Records
+			else if (name.equals("DeleteOld"))
+				p_DeleteOld = para.getParameterAsBoolean();
+			//	End Jorge Colmenarez
 		}
 	}
 
@@ -66,12 +76,23 @@ public class FixCost extends SvrProcess{
 		String resp = new String();
 		
 		//Get Produts to Fix Cost
-		List<MProduct>products = new Query(getCtx(), MProduct.Table_Name, "(M_Product_ID=? OR ?=0) AND AD_Client_ID=? AND ProductType='I'", get_TrxName())
-								.setParameters(p_M_Product_ID,p_M_Product_ID,getAD_Client_ID())
+		List<MProduct>products = new Query(getCtx(), MProduct.Table_Name, "(M_Product_ID=? OR ?=0) AND (M_Product_Category_ID=? OR ?=0) AND AD_Client_ID=? AND ProductType='I'", get_TrxName())
+								//	Added By Jorge Colmenarez 2015-05-04 
+								//	Add Support for Filter by Product Category
+								.setParameters(p_M_Product_ID,p_M_Product_ID,p_M_Product_Category_ID,p_M_Product_Category_ID,getAD_Client_ID())
+								//	End Jorge Colmenarez
 								.setOnlyActiveRecords(true)
 								.list();
 
 		for (MProduct product: products){
+			//	Added by Jorge Colmenarez 2015-05-04
+			//	Delete Records
+			if(p_DeleteOld){
+				DB.executeUpdateEx("DELETE FROM M_CostDetail WHERE M_Product_ID=? " +
+						"AND M_InventoryLine_ID IS NOT NULL"
+						, new Object[]{product.getM_Product_ID()}, get_TrxName());
+			}
+			//	End Jorge Colmenarez
 
 			MAcctSchema as = new MAcctSchema(getCtx(), p_C_AcctSchema_ID, get_TrxName());
 			/*
@@ -201,7 +222,7 @@ public class FixCost extends SvrProcess{
 										|| cost.getCostingMethod().equals(X_LVE_CostVersion.COSTINGMETHOD_AveragePO)){
 									if (!sumQty.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP).equals(Env.ZERO.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP)))
 										currentCost = sumAmt.divide(sumQty, costingPrecision);
-								}else if(cost.getCostingMethod().equals(X_LVE_CostVersion.COSTINGMETHOD_LastPOPrice))
+								}else if(cost.getCostingMethod().equals(X_LVE_CostVersion.COSTINGMETHOD_LastPOPrice) && currentCost.equals(Env.ZERO))
 									currentCost = cd.getCurrentCostPrice();
 								
 								DB.executeUpdateEx("Update M_CostDetail Set CumulatedAmt=?, CumulatedQty=?,CurrentQty=?,CurrentCostPrice=? Where M_CostDetail_ID=?", new Object[]{cumulatedAmt,cumulatedQty,currentQty,currentCost,cd.getM_CostDetail_ID()}, get_TrxName());
@@ -220,7 +241,7 @@ public class FixCost extends SvrProcess{
 										|| cost.getCostingMethod().equals(X_LVE_CostVersion.COSTINGMETHOD_AveragePO)){
 									if (!sumQty.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP).equals(Env.ZERO.setScale(costingPrecision,BigDecimal.ROUND_HALF_UP)))
 										currentCost = sumAmt.divide(sumQty, costingPrecision);
-								}else if(cost.getCostingMethod().equals(X_LVE_CostVersion.COSTINGMETHOD_LastPOPrice))
+								}else if(cost.getCostingMethod().equals(X_LVE_CostVersion.COSTINGMETHOD_LastPOPrice) && currentCost.equals(Env.ZERO))
 									currentCost = cd.getCurrentCostPrice();
 								
 								DB.executeUpdateEx("Update M_CostDetail Set CumulatedAmt=?, CumulatedQty=?, CurrentQty=?,Amt=Abs(Qty * ?),CurrentCostPrice=? Where M_CostDetail_ID=?", new Object[]{cumulatedAmt,cumulatedQty,currentQty,currentCost,currentCost,cd.getM_CostDetail_ID()}, get_TrxName());
@@ -326,10 +347,15 @@ public class FixCost extends SvrProcess{
 		}
 			
 		return resp;
-	}
-	
-	
-	
+	}	
+
+	/** Product Category to Fix Cost*/ 
+	//	Added By Jorge Colmenarez 2015-05-04 
+	//	Add Support for Filter by Product Category
+	int p_M_Product_Category_ID = 0;
+	//	Delete Old Records
+	boolean p_DeleteOld = false;
+	//	End Jorge Colmenarez
 	/** Product to Fix Cost*/ 
 	int p_M_Product_ID = 0;
 	
