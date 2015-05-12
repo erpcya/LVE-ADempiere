@@ -862,7 +862,7 @@ public class MMatchPO extends X_M_MatchPO
 	}	//	consolidate
 	
 	// Elaine 2008/6/20	
-	private String createMatchPOCostDetail()
+	public String createMatchPOCostDetail()
 	{
 		if (getM_InOutLine_ID() != 0)
 		{
@@ -969,7 +969,7 @@ public class MMatchPO extends X_M_MatchPO
 	}
 	
 	//AZ Goodwill
-	private String deleteMatchPOCostDetail()
+	public String deleteMatchPOCostDetail()
 	{
 		// Get Account Schemas to delete MCostDetail
 		MAcctSchema[] acctschemas = MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID());

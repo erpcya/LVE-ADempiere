@@ -19,21 +19,27 @@ package org.spin.process;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.List;
 
+import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCost;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInventoryLine;
+import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
 import org.compiere.model.Query;
+import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Trx;
 import org.spin.model.MLVECostVersion;
 import org.spin.model.X_LVE_CostVersion;
 public class FixCost extends SvrProcess{
@@ -175,6 +181,96 @@ public class FixCost extends SvrProcess{
 				//Update Date Update
 				DB.executeUpdateEx("Update M_CostDetail Set Processed=?,Updated=? Where M_CostDetail_ID=?", new Object[]{"Y",iLine.getUpdated(),costDet.getM_CostDetail_ID()}, get_TrxName());				
 			}
+			//2015-05-10 Carlos Parada Update Bads Quantities 
+			DB.executeUpdateEx("Update M_CostDetail "
+					+ "	Set Qty= (SELECT SUM(Qty) FROM M_MatchPO mpo WHERE mpo.C_OrderLine_ID = M_CostDetail.C_OrderLine_ID AND mpo.M_InOutLine_ID IS NOT NULL) "
+					+ " WHERE (SELECT SUM(cds.Qty) FROM M_CostDetail cds WHERE cds.C_OrderLine_ID = M_CostDetail.C_OrderLine_ID) <> (SELECT SUM(mpo.Qty) FROM M_MatchPO mpo WHERE mpo.C_OrderLine_ID = M_CostDetail.C_OrderLine_ID AND mpo.M_InOutLine_ID IS NOT NULL) "
+					+ " AND C_OrderLine_ID IS NOT NULL "
+					+ " AND M_Product_ID = ? "
+					+ " AND EXISTS (SELECT 1 FROM M_CostDetail cds WHERE cds.C_OrderLine_ID = M_CostDetail.C_OrderLine_ID HAVING Count(*)=1) ", new Object[]{product.getM_Product_ID()}, get_TrxName());
+			//End Carlos Parada
+			//2015-05-10 Carlos Parada Update Bads Product Cost Order Line 
+			DB.executeUpdateEx("Update M_CostDetail "
+					+ "	Set M_Product_ID= (SELECT ol.M_Product_ID FROM C_OrderLine ol WHERE ol.C_OrderLine_ID = M_CostDetail.C_OrderLine_ID) "
+					+ " WHERE M_Product_ID <> (SELECT ol.M_Product_ID FROM C_OrderLine ol WHERE ol.C_OrderLine_ID = M_CostDetail.C_OrderLine_ID) "
+					+ " AND C_OrderLine_ID IS NOT NULL "
+					+ " AND M_Product_ID = ? ", new Object[]{product.getM_Product_ID()}, get_TrxName());
+			//End Carlos Parada
+			//2015-05-10 Carlos Parada Create Costs Lines From MatchPO
+			List<MMatchPO> matchpos = new Query(getCtx(), MMatchPO.Table_Name, 
+							"NOT EXISTS(SELECT 1  FROM M_CostDetail WHERE M_CostDetail.C_OrderLine_ID = M_MatchPO.C_OrderLine_ID) AND " +
+							"M_Product_ID =? " 
+							, get_TrxName())
+							.setOnlyActiveRecords(true)
+							.setParameters(product.getM_Product_ID())
+							.list();
+			for (MMatchPO mpo : matchpos)
+				mpo.createMatchPOCostDetail();
+			//End Carlos Parada
+			
+			//2015-05-10 Carlos Parada Repair Bad Cost Receipt Movement
+			String sql = "SELECT " +
+							"COALESCE(cd.M_Product_ID,io.M_Product_ID) M_Product_ID, " + 
+							"cd.Qty, " +
+							"io.MovementQty , " +
+							"COALESCE(cd.C_OrderLine_ID,io.C_OrderLine_ID) C_OrderLine_ID " +
+							"FROM   " +
+							"(SELECT cd.AD_Client_ID, " +
+							"cd.M_Product_ID, " +
+							"MAX(cd.CurrentCostPrice) CurrentCostPrice, " +
+							"SUM(cd.Qty) Qty, " +
+							"	cd.C_OrderLine_ID, " +
+							"MAX(cd.AD_Org_ID) AD_Org_ID " +
+							"FROM M_CostDetail cd  " +
+							"WHERE cd.C_OrderLine_ID IS NOT NULL " +
+							"GROUP BY cd.M_Product_ID,cd.C_OrderLine_ID,cd.AD_Client_ID) cd " +
+							"FULL JOIN  " +
+							"(SELECT " + 
+							"MAX(io.DocStatus) DocStatus, " +
+							"Sum(iol.MovementQty) MovementQty, " +
+							"mpo.C_OrderLine_ID, " +
+							"io.AD_Client_ID, " +
+							"MAX(io.AD_Org_ID) AD_Org_ID, " +
+							"iol.M_Product_ID " +
+							"FROM M_InOut io " + 
+							"INNER JOIN M_InOutLine iol ON (io.M_InOut_ID=iol.M_InOut_ID) " + 
+							"INNER JOIN (SELECT mpo.M_InOutLine_ID,mpo.C_OrderLine_ID,SUM (Qty) Qty FROM M_MatchPO mpo GROUP BY mpo.M_InOutLine_ID,mpo.C_OrderLine_ID) mpo ON (mpo.M_InOutLine_ID=iol.M_InOutLine_ID) " +
+							"WHERE io.IsSOTrx = 'N' AND io.DocStatus NOT IN ('DR','IP','IN') " +
+							"GROUP BY mpo.C_OrderLine_ID,io.AD_Client_ID,iol.M_Product_ID) io ON (cd.C_OrderLine_ID=io.C_OrderLine_ID) " +
+							"WHERE EXISTS (SELECT 1 FROM C_AcctSchema cas INNER JOIN AD_ClientInfo ci ON (cas.C_AcctSchema_ID = ci.C_AcctSchema1_ID) WHERE cas.CostingMethod IN('A','p') AND (ci.AD_Client_ID = cd.AD_Client_ID OR ci.AD_Client_ID = io.AD_Client_ID)) " +
+							"AND COALESCE(cd.M_Product_ID,io.M_Product_ID) = ? " +
+							"AND COALESCE(cd.Qty,0)<>COALESCE(io.MovementQty,0) ";
+			
+			PreparedStatement ps = null ;
+			ResultSet rs = null;
+			ps = DB.prepareStatement(sql, get_TrxName());
+			ps.setInt(1, product.getM_Product_ID());
+			rs = ps.executeQuery();
+			Trx trx = Trx.get(get_TrxName(), false);
+			
+			while (rs.next()){
+				BigDecimal remain = rs.getBigDecimal("MovementQty");
+				MMatchPO[] mpo = MMatchPO.getOrderLine(getCtx(), rs.getInt("C_OrderLine_ID"), get_TrxName(), "M_InOutLine_ID IS NOT NULL");
+				
+				for (int i = 0 ;i <mpo.length;i++){
+					//mpo[i].deleteMatchPOCostDetail();
+					if (!remain.equals(Env.ZERO)){
+						remain = remain.subtract(mpo[i].getQty());
+					}
+					else{
+						ProcessInfo pi_MatchPO = new ProcessInfo(getProcessInfo().getTitle(), 301);
+						//	Add Parameters
+						pi_MatchPO.setRecord_ID(mpo[i].getM_MatchPO_ID());
+						//	Execute Process
+						ProcessUtil.startJavaProcess(getCtx(), pi_MatchPO, trx, false);
+						if(pi_MatchPO.isError()) {
+							return pi_MatchPO.getSummary();
+						}
+					}
+				}
+			}
+
+			//End Carlos Parada
 			
 			BigDecimal cumulatedAmt = Env.ZERO;
 			BigDecimal cumulatedQty = Env.ZERO;
