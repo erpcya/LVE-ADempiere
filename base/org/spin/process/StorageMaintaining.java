@@ -23,16 +23,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 
+import org.compiere.model.MAcctSchema;
+import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
+import org.compiere.model.MInOut;
+import org.compiere.model.MInOutLine;
 import org.compiere.model.MLocator;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MPeriodControl;
 import org.compiere.model.MProduct;
 import org.compiere.model.MStorage;
+import org.compiere.model.MTransaction;
 import org.compiere.model.MWarehouse;
+import org.compiere.model.Query;
 import org.compiere.model.X_C_Order;
+import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
@@ -50,7 +59,8 @@ public class StorageMaintaining extends SvrProcess {
 	private int 		p_M_Warehouse_ID 	= 0;
 	/** Product				*/
 	private int			p_M_Product_ID 		= 0;
-	
+	/** Autoperiod */
+	boolean autoPeriod = false;
 	@Override
 	protected void prepare() {
 		for (ProcessInfoParameter para:getParameter()){
@@ -69,6 +79,10 @@ public class StorageMaintaining extends SvrProcess {
 
 	@Override
 	protected String doIt() throws Exception {
+		//2015-05-11 Carlos Parada Evaluate Period Control 
+		MAcctSchema as = MClient.get(getCtx(), getAD_Client_ID()).getAcctSchema();
+		autoPeriod = as != null && as.isAutoPeriodControl();
+		//End Carlos Parada
 		//	Delete Warehouse
 		StringBuffer deleteSQL = new StringBuffer("DELETE FROM M_Storage " +
 				"WHERE QtyReserved <> 0 " +
@@ -97,13 +111,40 @@ public class StorageMaintaining extends SvrProcess {
 		log.fine("Storage Updated=" + storageUpdated);
 		
 		//	Delete Bad transactions
+		//2015-05-11 Carlos Parada All Documents And Open Period
 		StringBuffer deleteTSQL = new StringBuffer("DELETE " +
 				"FROM M_Transaction " +
-				"WHERE EXISTS(SELECT 1 " +
-				"					FROM M_InOut io " +
-				"					INNER JOIN M_InOutLine iol ON(iol.M_InOut_ID = io.M_InOut_ID) " +
-				"					WHERE io.DocStatus NOT IN('CO', 'CL', 'RE', 'VO') " +
-				"					AND iol.M_InOutLine_ID = M_Transaction.M_InOutLine_ID) ");
+				"WHERE M_Transaction.M_InOutLine_ID IS NOT NULL " +
+				"AND (" +
+				" 		EXISTS(SELECT 1 " + 
+				"		FROM M_InOut io " + 
+				"		INNER JOIN M_InOutLine iol ON(iol.M_InOut_ID = io.M_InOut_ID) " + 
+				"		WHERE io.DocStatus NOT IN('CO', 'CL', 'RE', 'VO') AND " + 
+				"		iol.M_InOutLine_ID = M_Transaction.M_InOutLine_ID) " +
+				"	OR ( " +
+				"			M_Transaction.M_InOutLine_ID IN (SELECT iol.M_InOutLine_ID " +  
+				"			FROM M_InOut io  " +
+				"			INNER JOIN M_InOutLine iol ON(iol.M_InOut_ID = io.M_InOut_ID) " +
+				"			INNER JOIN M_Transaction t ON(t.M_InOutLine_ID = iol.M_InOutLine_ID) " + 
+				"			WHERE io.DocStatus IN('CO', 'CL', 'RE')  " +
+				"			GROUP BY iol.M_InOutLine_ID " +
+				"			HAVING ABS(iol.MovementQty) <> SUM(ABS(t.MovementQty))) " +
+				"			AND " +
+				"			EXISTS (SELECT 1 FROM C_PeriodControl pc " +
+				"			INNER JOIN C_Period p ON (p.C_Period_ID=pc.C_Period_ID) " +
+				"			WHERE M_Transaction.MovementDate Between p.StartDate AND p.EndDate " );
+		
+				
+			if ( !autoPeriod )
+				deleteTSQL.append(" AND pc.PeriodStatus = 'O'  AND pc.DocBaseType IN ('" + MPeriodControl.DOCBASETYPE_MaterialDelivery
+				+ "','" + MPeriodControl.DOCBASETYPE_MaterialReceipt + "') ");
+			
+			deleteTSQL.append("		)");
+			deleteTSQL.append(""
+					+ ")");
+			deleteTSQL.append(""
+				+ ")");
+			
 		deleteTSQL.append("AND AD_Client_ID = ").append(getAD_Client_ID()).append(" ");
 		//	Org
 		if(p_AD_Org_ID != 0)
@@ -115,13 +156,13 @@ public class StorageMaintaining extends SvrProcess {
 					"WHERE l.M_Locator_ID = M_Transaction.M_Locator_ID " +
 					"AND l.M_Warehouse_ID = ").append(p_M_Warehouse_ID).append(") ");
 		//Product
-			if(p_M_Product_ID != 0)
-				deleteTSQL.append("AND M_Product_ID = ").append(p_M_Product_ID).append(" ");
+		if(p_M_Product_ID != 0)
+			deleteTSQL.append("AND M_Product_ID = ").append(p_M_Product_ID).append(" ");
 		//	Execute
 		int transactionDeleted = DB.executeUpdate(deleteTSQL.toString(), get_TrxName());
 		//	Log
 		log.fine("Transaction Deleted=" + transactionDeleted);
-			
+		recreateTransaction();
 		recreateQtyOnHand();
 		log.fine("Recreate QtyOnHand" );
 		
@@ -168,6 +209,48 @@ public class StorageMaintaining extends SvrProcess {
 		DB.close(rs, ps);
 		
 		return "@Updated@=" + storageUpdated + " @M_Transaction_ID@ @Deleted@=" + transactionDeleted;
+	}
+	
+	private void recreateTransaction(){
+		StringBuffer whereClause = new StringBuffer();
+		whereClause.append("EXISTS(SELECT 1 FROM M_InOut io WHERE M_InOutLine.M_InOut_ID = io.M_InOut_ID AND io.DocStatus IN('CO', 'CL', 'RE')) " +
+							" AND NOT EXISTS (SELECT 1 FROM M_Transaction tr WHERE tr.M_InOutLine_ID = M_InOutLine.M_InOutLine_ID)" +
+							" AND EXISTS (SELECT 1 FROM M_Product p WHERE p.M_Product_ID = M_InOutLine.M_Product_ID AND p.ProductType ='I') " +
+							" AND EXISTS (SELECT 1 FROM C_PeriodControl pc " +
+							" INNER JOIN C_Period p ON (p.C_Period_ID=pc.C_Period_ID) "+
+							" ,M_InOut io " +
+							" WHERE io.DateAcct Between p.StartDate AND p.EndDate AND M_InOutLine.M_InOut_ID= io.M_InOut_ID ");
+		if ( !autoPeriod )
+			whereClause.append(" AND pc.PeriodStatus = 'O'  AND pc.DocBaseType IN ('" + MPeriodControl.DOCBASETYPE_MaterialDelivery
+			+ "','" + MPeriodControl.DOCBASETYPE_MaterialReceipt + "') ");
+		
+		whereClause.append(")");
+	
+		List<MInOutLine> iols = new Query(getCtx(), MInOutLine.Table_Name, whereClause.toString(), get_TrxName()).list();
+		int transactionCreated = 0;
+		for (MInOutLine iol : iols) {
+			MInOut io = new MInOut(getCtx(), iol.getM_InOut_ID(), get_TrxName());
+			if (io.getM_InOut_ID()!=0){
+			MTransaction mtrx = new MTransaction (getCtx(), iol.getAD_Org_ID(),
+					io.getMovementType(), iol.getM_Locator_ID(),
+					iol.getM_Product_ID(), iol.getM_AttributeSetInstance_ID(),
+					iol.getMovementQty(), io.getMovementDate(), get_TrxName());
+				mtrx.setM_InOutLine_ID(iol.getM_InOutLine_ID());
+				if (!mtrx.save())
+				{
+					addLog("@M_Transaction_ID@ @Error@ " + io.getDocumentNo());
+				}
+				else{
+					addLog("@M_Transaction_ID@ @Created@ " + io.getDocumentNo());
+					transactionCreated++;
+				}
+					
+			}
+			
+		}
+		
+			
+			log.fine("Transaction Deleted=" + transactionCreated);
 	}
 	
 	/**
