@@ -127,8 +127,8 @@ public class StorageMaintaining extends SvrProcess {
 				"			INNER JOIN M_InOutLine iol ON(iol.M_InOut_ID = io.M_InOut_ID) " +
 				"			INNER JOIN M_Transaction t ON(t.M_InOutLine_ID = iol.M_InOutLine_ID) " + 
 				"			WHERE io.DocStatus IN('CO', 'CL', 'RE')  " +
-				"			GROUP BY iol.M_InOutLine_ID " +
-				"			HAVING ABS(iol.MovementQty) <> SUM(ABS(t.MovementQty))) " +
+				"			GROUP BY iol.M_InOutLine_ID,io.MovementType " +
+				"			HAVING iol.MovementQty * (CASE WHEN io.MovementType IN ('C-','V-') THEN -1 ELSE 1 END) <> SUM(t.MovementQty)) " +
 				"			AND " +
 				"			EXISTS (SELECT 1 FROM C_PeriodControl pc " +
 				"			INNER JOIN C_Period p ON (p.C_Period_ID=pc.C_Period_ID) " +
@@ -234,7 +234,7 @@ public class StorageMaintaining extends SvrProcess {
 			MTransaction mtrx = new MTransaction (getCtx(), iol.getAD_Org_ID(),
 					io.getMovementType(), iol.getM_Locator_ID(),
 					iol.getM_Product_ID(), iol.getM_AttributeSetInstance_ID(),
-					iol.getMovementQty(), io.getMovementDate(), get_TrxName());
+					(io.getMovementType().equals(MInOut.MOVEMENTTYPE_VendorReturns) ||io.getMovementType().equals(MInOut.MOVEMENTTYPE_CustomerShipment) ? iol.getMovementQty().negate() : iol.getMovementQty()), io.getMovementDate(), get_TrxName());
 				mtrx.setM_InOutLine_ID(iol.getM_InOutLine_ID());
 				if (!mtrx.save())
 				{
