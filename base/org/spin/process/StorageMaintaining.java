@@ -41,7 +41,6 @@ import org.compiere.model.MTransaction;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.Query;
 import org.compiere.model.X_C_Order;
-import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
@@ -59,6 +58,10 @@ public class StorageMaintaining extends SvrProcess {
 	private int 		p_M_Warehouse_ID 	= 0;
 	/** Product				*/
 	private int			p_M_Product_ID 		= 0;
+	/** Product	Category	*/
+	// 2015-05-13 Carlos Parada Add Support to Product Category Filter 
+	private int			p_M_Product_Category_ID = 0;
+	//End Carlos Parada
 	/** Autoperiod */
 	boolean autoPeriod = false;
 	@Override
@@ -74,6 +77,10 @@ public class StorageMaintaining extends SvrProcess {
 				p_M_Warehouse_ID = para.getParameterAsInt();
 			else if(name.equals("M_Product_ID"))
 				p_M_Product_ID = para.getParameterAsInt();
+			// 2015-05-13 Carlos Parada Add Support to Product Category Filter
+			else if(name.equals("M_Product_Category_ID"))
+				p_M_Product_Category_ID = para.getParameterAsInt();
+			//End Carlos Parada
 		}
 	}
 
@@ -101,6 +108,11 @@ public class StorageMaintaining extends SvrProcess {
 		//Product
 		if(p_M_Product_ID != 0)
 			deleteSQL.append("AND M_Product_ID = ").append(p_M_Product_ID).append(" ");
+		
+		// 2015-05-13 Carlos Parada Add Support to Product Category Filter
+		if(p_M_Product_Category_ID != 0)
+			deleteSQL.append("AND EXISTS (SELECT 1 FROM M_Product WHERE M_Product.M_Product_Category_ID= ").append(p_M_Product_Category_ID).append(" AND M_Product.M_Product_ID = M_Storage.M_Product_ID ) ");
+		//End Carlos Parada
 		
 		//	Log
 		log.fine("deleteSQL=" + deleteSQL.toString());
@@ -158,6 +170,12 @@ public class StorageMaintaining extends SvrProcess {
 		//Product
 		if(p_M_Product_ID != 0)
 			deleteTSQL.append("AND M_Product_ID = ").append(p_M_Product_ID).append(" ");
+		
+		// 2015-05-13 Carlos Parada Add Support to Product Category Filter
+		if(p_M_Product_Category_ID != 0)
+			deleteTSQL.append("AND EXISTS (SELECT 1 FROM M_Product WHERE M_Product.M_Product_Category_ID= ").append(p_M_Product_Category_ID).append(" AND M_Product.M_Product_ID = M_Transaction.M_Product_ID ) ");
+		//End Carlos Parada
+				
 		//	Execute
 		int transactionDeleted = DB.executeUpdate(deleteTSQL.toString(), get_TrxName());
 		//	Log
@@ -186,6 +204,11 @@ public class StorageMaintaining extends SvrProcess {
 		//Product
 		if(p_M_Product_ID != 0)
 			orderSQL.append("AND ol.M_Product_ID = ").append(p_M_Product_ID).append(" ");
+		
+		// 2015-05-13 Carlos Parada Add Support to Product Category Filter
+		if(p_M_Product_Category_ID != 0)
+			deleteTSQL.append("AND EXISTS (SELECT 1 FROM M_Product WHERE M_Product.M_Product_Category_ID= ").append(p_M_Product_Category_ID).append(" AND M_Product.M_Product_ID = ol.M_Product_ID ) ");
+		//End Carlos Parada
 		
 		//	Group By
 		orderSQL.append("GROUP BY o.C_Order_ID ");
@@ -225,6 +248,24 @@ public class StorageMaintaining extends SvrProcess {
 			+ "','" + MPeriodControl.DOCBASETYPE_MaterialReceipt + "') ");
 		
 		whereClause.append(")");
+		//		
+		if(p_AD_Org_ID != 0)
+			whereClause.append("AND AD_Org_ID = ").append(p_AD_Org_ID).append(" ");
+		//	Warehouse
+		if(p_M_Warehouse_ID != 0)
+			whereClause.append("AND EXISTS(SELECT 1 " +
+					"FROM M_InOut io " +
+					"WHERE io.M_InOut_ID = M_InOutLine.M_InOut_ID " +
+					"AND io.M_Warehouse_ID = ").append(p_M_Warehouse_ID).append(") ");
+		//Product
+		if(p_M_Product_ID != 0)
+			whereClause.append("AND M_Product_ID = ").append(p_M_Product_ID).append(" ");
+		
+		// 2015-05-13 Carlos Parada Add Support to Product Category Filter
+		if(p_M_Product_Category_ID != 0)
+			whereClause.append("AND EXISTS (SELECT 1 FROM M_Product WHERE M_Product.M_Product_Category_ID= ").append(p_M_Product_Category_ID).append(" AND M_Product.M_Product_ID = M_InOutLine.M_Product_ID ) ");
+		//End Carlos Parada
+		
 	
 		List<MInOutLine> iols = new Query(getCtx(), MInOutLine.Table_Name, whereClause.toString(), get_TrxName()).list();
 		int transactionCreated = 0;
