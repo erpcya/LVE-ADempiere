@@ -183,8 +183,8 @@ public class FixCost extends SvrProcess{
 			}
 			//2015-05-10 Carlos Parada Update Bads Quantities 
 			DB.executeUpdateEx("Update M_CostDetail "
-					+ "	Set Qty= (SELECT SUM(Qty) FROM M_MatchPO mpo WHERE mpo.C_OrderLine_ID = M_CostDetail.C_OrderLine_ID AND mpo.M_InOutLine_ID IS NOT NULL AND mpo.C_InvoiceLine_ID IS NULL) "
-					+ " WHERE (SELECT SUM(cds.Qty) FROM M_CostDetail cds WHERE cds.C_OrderLine_ID = M_CostDetail.C_OrderLine_ID) <> (SELECT SUM(mpo.Qty) FROM M_MatchPO mpo WHERE mpo.C_OrderLine_ID = M_CostDetail.C_OrderLine_ID AND mpo.M_InOutLine_ID IS NOT NULL AND mpo.C_InvoiceLine_ID IS NULL) "
+					+ "	Set Qty= (SELECT SUM(Qty) FROM M_MatchPO mpo WHERE mpo.C_OrderLine_ID = M_CostDetail.C_OrderLine_ID AND mpo.M_InOutLine_ID IS NOT NULL) "
+					+ " WHERE (SELECT SUM(cds.Qty) FROM M_CostDetail cds WHERE cds.C_OrderLine_ID = M_CostDetail.C_OrderLine_ID) <> (SELECT SUM(mpo.Qty) FROM M_MatchPO mpo WHERE mpo.C_OrderLine_ID = M_CostDetail.C_OrderLine_ID AND mpo.M_InOutLine_ID IS NOT NULL) "
 					+ " AND C_OrderLine_ID IS NOT NULL "
 					+ " AND M_Product_ID = ? "
 					+ " AND EXISTS (SELECT 1 FROM M_CostDetail cds WHERE cds.C_OrderLine_ID = M_CostDetail.C_OrderLine_ID HAVING Count(*)=1) ", new Object[]{product.getM_Product_ID()}, get_TrxName());
