@@ -192,13 +192,14 @@ public class MMatchPO extends X_M_MatchPO
 	 */
 	public static MMatchPO[] getOrderLine (Properties ctx, int C_OrderLine_ID, String trxName
 			//2015-05-06 Carlos Parada overload of Method getOrderLine
-			,String whereClause)
+			,String whereClause,String OrderByClause)
 			//End Carlos Parada
 	{
 		if (C_OrderLine_ID == 0)
 			return new MMatchPO[]{};
 		//
 		String sql = "SELECT * FROM M_MatchPO WHERE C_OrderLine_ID=? " + (whereClause == null ? "" : " AND (" + whereClause + ")" );
+		sql+= (OrderByClause==null ? "" : " ORDER BY " + OrderByClause);
 		ArrayList<MMatchPO> list = new ArrayList<MMatchPO>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -227,7 +228,7 @@ public class MMatchPO extends X_M_MatchPO
 	//2015-05-06 Carlos Parada
 	//Written for overload of Method getOrderLine
 	public static MMatchPO[] getOrderLine (Properties ctx, int C_OrderLine_ID, String trxName){
-		return getOrderLine (ctx, C_OrderLine_ID, trxName, null);
+		return getOrderLine (ctx, C_OrderLine_ID, trxName, null,null);
 	}
 	//End Carlos Parada
 	/**
@@ -909,7 +910,7 @@ public class MMatchPO extends X_M_MatchPO
 				// Create Cost Detail Matched PO using Total Amount and Total Qty based on OrderLine
 				MMatchPO[] mPO = MMatchPO.getOrderLine(getCtx(), oLine.getC_OrderLine_ID(), get_TrxName()
 						//2015-05-06 Only Receipts Movements
-						,"M_InOutLine_ID IS NOT NULL");
+						,"M_InOutLine_ID IS NOT NULL", null);
 						//End Carlos Parada
 				BigDecimal tQty = Env.ZERO;
 				BigDecimal tAmt = Env.ZERO;

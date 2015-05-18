@@ -32,6 +32,7 @@ import org.compiere.model.MInventoryLine;
 import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
+import org.compiere.model.MUOM;
 import org.compiere.model.Query;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
@@ -80,6 +81,7 @@ public class FixCost extends SvrProcess{
 		// TODO Auto-generated method stub
 		
 		String resp = new String();
+		int stdPrecision = 0;
 		
 		//Get Produts to Fix Cost
 		List<MProduct>products = new Query(getCtx(), MProduct.Table_Name, "(M_Product_ID=? OR ?=0) AND (M_Product_Category_ID=? OR ?=0) AND AD_Client_ID=? AND ProductType='I'", get_TrxName())
@@ -99,7 +101,8 @@ public class FixCost extends SvrProcess{
 						, new Object[]{product.getM_Product_ID()}, get_TrxName());
 			}
 			//	End Jorge Colmenarez
-
+			MUOM uom = new MUOM(getCtx(), product.getC_UOM_ID(), get_TrxName());
+			stdPrecision = uom.getStdPrecision();
 			MAcctSchema as = new MAcctSchema(getCtx(), p_C_AcctSchema_ID, get_TrxName());
 			/*
 			MCost cost = MCost.get(product, 0, as, p_AD_Org_ID, p_M_CostElement_ID, get_TrxName());
@@ -250,11 +253,11 @@ public class FixCost extends SvrProcess{
 			
 			while (rs.next()){
 				BigDecimal remain = rs.getBigDecimal("MovementQty");
-				MMatchPO[] mpo = MMatchPO.getOrderLine(getCtx(), rs.getInt("C_OrderLine_ID"), get_TrxName(), "M_InOutLine_ID IS NOT NULL");
+				MMatchPO[] mpo = MMatchPO.getOrderLine(getCtx(), rs.getInt("C_OrderLine_ID"), get_TrxName(), "M_InOutLine_ID IS NOT NULL","C_InvoiceLine_ID ");
 				
 				for (int i = 0 ;i <mpo.length;i++){
 					//mpo[i].deleteMatchPOCostDetail();
-					if (!remain.equals(Env.ZERO)){
+					if (!remain.setScale(stdPrecision).equals(Env.ZERO.setScale(stdPrecision))){
 						remain = remain.subtract(mpo[i].getQty());
 					}
 					else{
