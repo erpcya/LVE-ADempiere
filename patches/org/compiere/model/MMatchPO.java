@@ -909,7 +909,7 @@ public class MMatchPO extends X_M_MatchPO
 				// Create Cost Detail Matched PO using Total Amount and Total Qty based on OrderLine
 				MMatchPO[] mPO = MMatchPO.getOrderLine(getCtx(), oLine.getC_OrderLine_ID(), get_TrxName()
 						//2015-05-06 Only Receipts Movements
-						,"M_InOutLine_ID IS NOT NULL");
+						,"M_InOutLine_ID IS NOT NULL AND C_InvoiceLine_ID IS NULL");
 						//End Carlos Parada
 				BigDecimal tQty = Env.ZERO;
 				BigDecimal tAmt = Env.ZERO;
