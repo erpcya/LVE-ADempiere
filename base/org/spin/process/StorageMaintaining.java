@@ -131,14 +131,16 @@ public class StorageMaintaining extends SvrProcess {
 				" 		EXISTS(SELECT 1 " + 
 				"		FROM M_InOut io " + 
 				"		INNER JOIN M_InOutLine iol ON(iol.M_InOut_ID = io.M_InOut_ID) " + 
+				"		INNER JOIN M_Product p ON(iol.M_Product_ID = p.M_Product_ID) " +
 				"		WHERE io.DocStatus NOT IN('CO', 'CL', 'RE', 'VO') AND " + 
-				"		iol.M_InOutLine_ID = M_Transaction.M_InOutLine_ID) " +
+				"		iol.M_InOutLine_ID = M_Transaction.M_InOutLine_ID AND p.IsStocked = 'Y' AND p.ProductType = 'I' ) " +
 				"	OR ( " +
 				"			M_Transaction.M_InOutLine_ID IN (SELECT iol.M_InOutLine_ID " +  
 				"			FROM M_InOut io  " +
 				"			INNER JOIN M_InOutLine iol ON(iol.M_InOut_ID = io.M_InOut_ID) " +
+				"			INNER JOIN M_Product p ON(iol.M_Product_ID = p.M_Product_ID) " +
 				"			INNER JOIN M_Transaction t ON(t.M_InOutLine_ID = iol.M_InOutLine_ID) " + 
-				"			WHERE io.DocStatus IN('CO', 'CL', 'RE')  " +
+				"			WHERE io.DocStatus IN('CO', 'CL', 'RE') AND p.IsStocked = 'Y' AND p.ProductType = 'I' " +
 				"			GROUP BY iol.M_InOutLine_ID,io.MovementType " +
 				"			HAVING iol.MovementQty * (CASE WHEN io.MovementType IN ('C-','V-') THEN -1 ELSE 1 END) <> SUM(t.MovementQty)) " +
 				"			AND " +
@@ -238,7 +240,7 @@ public class StorageMaintaining extends SvrProcess {
 		StringBuffer whereClause = new StringBuffer();
 		whereClause.append("EXISTS(SELECT 1 FROM M_InOut io WHERE M_InOutLine.M_InOut_ID = io.M_InOut_ID AND io.DocStatus IN('CO', 'CL', 'RE')) " +
 							" AND NOT EXISTS (SELECT 1 FROM M_Transaction tr WHERE tr.M_InOutLine_ID = M_InOutLine.M_InOutLine_ID)" +
-							" AND EXISTS (SELECT 1 FROM M_Product p WHERE p.M_Product_ID = M_InOutLine.M_Product_ID AND p.ProductType ='I') " +
+							" AND EXISTS (SELECT 1 FROM M_Product p WHERE p.M_Product_ID = M_InOutLine.M_Product_ID AND p.ProductType ='I' AND p.IsStocked = 'Y' ) " +
 							" AND EXISTS (SELECT 1 FROM C_PeriodControl pc " +
 							" INNER JOIN C_Period p ON (p.C_Period_ID=pc.C_Period_ID) "+
 							" ,M_InOut io " +
