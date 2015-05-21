@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.DB;
@@ -726,7 +727,12 @@ public class MJournal extends X_GL_Journal implements DocAction
 		setDocAction(DOCACTION_None);
 		// Dixon Martinez
 		//	Add support for process journal to reverse
-		reverse.processIt(DOCACTION_Complete);
+		boolean sucess = reverse.processIt(DOCACTION_Complete);
+		//	Yamel Senih 2015-05-20, 23:01
+		if(!sucess) {
+			throw new AdempiereException(reverse.getProcessMsg());
+		}
+		//	End Yamel Senih
 		//	End Dixon Martinez
 		return reverse;
 	}	//	reverseCorrectionIt
