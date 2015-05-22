@@ -39,6 +39,10 @@ public class AnalyticalInventory extends SvrProcess {
 	private Timestamp			p_MovementDate = null;
 	/**	Date To		 			*/
 	private Timestamp			p_MovementDate_To = null;
+	/**	Is Moved				*/
+	private boolean				p_IsMoved = false;
+	/**	Show Cost				*/
+	private boolean				p_IsShowCost = false;
 	
 	/**	Parameter Where Clause	*/
 	private StringBuffer		m_optionalWhere = new StringBuffer();
@@ -64,6 +68,10 @@ public class AnalyticalInventory extends SvrProcess {
 				p_M_Product_ID = para.getParameterAsInt();
 			else if (name.equals("MovementType"))
 				p_MovementType = (String)para.getParameter();
+			else if(name.equals("IsMoved"))
+				p_IsMoved = para.getParameterAsBoolean();
+			else if(name.equals("IsShowCost"))
+				p_IsShowCost = para.getParameterAsBoolean();
 			else if (name.equals("MovementDate")){
 				p_MovementDate = (Timestamp)para.getParameter();
 				p_MovementDate_To = (Timestamp)para.getParameter_To();
@@ -98,10 +106,8 @@ public class AnalyticalInventory extends SvrProcess {
 	@Override
 	protected String doIt() throws SQLException{
 	//	Get Precision
-		//int precision = MCurrency.getStdPrecision(getCtx(), 
-		//						Env.getContextAsInt(getCtx(), "$C_Currency_ID"));
-		MCurrency currency = new MCurrency(getCtx(), Env.getContextAsInt(getCtx(), "$C_Currency_ID"), get_TrxName());
-		int precision = currency.getCostingPrecision();
+		MCurrency currency = MCurrency.get(getCtx(), Env.getContextAsInt(getCtx(), "$C_Currency_ID"));
+		int precision = currency.getCostingPrecision();		
 		StringBuffer sql = new StringBuffer();	
 		//	Select for Previous Balance
 		sql.append("SELECT " +
@@ -129,9 +135,13 @@ public class AnalyticalInventory extends SvrProcess {
 				"	END" +
 				", 0)) QtyIn, ");
 		//	Add Current Cost Price
-		sql.append("productCostPriceAt(p.M_Product_ID, ?,w.AD_Org_ID) CurrentCostPrice, ");
+		if(p_IsShowCost) {
+			sql.append("productCostPriceAt(p.M_Product_ID, ?) CurrentCostPrice, ");
+		} else {
+			sql.append("0 CurrentCostPrice, ");
+		}
 		//	Movement Date
-		sql.append("NULL MovementDate, " +
+		sql.append(DB.TO_DATE(p_MovementDate, true) + " MovementDate, " +
 				"'PB' MovementType, ");
 		//	Validate Multiplier
 		if(p_MovementDate_To != null)
@@ -145,7 +155,11 @@ public class AnalyticalInventory extends SvrProcess {
 				"0 seqNo, " +
 				"t.AD_Client_ID, " +
 				"w.AD_Org_ID, " +
-				getAD_PInstance_ID() + " AD_PInstance_ID " +
+				getAD_PInstance_ID() + " AD_PInstance_ID, " +
+				//	Jorge Colmenarez 2014-04-10
+				//	Add Support for Created Date for Sort
+				DB.TO_DATE(p_MovementDate, true) + " Created " +
+				//	End Jorge Colmenarez
 				//	From
 				"FROM M_Transaction t " +
 				"INNER JOIN M_Product p ON(t.M_Product_ID = p.M_Product_ID) " +
@@ -159,6 +173,14 @@ public class AnalyticalInventory extends SvrProcess {
 			sql.append("AND t.MovementDate < ? ");
 		else
 			sql.append("AND t.MovementDate <= ? ");
+		//	Add Validation for Just "Is Moved"
+		if(p_IsMoved) {
+			sql.append("AND EXISTS(SELECT 1 "
+					+ "FROM M_Transaction tr "
+					+ "WHERE tr.M_Product_ID = t.M_Product_ID "
+					+ "AND tr.M_Locator_ID = t.M_Locator_ID "
+					+ "AND tr.MovementDate BETWEEN ? AND ? ) ");
+		}
 		//	Clause Where Add
 		sql.append(m_optionalWhere);
 		//	Group By
@@ -190,8 +212,7 @@ public class AnalyticalInventory extends SvrProcess {
 					"w.AD_Org_ID, " +
 					"w.M_Warehouse_ID, " +
 					"w.Name, " +
-					"l.M_Locator_ID, " +
-					"l.Value ");
+					"l.M_Locator_ID ");
 		}
 		//	Union
 		if(p_MovementDate_To != null) {
@@ -218,9 +239,15 @@ public class AnalyticalInventory extends SvrProcess {
 					"	WHEN t.MovementQty > 0 THEN t.MovementQty " +
 					"	ELSE 0 " +
 					"END, 0) " +
-					"QtyIn, " +
-					"productCostPriceAt(t.M_Product_ID, t.MovementDate,w.AD_Org_ID) CurrentCostPrice, " + 
-					"t.MovementDate, " +
+					"QtyIn, ");
+			//	Add Show Cost
+			if(p_IsShowCost) {
+				sql.append("productCostPriceAt(t.M_Product_ID, t.MovementDate) CurrentCostPrice, ");
+			} else {
+				sql.append("0 CurrentCostPrice, ");
+			}
+			//	
+			sql.append("t.MovementDate, " +
 					"t.MovementType, " +
 					"1 Multiply, " +
 					//	Document No
@@ -235,6 +262,10 @@ public class AnalyticalInventory extends SvrProcess {
 					"t.AD_Client_ID, " +
 					"w.AD_Org_ID, " +
 					getAD_PInstance_ID() + " AD_PInstance_ID " +
+					//	Jorge Colmenarez 2014-04-10
+					//	Add Support for Created Date for Sort
+					",t.Created " +
+					//	End Jorge Colmenarez
 					//	From
 					"FROM M_Transaction t " +
 					"INNER JOIN M_Product p ON(t.M_Product_ID = p.M_Product_ID) " +
@@ -255,7 +286,7 @@ public class AnalyticalInventory extends SvrProcess {
 					//	Clause Where Add
 			sql.append(m_optionalWhere);	
 			//	Order By
-			sql.append("ORDER BY Warehouse, Locator, Category, Product, SeqNo, MovementDate");
+			sql.append("ORDER BY Warehouse, Locator, Category, Product, SeqNo, MovementDate, Created");
 		} else {
 			//	Order By
 			sql.append("ORDER BY Category, Product, Warehouse, Locator ");
@@ -273,10 +304,20 @@ public class AnalyticalInventory extends SvrProcess {
 			//	
 			pstmt = DB.prepareStatement (sql.toString(), get_TrxName());
 			//	Query 1 
-			//	Movement Date for Cost
-			pstmt.setTimestamp(i++, p_MovementDate);
+			//	Validate Cost for Show
+			if(p_IsShowCost) {
+				//	Movement Date for Cost
+				pstmt.setTimestamp(i++, p_MovementDate);
+			}
 			//	Movement Date Where
 			pstmt.setTimestamp(i++, p_MovementDate);
+			//	Optional Validation for Just "Is Moved"
+			if(p_IsMoved) {
+				//	Movement Date from
+				pstmt.setTimestamp(i++, p_MovementDate);
+				//	Movement Date to
+				pstmt.setTimestamp(i++, p_MovementDate_To);
+			}
 			//	Optional Organization
 			if (p_AD_Org_ID != 0){
 				pstmt.setInt(i++, p_AD_Org_ID);
@@ -341,7 +382,6 @@ public class AnalyticalInventory extends SvrProcess {
 			BigDecimal v_CurrentCostPrice = Env.ZERO;
 			BigDecimal v_CumulatedAmt = Env.ZERO;
 			BigDecimal v_Multiply = Env.ZERO;
-			Timestamp v_MovementDate = null;
 			//	Loop
 			while (rs.next()){
 				i = 1;
@@ -355,10 +395,6 @@ public class AnalyticalInventory extends SvrProcess {
 				v_Balance = v_Balance.add(v_LinealBalance);
 				//	Calculate Cumulated Cost
 				v_CumulatedAmt = v_CurrentCostPrice.multiply(v_LinealBalance);
-				//	Movement Date
-				v_MovementDate = rs.getTimestamp("MovementDate");
-				if(v_MovementDate == null)
-					v_MovementDate = p_MovementDate;
 				//	Sql Insert
 				sql = new StringBuffer("INSERT INTO T_AnalyticalInventory(" +
 						"M_Warehouse_ID, " +
@@ -378,8 +414,10 @@ public class AnalyticalInventory extends SvrProcess {
 						"SeqNo, " +
 						"AD_Client_ID, " +
 						"AD_Org_ID, " +
-						"AD_PInstance_ID) " +
-						"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+						"AD_PInstance_ID, " +
+						"IsMoved, " +
+						"IsShowCost) " +
+						"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 				//	
 				noInserts++;
 				log.fine("SQL Insert = " + sql);
@@ -397,13 +435,15 @@ public class AnalyticalInventory extends SvrProcess {
 				pstmtInsert.setBigDecimal(i++, v_CumulatedAmt.setScale(precision, BigDecimal.ROUND_HALF_UP));
 				pstmtInsert.setBigDecimal(i++, v_Balance.setScale(precision, BigDecimal.ROUND_HALF_UP));
 				pstmtInsert.setBigDecimal(i++, v_LinealBalance.setScale(precision, BigDecimal.ROUND_HALF_UP));
-				pstmtInsert.setTimestamp(i++, v_MovementDate);
+				pstmtInsert.setTimestamp(i++, rs.getTimestamp("MovementDate"));
 				pstmtInsert.setString(i++, rs.getString("MovementType"));
 				pstmtInsert.setString(i++, rs.getString("DocumentNo"));
 				pstmtInsert.setInt(i++, rs.getInt("seqNo"));
 				pstmtInsert.setInt(i++, rs.getInt("AD_Client_ID"));
 				pstmtInsert.setInt(i++, rs.getInt("AD_Org_ID"));
 				pstmtInsert.setInt(i++, rs.getInt("AD_PInstance_ID"));
+				pstmtInsert.setString(i++, p_IsMoved? "Y": "N");
+				pstmtInsert.setString(i++, p_IsShowCost? "Y": "N");
 				//	
 				pstmtInsert.executeUpdate();
 			}
