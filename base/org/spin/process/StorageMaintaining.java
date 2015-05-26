@@ -132,7 +132,7 @@ public class StorageMaintaining extends SvrProcess {
 				"		FROM M_InOut io " + 
 				"		INNER JOIN M_InOutLine iol ON(iol.M_InOut_ID = io.M_InOut_ID) " + 
 				"		INNER JOIN M_Product p ON(iol.M_Product_ID = p.M_Product_ID) " +
-				"		WHERE io.DocStatus NOT IN('CO', 'CL', 'RE', 'VO') AND " + 
+				"		WHERE io.DocStatus NOT IN('CO', 'CL', 'RE') AND " + 
 				"		iol.M_InOutLine_ID = M_Transaction.M_InOutLine_ID AND p.IsStocked = 'Y' AND p.ProductType = 'I' ) " +
 				"	OR ( " +
 				"			M_Transaction.M_InOutLine_ID IN (SELECT iol.M_InOutLine_ID " +  
