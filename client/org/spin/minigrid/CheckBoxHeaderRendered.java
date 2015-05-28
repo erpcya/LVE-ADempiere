@@ -8,19 +8,26 @@ import java.awt.event.MouseListener;
 import javax.swing.JCheckBox;
 import javax.swing.JTable;
 import javax.swing.UIManager;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
+import org.compiere.swing.CTable;
+
 public class CheckBoxHeaderRendered extends JCheckBox implements TableCellRenderer, MouseListener {   
 	private static final long serialVersionUID = 1L;
-	protected CheckBoxHeaderRendered rendererComponent;   
-	protected int column;   
-	protected boolean mousePressed = false;   
+	private CheckBoxHeaderRendered rendererComponent;   
+	private int column;   
+	private boolean mousePressed = false;
+	private JTable m_Table = null; 
 
-	public CheckBoxHeaderRendered(ItemListener itemListener) {   
+	public CheckBoxHeaderRendered(ItemListener itemListener ,JTable table) {   
 		rendererComponent = this;   
-		rendererComponent.addItemListener(itemListener);   
+		rendererComponent.addItemListener(itemListener); 
+		rendererComponent.setHorizontalAlignment(JCheckBox.CENTER);
+		m_Table = table;
+		
 	}   
 	public Component getTableCellRendererComponent(JTable table, Object value,   
 			boolean isSelected, boolean hasFocus, int row, int column) {   
@@ -31,14 +38,10 @@ public class CheckBoxHeaderRendered extends JCheckBox implements TableCellRender
 				rendererComponent.setForeground(header.getForeground());   
 			    rendererComponent.setBackground(header.getBackground());   
 			    rendererComponent.setFont(header.getFont());   
-			    rendererComponent.setAlignmentX(CENTER_ALIGNMENT);
-			    rendererComponent.setAlignmentY(CENTER_ALIGNMENT);
 			    
 			    header.addMouseListener(rendererComponent);   
 			}   
 		}   
-		setAlignmentX(CENTER_ALIGNMENT);
-		setAlignmentY(CENTER_ALIGNMENT);
 		setColumn(column);  
 		setBorder(UIManager.getBorder("TableHeader.cellBorder"));   
 		return rendererComponent;   
@@ -56,11 +59,11 @@ public class CheckBoxHeaderRendered extends JCheckBox implements TableCellRender
 		
 		if (mousePressed) {   
 			mousePressed=false;   
-			JTableHeader header = (JTableHeader)(e.getSource());   
-			JTable tableView = header.getTable();   
-			TableColumnModel columnModel = tableView.getColumnModel();   
+			//JTableHeader header = (JTableHeader)(e.getSource());   
+			//JTable tableView = header.getTable();   
+			TableColumnModel columnModel = m_Table.getColumnModel();   
 			int viewColumn = columnModel.getColumnIndexAtX(e.getX());   
-			int column = tableView.convertColumnIndexToModel(viewColumn);   
+			int column = m_Table.convertColumnIndexToModel(viewColumn);   
  
 			if (viewColumn == this.column && e.getClickCount() == 1 && column != -1) {   
 				doClick();   
@@ -77,19 +80,17 @@ public class CheckBoxHeaderRendered extends JCheckBox implements TableCellRender
 		mousePressed = true;   
 	}
 	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+	public void mouseReleased(MouseEvent e) {		
 	}
 	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+	public void mouseEntered(MouseEvent e) {		
 	}
 	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}	
+	public void mouseExited(MouseEvent e) {		
+	}
+	
+	public JTable getM_Table() {
+		return m_Table;
+	}
 }  
 

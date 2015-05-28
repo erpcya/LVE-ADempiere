@@ -27,7 +27,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Level;
-
 import javax.swing.AbstractButton;
 import javax.swing.DefaultCellEditor;
 import javax.swing.SwingConstants;
@@ -36,7 +35,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
-
 import org.compiere.apps.search.Info_Column;
 import org.compiere.grid.ed.VCellRenderer;
 import org.compiere.grid.ed.VHeaderRenderer;
@@ -125,8 +123,7 @@ public class MiniTable extends CTable implements IMiniTable, ItemListener
 	
 	//2015-05-27 Carlos Parada Listener for Selected Row
 	private ItemListener iListener = null ;
-	
-	
+		
 	/** Is Total Show */
 	private boolean showTotals = false;
 	private boolean autoResize = true;
@@ -440,7 +437,7 @@ public class MiniTable extends CTable implements IMiniTable, ItemListener
 			tc.setResizable(false);
 			if (headerSelection)
 				//2015-05-23 Carlos Parada Add Support to Header Multiple Selection
-				tc.setHeaderRenderer(new CheckBoxHeaderRendered((iListener== null ? this : iListener)) );
+				tc.setHeaderRenderer(new CheckBoxHeaderRendered((iListener== null ? this : iListener),this));
 				//End Carlos Parada
 			else
 				tc.setHeaderRenderer(new VHeaderRenderer(DisplayType.Number));
@@ -992,21 +989,36 @@ public class MiniTable extends CTable implements IMiniTable, ItemListener
 	public void itemStateChanged(ItemEvent e) {
 		Object source = e.getSource();   
 	      if (source instanceof AbstractButton == false) return;   
-	      boolean checked = e.getStateChange() == ItemEvent.SELECTED;   
+	      boolean checked = e.getStateChange() == ItemEvent.SELECTED;  
 	      for(int x = 0, y = this.getRowCount(); x < y; x++)   
 	      {   
 	    	  setDynamicSelectedRow(x);
 	    	  IDColumn col = (IDColumn)getValueAt(x, 0);
-	    	  col.setSelected(checked);
-	    	  this.setValueAt(col,x,0);  
-	      } 
+	    	  if (col.isSelected() != checked){
+		    	  col.setSelected(checked);
+		    	  this.setValueAt(col,x,0);  
+	    	  }
+	      }
 	}
 	
+	/**
+	 * 
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 28/5/2015, 1:38:41
+	 * @return
+	 * @return int
+	 */
 	public int getDynamicSelectedRow() {
 		return dynamicSelectedRow;
 	}
 	
+	/**
+	 * 
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 28/5/2015, 1:38:55
+	 * @param dynamicSelectedRow
+	 * @return void
+	 */
 	public void setDynamicSelectedRow(int dynamicSelectedRow) {
 		this.dynamicSelectedRow = dynamicSelectedRow;
 	}
+	
 }   //  MiniTable
