@@ -18,6 +18,8 @@ package org.compiere.minigrid;
 
 import java.awt.Component;
 import java.awt.Insets;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Level;
 
+import javax.swing.AbstractButton;
 import javax.swing.DefaultCellEditor;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -46,6 +49,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Util;
+import org.spin.minigrid.CheckBoxHeaderRendered;
 
 /**
  *  Mini Table.
@@ -73,13 +77,17 @@ import org.compiere.util.Util;
  * 				<li>BF [ 2876895 ] MiniTable.loadTable: NPE if column is null
  * 					https://sourceforge.net/tracker/?func=detail&aid=2876895&group_id=176962&atid=879332
  */
-public class MiniTable extends CTable implements IMiniTable
+public class MiniTable extends CTable implements IMiniTable, ItemListener
 {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 2853772547464132497L;
 
+	public MiniTable(ItemListener il){
+		this();
+		iListener= il;
+	}
 	/**
 	 *  Default Constructor
 	 */
@@ -105,15 +113,20 @@ public class MiniTable extends CTable implements IMiniTable
 	private Object      m_colorDataCompare = Env.ZERO;
 
 	/** Multi Selection mode (default false) */
-	//2015-05-25 Carlos Parada replace private for Protected
-	protected boolean     m_multiSelection = false;
+	private boolean     m_multiSelection = false;
 
 	/** Lauout set in prepareTable and used in loadTable    */
-	//2015-05-25 Carlos Parada replace private for Protected 
-	protected ColumnInfo[]        m_layout = null;
+	private ColumnInfo[]        m_layout = null;
 	/**	Logger			*/
-	//2015-05-25 Carlos Parada replace private for Protected
-	protected static CLogger log = CLogger.getCLogger(MiniTable.class);
+	private static CLogger log = CLogger.getCLogger(MiniTable.class);
+	
+	//2015-05-27 Carlos Parada Dynamic Selected Row
+	private int dynamicSelectedRow= -1;
+	
+	//2015-05-27 Carlos Parada Listener for Selected Row
+	private ItemListener iListener = null ;
+	
+	
 	/** Is Total Show */
 	private boolean showTotals = false;
 	private boolean autoResize = true;
@@ -250,6 +263,15 @@ public class MiniTable extends CTable implements IMiniTable
 	}   //  setColumnReadOnly
 
 	
+	/**
+	* Maintenance Support set Column Class Before Header Check
+	* @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 27/5/2015, 20:00:18
+	*/
+	public String prepareTable(ColumnInfo[] layout, 
+			String from, String where, boolean multiSelection, String tableName){
+		return prepareTable(layout, from, where, multiSelection, tableName ,false);
+	}
+	
 	/**************************************************************************
 	 *  Prepare Table and return SQL
 	 *
@@ -261,7 +283,11 @@ public class MiniTable extends CTable implements IMiniTable
 	 *  @return SQL
 	 */
 	public String prepareTable(ColumnInfo[] layout, 
-		String from, String where, boolean multiSelection, String tableName)
+		String from, String where, boolean multiSelection, String tableName
+		//2015-05-23 Carlos Parada Add Support to Header Multiple Selection 
+		,boolean headerSelection
+		//End Carlos Parada
+		)
 	{
 		m_layout = layout;
 		m_multiSelection = multiSelection;
@@ -287,7 +313,10 @@ public class MiniTable extends CTable implements IMiniTable
 		}
 		//  set editors (two steps)
 		for (int i = 0; i < layout.length; i++)
-			setColumnClass(i, layout[i].getColClass(), layout[i].isReadOnly(), layout[i].getColHeader());
+			if(layout[i].getColClass() == IDColumn.class && headerSelection)
+				setColumnClass(i, layout[i].getColClass(),0, layout[i].isReadOnly(), layout[i].getColHeader(),true);
+			else
+				setColumnClass(i, layout[i].getColClass(), layout[i].isReadOnly(), layout[i].getColHeader());
 
 		sql.append( " FROM ").append(from);
 		sql.append(" WHERE ").append(where);
@@ -351,6 +380,20 @@ public class MiniTable extends CTable implements IMiniTable
 	}
 	
 	/**
+	 * Maintenance Support set Column Class Before Header Check
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 27/5/2015, 20:00:18
+	 * @param index
+	 * @param c
+	 * @param displayType
+	 * @param readOnly
+	 * @param header
+	 * @return void
+	 */
+	public void setColumnClass (int index, Class c, int displayType ,boolean readOnly, String header){
+		setColumnClass (index, c, displayType , readOnly, header, false);
+	}
+	
+	/**
 	 *  Set Column Editor & Renderer to Class
 	 *  (after all columns were added)
 	 *  Lauout of IDColumn depemds on multiSelection
@@ -361,7 +404,11 @@ public class MiniTable extends CTable implements IMiniTable
 	 *  @param readOnly read only flag
 	 *  @param header optional header value
 	 */
-	public void setColumnClass (int index, Class c, int displayType ,boolean readOnly, String header)
+	public void setColumnClass (int index, Class c, int displayType ,boolean readOnly, String header
+			//2015-05-23 Carlos Parada Add Support to Header Multiple Selection 
+			,boolean headerSelection
+			//End Carlos Parada
+			)
 	{
 	//	log.config( "MiniTable.setColumnClass - " + index, c.getName() + ", r/o=" + readOnly);
 		TableColumn tc = getColumnModel().getColumn(index);
@@ -391,8 +438,12 @@ public class MiniTable extends CTable implements IMiniTable
 			tc.setMaxWidth(20);
 			tc.setPreferredWidth(20);
 			tc.setResizable(false);
-			
-			tc.setHeaderRenderer(new VHeaderRenderer(DisplayType.Number));
+			if (headerSelection)
+				//2015-05-23 Carlos Parada Add Support to Header Multiple Selection
+				tc.setHeaderRenderer(new CheckBoxHeaderRendered((iListener== null ? this : iListener)) );
+				//End Carlos Parada
+			else
+				tc.setHeaderRenderer(new VHeaderRenderer(DisplayType.Number));
 		}
 		//  Boolean
 		else if (DisplayType.YesNo == displayType || c == Boolean.class )
@@ -936,11 +987,26 @@ public class MiniTable extends CTable implements IMiniTable
 			
 		}
 	}
-	
+
 	@Override
-	public String prepareTable(ColumnInfo[] layout, String from, String where,
-			boolean multiSelection, String tableName, boolean headerSelection) {
-		// TODO Auto-generated method stub
-		return null;
+	public void itemStateChanged(ItemEvent e) {
+		Object source = e.getSource();   
+	      if (source instanceof AbstractButton == false) return;   
+	      boolean checked = e.getStateChange() == ItemEvent.SELECTED;   
+	      for(int x = 0, y = this.getRowCount(); x < y; x++)   
+	      {   
+	    	  setDynamicSelectedRow(x);
+	    	  IDColumn col = (IDColumn)getValueAt(x, 0);
+	    	  col.setSelected(checked);
+	    	  this.setValueAt(col,x,0);  
+	      } 
+	}
+	
+	public int getDynamicSelectedRow() {
+		return dynamicSelectedRow;
+	}
+	
+	public void setDynamicSelectedRow(int dynamicSelectedRow) {
+		this.dynamicSelectedRow = dynamicSelectedRow;
 	}
 }   //  MiniTable
