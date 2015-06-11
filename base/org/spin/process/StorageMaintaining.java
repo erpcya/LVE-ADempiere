@@ -193,7 +193,7 @@ public class StorageMaintaining extends SvrProcess {
 				"INNER JOIN C_OrderLine ol ON(ol.C_Order_ID = o.C_Order_ID) " +
 				"INNER JOIN C_DocType dt ON(dt.C_DocType_ID = o.C_DocType_ID) " +
 				"WHERE o.DocStatus IN('IP', 'CO') " +
-				"AND (ol.QtyOrdered - ol.QtyDelivered) <> 0 " +
+				//"AND (ol.QtyOrdered - ol.QtyDelivered) <> 0 " +
 				//"AND o.IsSOTrx = 'Y' " +
 				"AND o.AD_Client_ID = ").append(getAD_Client_ID()).append(" ");
 		//	Org
@@ -228,8 +228,15 @@ public class StorageMaintaining extends SvrProcess {
 		//	Loop
 		while(rs.next()){
 			MOrder order = new MOrder(getCtx(), rs.getInt(1), get_TrxName());
-			reserveStock(order);
-			addLog("@C_Order_ID@ " + order.getDocumentNo() + " @Processed@");
+			//	Message
+			String message = null;
+			try {
+				reserveStock(order);
+			} catch (Exception e) {
+				message = e.getMessage();
+			}
+			//	Add Log
+			addLog("@C_Order_ID@ " + order.getDocumentNo() + (message == null? " @Processed@": " @Error@" + message));
 		}
 		DB.close(rs, ps);
 		
@@ -380,7 +387,7 @@ public class StorageMaintaining extends SvrProcess {
 	 * 	@return true if (un) reserved
 	 * @throws SQLException 
 	 */
-	private boolean reserveStock (MOrder order) throws SQLException
+	private boolean reserveStock (MOrder order) throws Exception
 	{
 		if(order == null)
 			return false;
@@ -413,9 +420,11 @@ public class StorageMaintaining extends SvrProcess {
 		{
 			MOrderLine line = lines[i];
 			
-			BigDecimal m_DeliveredQty = DB.getSQLValueBD(get_TrxName(), "SELECT SUM(MovementQty) MovementQty "
-					+ "FROM M_InOutLine "
-					+ "WHERE C_OrderLine_ID = ?", line.getC_OrderLine_ID());
+			BigDecimal m_DeliveredQty = DB.getSQLValueBD(get_TrxName(), "SELECT SUM(iol.MovementQty) MovementQty "
+					+ "FROM M_InOut io "
+					+ "INNER JOIN M_InOutLine iol ON(iol.M_InOut_ID = io.M_InOut_ID) "
+					+ "WHERE io.DocStatus IN('CO', 'CL') "
+					+ "AND iol.C_OrderLine_ID = ?", line.getC_OrderLine_ID());
 			//	Valid Quantity
 			if(m_DeliveredQty == null)
 				m_DeliveredQty = Env.ZERO;
@@ -451,8 +460,8 @@ public class StorageMaintaining extends SvrProcess {
 					if(!m_DeliveredQty.equals(m_OldDeliveredQty)) {
 						//	Set Reserved Quantity
 						line.setQtyReserved(difference);
-						if (!line.save(get_TrxName()))
-							return false;
+						//	Save Record
+						line.saveEx(get_TrxName());
 					}
 				}
 				continue;
@@ -515,8 +524,8 @@ public class StorageMaintaining extends SvrProcess {
 				}	//	stockec
 				//	update line
 				line.setQtyReserved(line.getQtyReserved().add(difference));
-				if (!line.save(get_TrxName()))
-					return false;
+				//	Save Record
+				line.saveEx(get_TrxName());
 				//
 				Volume = Volume.add(product.getVolume().multiply(line.getQtyOrdered()));
 				Weight = Weight.add(product.getWeight().multiply(line.getQtyOrdered()));
