@@ -526,6 +526,11 @@ public class MOrder extends X_C_Order implements DocAction
 			line.setQtyReserved(Env.ZERO);
 			line.setDateDelivered(null);
 			line.setDateInvoiced(null);
+			//2015-08-11 Carlos Parada Set Quantity Ordered from Quantity Entered When Quantity Ordered is Zero
+			if (line.getQtyOrdered().equals(Env.ZERO))
+				line.setQtyOrdered(line.getQtyEntered());
+			//End Carlos Parada
+			//
 			//
 			line.setOrder(this);
 			line.set_ValueNoCheck ("C_OrderLine_ID", I_ZERO);	//	new
