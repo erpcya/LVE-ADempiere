@@ -444,7 +444,9 @@ public class M_PriceList_Create extends SvrProcess {
 							+ " ,COALESCE(currencyConvert(" +
 							//Carlos Parada if Base Cost get Cost From Product 
 							(dl.getString("List_Base").equals("C")?
-									"(SELECT Max(CurrentCostPrice) FROM M_Cost c WHERE po.M_Product_ID=c.M_Product_ID AND c.M_CostElement_ID= "+dl.getInt("BaseCostElement_ID")+")"
+									//2015-07-16 Carlos Parada Add Support to Sum Cost With Landed Cost
+									"(SELECT SUM(c.CurrentCostPrice) FROM M_Cost c INNER JOIN M_CostElement ce ON (ce.M_CostElement_ID=c.M_CostElement_ID) WHERE po.M_Product_ID=c.M_Product_ID AND (c.M_CostElement_ID= "+dl.getInt("BaseCostElement_ID")+" OR ce.CostingMethod IS NULL ) )"
+									//End Carlos Parada
 									:"po.PriceList")
 							+", po.C_Currency_ID, "
 							+ v.getInt("C_Currency_ID")
@@ -460,7 +462,9 @@ public class M_PriceList_Create extends SvrProcess {
 							+ " ,COALESCE(currencyConvert(" +
 							//Carlos Parada if Std Cost get Cost From Product 
 							(dl.getString("Std_Base").equals("C")?
-									"(SELECT Max(CurrentCostPrice) FROM M_Cost c WHERE po.M_Product_ID=c.M_Product_ID AND c.M_CostElement_ID= "+dl.getInt("StdCostElement_ID")+")"
+									//2015-07-16 Carlos Parada Add Support to Sum Cost With Landed Cost
+									"(SELECT SUM(c.CurrentCostPrice) FROM M_Cost c INNER JOIN M_CostElement ce ON (ce.M_CostElement_ID=c.M_CostElement_ID) WHERE po.M_Product_ID=c.M_Product_ID AND (c.M_CostElement_ID= "+dl.getInt("StdCostElement_ID")+" OR ce.CostingMethod IS NULL ))"
+									//End Carlos Parada
 									:"po.PriceList")
 							+ ", po.C_Currency_ID, "
 							+ v.getInt("C_Currency_ID")
@@ -476,7 +480,9 @@ public class M_PriceList_Create extends SvrProcess {
 							+ " ,COALESCE(currencyConvert(" +
 							//Carlos Parada if Limit Cost get Cost From Product 
 							(dl.getString("Limit_Base").equals("C")?
-									"(SELECT Max(CurrentCostPrice) FROM M_Cost c WHERE po.M_Product_ID=c.M_Product_ID AND c.M_CostElement_ID= "+dl.getInt("LimitCostElement_ID")+")"
+									//2015-07-16 Carlos Parada Add Support to Sum Cost With Landed Cost
+									"(SELECT SUM(c.CurrentCostPrice) FROM M_Cost c INNER JOIN M_CostElement ce ON (ce.M_CostElement_ID=c.M_CostElement_ID) WHERE po.M_Product_ID=c.M_Product_ID AND (c.M_CostElement_ID= "+dl.getInt("LimitCostElement_ID")+" OR ce.CostingMethod IS NULL ))"
+									//End Carlos Parada
 									:"po.PricePO") 
 							+",po.C_Currency_ID, "
 							+ v.getInt("C_Currency_ID")
@@ -530,7 +536,9 @@ public class M_PriceList_Create extends SvrProcess {
 							+ "COALESCE(currencyConvert(" +
 							//Carlos Parada if Base Cost get Cost From Product 
 							(dl.getString("List_Base").equals("C")?
-									"(SELECT Max(CurrentCostPrice) FROM M_Cost c WHERE pp.M_Product_ID=c.M_Product_ID AND c.M_CostElement_ID= "+dl.getInt("BaseCostElement_ID")+")"
+									//2015-07-16 Carlos Parada Add Support to Sum Cost With Landed Cost
+									"(SELECT SUM(c.CurrentCostPrice) FROM M_Cost c INNER JOIN M_CostElement ce ON (ce.M_CostElement_ID=c.M_CostElement_ID) WHERE pp.M_Product_ID=c.M_Product_ID AND (c.M_CostElement_ID= "+dl.getInt("BaseCostElement_ID")+" OR ce.CostingMethod IS NULL ))"
+									//End Carlos Parada
 									:"pp.PriceList")
 							+ ", pl.C_Currency_ID, "
 							+ v.getInt("C_Currency_ID")
@@ -545,7 +553,9 @@ public class M_PriceList_Create extends SvrProcess {
 							+ "COALESCE(currencyConvert(" +
 							//Carlos Parada if Std Cost get Cost From Product 
 							(dl.getString("Std_Base").equals("C")?
-									"(SELECT Max(CurrentCostPrice) FROM M_Cost c WHERE pp.M_Product_ID=c.M_Product_ID AND c.M_CostElement_ID= "+dl.getInt("StdCostElement_ID")+")"
+									//2015-07-16 Carlos Parada Add Support to Sum Cost With Landed Cost
+									"(SELECT SUM(c.CurrentCostPrice) FROM M_Cost c INNER JOIN M_CostElement ce ON (ce.M_CostElement_ID=c.M_CostElement_ID) WHERE pp.M_Product_ID=c.M_Product_ID AND (c.M_CostElement_ID= "+dl.getInt("StdCostElement_ID")+" OR ce.CostingMethod IS NULL ))"
+									//End Carlos Parada
 									:"pp.PriceStd")
 							+ ",pl.C_Currency_ID, "
 							+ v.getInt("C_Currency_ID")
@@ -560,7 +570,9 @@ public class M_PriceList_Create extends SvrProcess {
 							+ " COALESCE(currencyConvert(" +
 							//Carlos Parada if Limit Cost get Cost From Product 
 							(dl.getString("Limit_Base").equals("C")?
-									"(SELECT Max(CurrentCostPrice) FROM M_Cost c WHERE pp.M_Product_ID=c.M_Product_ID AND c.M_CostElement_ID= "+dl.getInt("LimitCostElement_ID")+")"
+									//2015-07-16 Carlos Parada Add Support to Sum Cost With Landed Cost
+									"(SELECT SUM(c.CurrentCostPrice) FROM M_Cost c INNER JOIN M_CostElement ce ON (ce.M_CostElement_ID=c.M_CostElement_ID) WHERE pp.M_Product_ID=c.M_Product_ID AND (c.M_CostElement_ID= "+dl.getInt("LimitCostElement_ID")+" OR ce.CostingMethod IS NULL ))"
+									//End Carlos Parada
 									:"pp.PriceLimit")
 							+ ",pl.C_Currency_ID, "
 							+ v.getInt("C_Currency_ID")

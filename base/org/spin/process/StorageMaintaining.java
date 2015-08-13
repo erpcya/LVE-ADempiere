@@ -64,6 +64,10 @@ public class StorageMaintaining extends SvrProcess {
 	//End Carlos Parada
 	/** Autoperiod */
 	boolean autoPeriod = false;
+	
+	//2015-07-13 Carlos Parada Used Period Control ?
+	boolean periodControl = false;
+	//End Carlos Parada
 	@Override
 	protected void prepare() {
 		for (ProcessInfoParameter para:getParameter()){
@@ -80,6 +84,8 @@ public class StorageMaintaining extends SvrProcess {
 			// 2015-05-13 Carlos Parada Add Support to Product Category Filter
 			else if(name.equals("M_Product_Category_ID"))
 				p_M_Product_Category_ID = para.getParameterAsInt();
+			else if(name.equals("PeriodControl"))
+				periodControl = para.getParameterAsBoolean();
 			//End Carlos Parada
 		}
 	}
@@ -132,7 +138,7 @@ public class StorageMaintaining extends SvrProcess {
 				"		FROM M_InOut io " + 
 				"		INNER JOIN M_InOutLine iol ON(iol.M_InOut_ID = io.M_InOut_ID) " + 
 				"		INNER JOIN M_Product p ON(iol.M_Product_ID = p.M_Product_ID) " +
-				"		WHERE io.DocStatus NOT IN('CO', 'CL', 'RE') AND " + 
+				"		WHERE io.DocStatus NOT IN('CO', 'CL', 'RE', 'VO') AND " + 
 				"		iol.M_InOutLine_ID = M_Transaction.M_InOutLine_ID AND p.IsStocked = 'Y' AND p.ProductType = 'I' ) " +
 				"	OR ( " +
 				"			M_Transaction.M_InOutLine_ID IN (SELECT iol.M_InOutLine_ID " +  
@@ -140,19 +146,21 @@ public class StorageMaintaining extends SvrProcess {
 				"			INNER JOIN M_InOutLine iol ON(iol.M_InOut_ID = io.M_InOut_ID) " +
 				"			INNER JOIN M_Product p ON(iol.M_Product_ID = p.M_Product_ID) " +
 				"			INNER JOIN M_Transaction t ON(t.M_InOutLine_ID = iol.M_InOutLine_ID) " + 
-				"			WHERE io.DocStatus IN('CO', 'CL', 'RE') AND p.IsStocked = 'Y' AND p.ProductType = 'I' " +
+				"			WHERE io.DocStatus IN('CO', 'CL', 'RE', 'VO') AND p.IsStocked = 'Y' AND p.ProductType = 'I' " +
 				"			GROUP BY iol.M_InOutLine_ID,io.MovementType " +
-				"			HAVING iol.MovementQty * (CASE WHEN io.MovementType IN ('C-','V-') THEN -1 ELSE 1 END) <> SUM(t.MovementQty)) " +
-				"			AND " +
-				"			EXISTS (SELECT 1 FROM C_PeriodControl pc " +
-				"			INNER JOIN C_Period p ON (p.C_Period_ID=pc.C_Period_ID) " +
-				"			WHERE M_Transaction.MovementDate Between p.StartDate AND p.EndDate " );
-		
+				"			HAVING iol.MovementQty * (CASE WHEN io.MovementType IN ('C-','V-') THEN -1 ELSE 1 END) <> SUM(t.MovementQty)) " );
 				
-			if ( !autoPeriod )
-				deleteTSQL.append(" AND pc.PeriodStatus = 'O'  AND pc.DocBaseType IN ('" + MPeriodControl.DOCBASETYPE_MaterialDelivery
-				+ "','" + MPeriodControl.DOCBASETYPE_MaterialReceipt + "') ");
+				if (periodControl){
+					deleteTSQL.append("			AND " +
+					"			EXISTS (SELECT 1 FROM C_PeriodControl pc " +
+					"			INNER JOIN C_Period p ON (p.C_Period_ID=pc.C_Period_ID) " +
+					"			WHERE M_Transaction.MovementDate Between p.StartDate AND p.EndDate " );
 			
+					
+					if ( !autoPeriod )
+						deleteTSQL.append(" AND pc.PeriodStatus = 'O'  AND pc.DocBaseType IN ('" + MPeriodControl.DOCBASETYPE_MaterialDelivery
+						+ "','" + MPeriodControl.DOCBASETYPE_MaterialReceipt + "') ");
+				}	
 			deleteTSQL.append("		)");
 			deleteTSQL.append(""
 					+ ")");
@@ -183,6 +191,7 @@ public class StorageMaintaining extends SvrProcess {
 		//	Log
 		log.fine("Transaction Deleted=" + transactionDeleted);
 		recreateTransaction();
+		log.fine("Recreate Transaction" );
 		recreateQtyOnHand();
 		log.fine("Recreate QtyOnHand" );
 		
@@ -245,18 +254,21 @@ public class StorageMaintaining extends SvrProcess {
 	
 	private void recreateTransaction(){
 		StringBuffer whereClause = new StringBuffer();
-		whereClause.append("EXISTS(SELECT 1 FROM M_InOut io WHERE M_InOutLine.M_InOut_ID = io.M_InOut_ID AND io.DocStatus IN('CO', 'CL', 'RE')) " +
+		whereClause.append("EXISTS(SELECT 1 FROM M_InOut io WHERE M_InOutLine.M_InOut_ID = io.M_InOut_ID AND io.DocStatus IN('CO', 'CL', 'RE', 'VO')) " +
 							" AND NOT EXISTS (SELECT 1 FROM M_Transaction tr WHERE tr.M_InOutLine_ID = M_InOutLine.M_InOutLine_ID)" +
-							" AND EXISTS (SELECT 1 FROM M_Product p WHERE p.M_Product_ID = M_InOutLine.M_Product_ID AND p.ProductType ='I' AND p.IsStocked = 'Y' ) " +
-							" AND EXISTS (SELECT 1 FROM C_PeriodControl pc " +
-							" INNER JOIN C_Period p ON (p.C_Period_ID=pc.C_Period_ID) "+
-							" ,M_InOut io " +
-							" WHERE io.DateAcct Between p.StartDate AND p.EndDate AND M_InOutLine.M_InOut_ID= io.M_InOut_ID ");
-		if ( !autoPeriod )
-			whereClause.append(" AND pc.PeriodStatus = 'O'  AND pc.DocBaseType IN ('" + MPeriodControl.DOCBASETYPE_MaterialDelivery
-			+ "','" + MPeriodControl.DOCBASETYPE_MaterialReceipt + "') ");
+							" AND EXISTS (SELECT 1 FROM M_Product p WHERE p.M_Product_ID = M_InOutLine.M_Product_ID AND p.ProductType ='I' AND p.IsStocked = 'Y' ) ");
 		
-		whereClause.append(")");
+		if (periodControl){
+			whereClause.append(" AND EXISTS (SELECT 1 FROM C_PeriodControl pc " +
+				" INNER JOIN C_Period p ON (p.C_Period_ID=pc.C_Period_ID) "+
+				" ,M_InOut io " +
+				" WHERE io.DateAcct Between p.StartDate AND p.EndDate AND M_InOutLine.M_InOut_ID= io.M_InOut_ID ");
+			if ( !autoPeriod )
+				whereClause.append(" AND pc.PeriodStatus = 'O'  AND pc.DocBaseType IN ('" + MPeriodControl.DOCBASETYPE_MaterialDelivery
+				+ "','" + MPeriodControl.DOCBASETYPE_MaterialReceipt + "') ");
+			whereClause.append(")");
+
+		}
 		//		
 		if(p_AD_Org_ID != 0)
 			whereClause.append("AND AD_Org_ID = ").append(p_AD_Org_ID).append(" ");
@@ -294,13 +306,8 @@ public class StorageMaintaining extends SvrProcess {
 					addLog("@M_Transaction_ID@ @Created@ " + io.getDocumentNo());
 					transactionCreated++;
 				}
-					
 			}
-			
 		}
-		
-			
-			log.fine("Transaction Deleted=" + transactionCreated);
 	}
 	
 	/**
